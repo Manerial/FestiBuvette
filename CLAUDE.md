@@ -71,6 +71,9 @@ Les écrans (`presentation/`) ne font **jamais** de SQL — ils passent toujours
 - Services (`sales/services/`) : orchestration multi-repository, logique métier complexe
 - Widgets privés dans un écran : préfixés `_` (ex: `_ProductTile`)
 
+**Commits**
+- Une phrase max, concise : `feat(products): add soft delete`.
+
 **État (Riverpod)**
 - État async (lecture BDD) → `AsyncNotifier` + `AsyncNotifierProvider`
 - État synchrone en mémoire (panier) → `Notifier` + `NotifierProvider`
@@ -112,8 +115,9 @@ flutter gen-l10n   # régénère lib/l10n/app_localizations*.dart
 **Règles :**
 - Ne jamais mettre de `String` en dur dans les widgets — toujours passer par `l10n`
 - Les fichiers `app_localizations*.dart` sont générés : **ne pas les éditer à la main**
-  107 -- Import : `import 'package:ludo_pay_app/l10n/app_localizations.dart';`
-  108 -- Après modification des ARB : flutter gen-l10n
+- Import : `import 'package:ludo_pay_app/l10n/app_localizations.dart';`
+- Après modification des ARB : flutter gen-l10n
+
 ---
 
 ## Tests
