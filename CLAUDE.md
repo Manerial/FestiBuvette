@@ -61,11 +61,15 @@ Les écrans (`presentation/`) ne font **jamais** de SQL — ils passent toujours
 - Tout le code Dart doit être en anglais : noms de classes, de méthodes, de champs, chaînes UI, commentaires.
 - Les noms de tables et colonnes SQL sont également en anglais `snake_case`.
 
+**Imports**
+- Dans `lib/` : toujours `package:ludo_pay_app/...` — jamais de chemins relatifs (`../`).
+- Dans `test/` : `package:ludo_pay_app/...` pour les fichiers `lib/` ; chemins relatifs **uniquement** pour les helpers de test (`test/helpers/`) car les fichiers `test/` ne sont pas accessibles via `package:`.
+
 **Nommage**
 - Providers : `xxxProvider` + `XxxNotifier` dans le même fichier
 - Repositories : accès brut SQLite, aucune logique métier
-- Services (`ventes/services/`) : orchestration multi-repository, logique métier complexe
-- Widgets privés dans un écran : préfixés `_` (ex: `_ProduitTile`)
+- Services (`sales/services/`) : orchestration multi-repository, logique métier complexe
+- Widgets privés dans un écran : préfixés `_` (ex: `_ProductTile`)
 
 **État (Riverpod)**
 - État async (lecture BDD) → `AsyncNotifier` + `AsyncNotifierProvider`
@@ -76,12 +80,13 @@ Les écrans (`presentation/`) ne font **jamais** de SQL — ils passent toujours
 **Base de données**
 - `DatabaseHelper.instance` est le seul point d'entrée SQLite dans toute l'app
 - Toujours utiliser `db.transaction()` pour les écritures multi-tables
-- Les colonnes SQL gardent le style `snake_case` ; les champs Dart sont en `camelCase`
-- `ventes_lignes` stocke `nom_snapshot` et `prix_snapshot` : ne jamais recalculer depuis les produits actuels
+- Tables : `products`, `business_days`, `sales`, `sale_lines`
+- `sale_lines` stocke `name_snapshot` et `price_snapshot` : ne jamais recalculer depuis les produits actuels
+- `sort_order` (et non `order`) pour la colonne de tri des produits — `ORDER` est un mot-clé SQL réservé
 
-**Suppression produit** : si `ventes_lignes` référence le produit → `actif = 0` (soft delete), sinon `DELETE` physique.
+**Suppression produit** : si `sale_lines` référence le produit → `active = 0` (soft delete), sinon `DELETE` physique.
 
-**Journée** : `SalesRepository.getOrCreateToday()` est le seul endroit qui crée une journée. Ne jamais insérer dans `journees` ailleurs.
+**Journée** : `SalesRepository.getOrCreateToday()` est le seul endroit qui crée une journée. Ne jamais insérer dans `business_days` ailleurs.
 
 **API Flutter**
 - `onReorderItem` (pas `onReorder`, déprécié depuis Flutter 3.41) — l'index est déjà ajusté, ne pas faire `newIndex--`
@@ -104,40 +109,22 @@ La langue est détectée automatiquement depuis les paramètres du device. Fallb
 flutter gen-l10n   # régénère lib/l10n/app_localizations*.dart
 ```
 
-**Utilisation dans un widget :**
-```dart
-// En haut de build()
-final l10n = AppLocalizations.of(context)!;
-
-// Chaîne simple
-Text(l10n.cartTab)
-
-// Chaîne avec paramètre
-Text(l10n.errorMessage(e))          // {message} : Object
-Text(l10n.deleteProductMessage(name)) // {name} : String
-Text(l10n.maximumCharacters(50))    // {count} : int
-```
-
 **Règles :**
 - Ne jamais mettre de `String` en dur dans les widgets — toujours passer par `l10n`
 - Les fichiers `app_localizations*.dart` sont générés : **ne pas les éditer à la main**
-- Import : `import 'package:ludo_pay_app/l10n/app_localizations.dart';`
-
+  107 -- Import : `import 'package:ludo_pay_app/l10n/app_localizations.dart';`
+  108 -- Après modification des ARB : flutter gen-l10n
 ---
 
 ## Tests
 
-Fichier existant : `test/widget_test.dart` (smoke test).
+> **Règle** : toute nouvelle feature doit être livrée avec ses tests. Une feature sans tests n'est pas considérée comme terminée.
 
-**Tests obligatoires pour chaque feature :**
-- Repository : tester les opérations CRUD avec une BDD en mémoire (`sqflite_common_ffi`)
-- Service : tester la logique métier (ex: `SaleService.record` avec panier vide doit lever une exception)
-- Notifier : tester les transitions d'état
+**Ce qu'il faut couvrir par couche :**
+- Repository : toutes les opérations CRUD + cas limites (soft delete, contraintes…) avec une BDD en mémoire via `sqflite_common_ffi`
+- Notifier : toutes les transitions d'état (valeur initiale, chaque méthode publique)
+- Service : logique métier (cas nominal + cas d'erreur)
 
-Lancer un test isolé :
-```bash
-flutter test test/widget_test.dart
-```
 
 ---
 
