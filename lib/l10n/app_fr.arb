@@ -1,0 +1,45 @@
+{
+  "@@locale": "fr",
+
+  "errorMessage": "Erreur : {message}",
+  "cancel": "Annuler",
+  "delete": "Supprimer",
+  "save": "Enregistrer",
+  "add": "Ajouter",
+
+  "cartTab": "Panier",
+  "productsTab": "Produits",
+  "reportTab": "Rapport",
+  "printerTooltip": "Imprimante",
+
+  "noProductsInCatalogue": "Aucun produit dans le catalogue",
+  "addProductsFromTab": "Ajoutez des produits depuis l'onglet Produits",
+  "saleRecorded": "✅ Vente enregistrée",
+  "clearCartTitle": "Vider le panier ?",
+  "clearCartMessage": "Tous les articles sélectionnés seront retirés.",
+  "clear": "Vider",
+  "total": "TOTAL",
+  "print": "Imprimer",
+
+  "noProducts": "Aucun produit",
+  "tapPlusToAddProduct": "Appuyez sur + pour ajouter votre premier produit",
+  "addProductTooltip": "Ajouter un produit",
+  "deleteProductTitle": "Supprimer ?",
+  "deleteProductMessage": "Supprimer « {name} » ?\n\nSi ce produit a déjà été vendu, il sera seulement désactivé pour préserver l'historique.",
+
+  "editProduct": "Modifier le produit",
+  "newProduct": "Nouveau produit",
+  "productNameLabel": "Nom du produit",
+  "productNameHint": "Ex : Café, Sandwich…",
+  "nameRequired": "Nom requis",
+  "maximumCharacters": "Maximum {count} caractères",
+  "priceLabel": "Prix TTC (€)",
+  "priceHint": "Ex : 1,50",
+  "priceRequired": "Prix requis",
+  "invalidPrice": "Prix invalide",
+  "priceMustBePositive": "Le prix doit être supérieur à 0",
+
+  "printerScreenTitle": "Imprimante Bluetooth",
+  "printerSettingsPlaceholder": "Paramètres imprimante — à implémenter (E3)",
+  "reportPlaceholder": "Rapport — à implémenter (E4)"
+}
