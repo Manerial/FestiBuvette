@@ -99,7 +99,7 @@ class _PrinterScreenState extends ConsumerState<PrinterScreen> {
           const SizedBox(height: 32),
 
           // ── Bluetooth printer ────────────────────────────────────────────
-          _SectionHeader(label: l10n.settingsPrinterSection),
+          _SectionHeader(label: l10n.settings),
           const SizedBox(height: 12),
           _BluetoothSection(),
         ],

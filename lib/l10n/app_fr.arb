@@ -12,7 +12,7 @@
   "cartTab": "Panier",
   "productsTab": "Produits",
   "reportTab": "Rapport",
-  "settingsTooltip": "Paramètres",
+  "settings": "Paramètres",
 
   "noProductsInCatalogue": "Aucun produit dans le catalogue",
   "addProductsFromTab": "Ajoutez des produits depuis l'onglet Produits",
@@ -81,8 +81,6 @@
   "settingsLanguageSystem": "Système",
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
-
-  "settingsPrinterSection": "Imprimante Bluetooth",
 
   "allCategories": "Tout",
   "manageCategories": "Gérer les catégories",

@@ -38,7 +38,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportTab => 'Report';
 
   @override
-  String get settingsTooltip => 'Settings';
+  String get settings => 'Settings';
 
   @override
   String get noProductsInCatalogue => 'No products in catalogue';
@@ -239,9 +239,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsLanguageEn => 'English';
-
-  @override
-  String get settingsPrinterSection => 'Bluetooth printer';
 
   @override
   String get allCategories => 'All';

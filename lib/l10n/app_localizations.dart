@@ -152,11 +152,11 @@ abstract class AppLocalizations {
   /// **'Report'**
   String get reportTab;
 
-  /// No description provided for @settingsTooltip.
+  /// No description provided for @settings.
   ///
   /// In en, this message translates to:
   /// **'Settings'**
-  String get settingsTooltip;
+  String get settings;
 
   /// No description provided for @noProductsInCatalogue.
   ///
@@ -518,97 +518,91 @@ abstract class AppLocalizations {
   /// **'English'**
   String get settingsLanguageEn;
 
-  /// No description provided for @settingsPrinterSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Bluetooth printer'**
-  String get settingsPrinterSection;
-
-  /// Filter chip to show all products regardless of category
+  /// No description provided for @allCategories.
   ///
   /// In en, this message translates to:
   /// **'All'**
   String get allCategories;
 
-  /// Tooltip for the category management button
+  /// No description provided for @manageCategories.
   ///
   /// In en, this message translates to:
   /// **'Manage categories'**
   String get manageCategories;
 
-  /// Empty state in the category management sheet
+  /// No description provided for @noCategoriesYet.
   ///
   /// In en, this message translates to:
   /// **'No categories yet'**
   String get noCategoriesYet;
 
-  /// Title of the add-category dialog
+  /// No description provided for @newCategory.
   ///
   /// In en, this message translates to:
   /// **'New category'**
   String get newCategory;
 
-  /// Title of the edit-category dialog
+  /// No description provided for @editCategory.
   ///
   /// In en, this message translates to:
   /// **'Edit category'**
   String get editCategory;
 
-  /// Confirmation dialog title when deleting a category
+  /// No description provided for @deleteCategoryTitle.
   ///
   /// In en, this message translates to:
   /// **'Delete category?'**
   String get deleteCategoryTitle;
 
-  /// Confirmation dialog body when deleting a category
+  /// No description provided for @deleteCategoryMessage.
   ///
   /// In en, this message translates to:
   /// **'Products in this category will become uncategorized.'**
   String get deleteCategoryMessage;
 
-  /// Label for the category name text field
+  /// No description provided for @categoryNameLabel.
   ///
   /// In en, this message translates to:
   /// **'Category name'**
   String get categoryNameLabel;
 
-  /// Hint for the category name text field
+  /// No description provided for @categoryNameHint.
   ///
   /// In en, this message translates to:
   /// **'E.g.: Drinks, Food…'**
   String get categoryNameHint;
 
-  /// Label for the category dropdown in the product form
+  /// No description provided for @categoryLabel.
   ///
   /// In en, this message translates to:
   /// **'Category'**
   String get categoryLabel;
 
-  /// Dropdown option meaning no category assigned
+  /// No description provided for @noCategory.
   ///
   /// In en, this message translates to:
   /// **'Uncategorized'**
   String get noCategory;
 
-  /// Empty state when a category filter returns no products
+  /// No description provided for @noProductsInCategory.
   ///
   /// In en, this message translates to:
   /// **'No products in this category'**
   String get noProductsInCategory;
 
-  /// Label for the cash amount given by the customer
+  /// No description provided for @tenderedAmount.
   ///
   /// In en, this message translates to:
   /// **'Amount tendered'**
   String get tenderedAmount;
 
-  /// Money change to return to the customer
+  /// No description provided for @changeDue.
   ///
   /// In en, this message translates to:
   /// **'Change'**
   String get changeDue;
 
-  /// Error shown when the tendered amount is less than the total
+  /// No description provided for @insufficientAmount.
   ///
   /// In en, this message translates to:
   /// **'Insufficient amount'**

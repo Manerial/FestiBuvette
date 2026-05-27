@@ -13,7 +13,7 @@
   "cartTab": "Cart",
   "productsTab": "Products",
   "reportTab": "Report",
-  "settingsTooltip": "Settings",
+  "settings": "Settings",
 
   "noProductsInCatalogue": "No products in catalogue",
   "addProductsFromTab": "Add products from the Products tab",
@@ -88,8 +88,6 @@
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
 
-  "settingsPrinterSection": "Bluetooth printer",
-
   "allCategories": "All",
   "manageCategories": "Manage categories",
   "noCategoriesYet": "No categories yet",
@@ -105,5 +103,5 @@
 
   "tenderedAmount": "Amount tendered",
   "changeDue": "Change",
-  "insufficientAmount": "Insufficient amount",
+  "insufficientAmount": "Insufficient amount"
 }
