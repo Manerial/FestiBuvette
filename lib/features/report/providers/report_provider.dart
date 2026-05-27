@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo_pay_app/core/database/database_helper.dart';
 import 'package:ludo_pay_app/features/sales/data/models/business_day.dart';
+import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
 import 'package:ludo_pay_app/features/sales/data/repositories/sales_repository.dart';
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -12,6 +13,9 @@ class ReportState {
   /// Each entry: { name_snapshot, total_quantity, product_total }
   final List<Map<String, dynamic>> productTotals;
 
+  /// Individual sales for the day, each with its lines pre-loaded.
+  final List<Sale> sales;
+
   /// All business days in the DB, ordered by date DESC (index 0 = most recent).
   final List<BusinessDay> allDays;
 
@@ -21,6 +25,7 @@ class ReportState {
   const ReportState({
     this.day,
     required this.productTotals,
+    this.sales = const [],
     this.allDays = const [],
     this.currentDayIndex = 0,
   });
@@ -78,11 +83,17 @@ class ReportNotifier extends AsyncNotifier<ReportState> {
     _currentIndex = targetIndex;
 
     final day = allDays[targetIndex];
-    final totals = await _repo.getTotalsByProduct(day.id!);
+
+    // Load product totals and individual sales in parallel.
+    final results = await Future.wait([
+      _repo.getTotalsByProduct(day.id!),
+      _repo.getSalesWithLinesByDay(day.id!),
+    ]);
 
     return ReportState(
       day: day,
-      productTotals: totals,
+      productTotals: results[0] as List<Map<String, dynamic>>,
+      sales: results[1] as List<Sale>,
       allDays: allDays,
       currentDayIndex: targetIndex,
     );

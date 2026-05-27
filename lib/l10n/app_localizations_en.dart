@@ -196,6 +196,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportByProduct => 'By product';
 
   @override
+  String get reportByCart => 'By cart';
+
+  @override
   String get reportQtyHeader => 'Qty';
 
   @override

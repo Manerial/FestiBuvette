@@ -65,6 +65,7 @@
   "reportNoSalesToday": "Aucune vente enregistrée aujourd'hui",
   "reportSaleCount": "{count, plural, =1{1 vente} other{{count} ventes}}",
   "reportByProduct": "Par produit",
+  "reportByCart": "Par panier",
   "reportQtyHeader": "Qté",
   "reportCloseDay": "Clôturer la journée",
   "reportDayClosed": "Clôturée à {time}",

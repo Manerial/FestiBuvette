@@ -149,6 +149,34 @@ class SalesRepository {
     return rows.isEmpty ? null : BusinessDay.fromMap(rows.first);
   }
 
+  /// Returns all sales for a business day, each with its lines pre-loaded.
+  /// Uses 2 queries instead of N+1 for performance.
+  Future<List<Sale>> getSalesWithLinesByDay(int businessDayId) async {
+    final sales = await getSalesByDay(businessDayId);
+    if (sales.isEmpty) return [];
+
+    final db = await _dbHelper.database;
+    final saleIds = sales.map((s) => s.id!).toList();
+    final placeholders = List.filled(saleIds.length, '?').join(', ');
+
+    final lineRows = await db.rawQuery(
+      'SELECT * FROM sale_lines WHERE sale_id IN ($placeholders) ORDER BY sale_id, id',
+      saleIds,
+    );
+
+    final linesBySaleId = <int, List<SaleLine>>{};
+    for (final row in lineRows) {
+      (linesBySaleId[row['sale_id'] as int] ??= []).add(SaleLine.fromMap(row));
+    }
+
+    return sales
+        .map((s) => Sale.fromMap(
+              s.toMap(),
+              lines: linesBySaleId[s.id!] ?? const [],
+            ))
+        .toList();
+  }
+
   /// Returns all business days ordered by date descending (most recent first).
   Future<List<BusinessDay>> getAllBusinessDays() async {
     final db = await _dbHelper.database;

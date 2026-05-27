@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ludo_pay_app/features/report/providers/report_provider.dart';
+import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
 import 'package:ludo_pay_app/l10n/app_localizations.dart';
 
 class ReportScreen extends ConsumerWidget {
@@ -48,21 +49,34 @@ class _EmptyState extends ConsumerWidget {
   }
 }
 
+// ─── Report view mode ─────────────────────────────────────────────────────────
+
+enum _ReportView { byProduct, byCart }
+
+// Shared formatters (used by both _ReportContentState and _CartView).
+final _kCurrencyFmt = NumberFormat.currency(
+  locale: 'fr_FR',
+  symbol: '€',
+  decimalDigits: 2,
+);
+final _kTimeFmt = DateFormat.Hm();
+
 // ─── Report content ───────────────────────────────────────────────────────────
 
-class _ReportContent extends ConsumerWidget {
+class _ReportContent extends ConsumerStatefulWidget {
   final ReportState report;
   const _ReportContent({required this.report});
 
+  @override
+  ConsumerState<_ReportContent> createState() => _ReportContentState();
+}
 
-  static final _currencyFmt = NumberFormat.currency(
-    locale: 'fr_FR',
-    symbol: '€',
-    decimalDigits: 2,
-  );
+class _ReportContentState extends ConsumerState<_ReportContent> {
+  _ReportView _view = _ReportView.byProduct;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final report = widget.report;
     final l10n = AppLocalizations.of(context)!;
     final day = report.day!;
     final locale = Localizations.localeOf(context).toString();
@@ -129,7 +143,7 @@ class _ReportContent extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _currencyFmt.format(day.totalRevenue),
+                            _kCurrencyFmt.format(day.totalRevenue),
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineMedium
@@ -165,125 +179,253 @@ class _ReportContent extends ConsumerWidget {
           ),
         ),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
 
-        // ── Product breakdown ───────────────────────────────────────────────
-        Text(
-          l10n.reportByProduct.toUpperCase(),
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                letterSpacing: 1,
-              ),
+        // ── View selector ───────────────────────────────────────────────────
+        SegmentedButton<_ReportView>(
+          segments: [
+            ButtonSegment(
+              value: _ReportView.byProduct,
+              label: Text(l10n.reportByProduct),
+              icon: const Icon(Icons.bar_chart_outlined),
+            ),
+            ButtonSegment(
+              value: _ReportView.byCart,
+              label: Text(l10n.reportByCart),
+              icon: const Icon(Icons.shopping_cart_outlined),
+            ),
+          ],
+          selected: {_view},
+          onSelectionChanged: (s) => setState(() => _view = s.first),
         ),
-        const SizedBox(height: 8),
-        Card(
-          child: Column(
-            children: [
-              // Header row
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '',
-                        style: Theme.of(context).textTheme.labelMedium,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 48,
-                      child: Text(
-                        l10n.reportQtyHeader,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
-                            ?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 80,
-                      child: Text(
-                        '€',
-                        textAlign: TextAlign.right,
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelMedium
-                            ?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 1),
-              // Product rows
-              ...report.productTotals.asMap().entries.map((entry) {
-                final i = entry.key;
-                final row = entry.value;
-                final isLast = i == report.productTotals.length - 1;
-                return Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              row['name_snapshot'] as String,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 48,
-                            child: Text(
-                              '× ${row['total_quantity']}',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 80,
-                            child: Text(
-                              _currencyFmt
-                                  .format(row['product_total'] as num),
-                              textAlign: TextAlign.right,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (!isLast) const Divider(height: 1, indent: 16),
-                  ],
-                );
-              }),
-            ],
-          ),
-        ),
+
+        const SizedBox(height: 16),
+
+        // ── Breakdown ───────────────────────────────────────────────────────
+        if (_view == _ReportView.byProduct)
+          _ProductView(productTotals: report.productTotals)
+        else
+          _CartView(sales: report.sales),
       ],
+    );
+  }
+}
+
+// ─── Product view ─────────────────────────────────────────────────────────────
+
+class _ProductView extends StatelessWidget {
+  final List<Map<String, dynamic>> productTotals;
+  const _ProductView({required this.productTotals});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Card(
+      child: Column(
+        children: [
+          // Header row
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                  child: Text(
+                    l10n.reportQtyHeader,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ),
+                SizedBox(
+                  width: 80,
+                  child: Text(
+                    '€',
+                    textAlign: TextAlign.right,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          // Product rows
+          ...productTotals.asMap().entries.map((entry) {
+            final i = entry.key;
+            final row = entry.value;
+            final isLast = i == productTotals.length - 1;
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          row['name_snapshot'] as String,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 48,
+                        child: Text(
+                          '× ${row['total_quantity']}',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          _kCurrencyFmt.format(row['product_total'] as num),
+                          textAlign: TextAlign.right,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!isLast) const Divider(height: 1, indent: 16),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Cart view ────────────────────────────────────────────────────────────────
+
+class _CartView extends StatelessWidget {
+  final List<Sale> sales;
+  const _CartView({required this.sales});
+
+  @override
+  Widget build(BuildContext context) {
+    if (sales.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      children: sales.asMap().entries.map((entry) {
+        final i = entry.key;
+        final sale = entry.value;
+        final time = _kTimeFmt.format(DateTime.parse(sale.dateTime));
+        final isLastSale = i == sales.length - 1;
+
+        return Padding(
+          padding: EdgeInsets.only(bottom: isLastSale ? 0 : 12),
+          child: Card(
+            child: Column(
+              children: [
+                // ── Sale header: time + total ─────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        time,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const Spacer(),
+                      Text(
+                        _kCurrencyFmt.format(sale.total),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                // ── Sale lines ────────────────────────────────────────────
+                ...sale.lines.asMap().entries.map((lineEntry) {
+                  final j = lineEntry.key;
+                  final line = lineEntry.value;
+                  final isLastLine = j == sale.lines.length - 1;
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                line.nameSnapshot,
+                                style:
+                                    Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 48,
+                              child: Text(
+                                '× ${line.quantity}',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 80,
+                              child: Text(
+                                _kCurrencyFmt.format(line.subtotal),
+                                textAlign: TextAlign.right,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (!isLastLine) const Divider(height: 1, indent: 16),
+                    ],
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

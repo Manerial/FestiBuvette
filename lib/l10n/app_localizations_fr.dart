@@ -200,6 +200,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportByProduct => 'Par produit';
 
   @override
+  String get reportByCart => 'Par panier';
+
+  @override
   String get reportQtyHeader => 'Qté';
 
   @override

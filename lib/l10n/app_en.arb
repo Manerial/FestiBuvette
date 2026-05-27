@@ -70,6 +70,7 @@
   "reportSaleCount": "{count, plural, =1{1 sale} other{{count} sales}}",
   "@reportSaleCount": { "placeholders": { "count": { "type": "num" } } },
   "reportByProduct": "By product",
+  "reportByCart": "By cart",
   "reportQtyHeader": "Qty",
   "reportCloseDay": "Close day",
   "reportDayClosed": "Closed at {time}",

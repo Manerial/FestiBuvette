@@ -434,6 +434,12 @@ abstract class AppLocalizations {
   /// **'By product'**
   String get reportByProduct;
 
+  /// No description provided for @reportByCart.
+  ///
+  /// In en, this message translates to:
+  /// **'By cart'**
+  String get reportByCart;
+
   /// No description provided for @reportQtyHeader.
   ///
   /// In en, this message translates to:
