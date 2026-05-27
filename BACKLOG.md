@@ -159,40 +159,22 @@
 - [x] **E8-6** Cancel last sale — delete any sale from "By cart" view with confirmation dialog + business day aggregate recompute (E4-8)
 - [x] **E8-7** Reprint last ticket — reprint any past sale from "By cart" view using ESC/POS snapshots (E4-9)
 - [x] **E8-8** Quick bill buttons in change calculator — inline row `[ 5€ ][ 10€ ][ 20€ ][ 50€ ][ ✏️ ]` replacing the text field; tap a button to fill the tendered amount (toggle off = re-tap), tap ✏️ for custom amount via dialog
+- [ ] **E8-9** Haptic feedback — `HapticFeedback.lightImpact()` on `+` / `-` product buttons (list + grid views)
+- [ ] **E8-10** Out-of-stock toggle — long-press on a product to mark it unavailable; grayed + non-clickable in cart; sorted last without altering `sort_order` (ORDER BY `is_out_of_stock ASC, sort_order ASC`); DB migration v2→v3
 
 ---
 
-## EPIC 10 — Export
+## EPIC 9 — Export
 
-- [ ] **E10-1** Export daily report as CSV (revenue, sale count, breakdown by product)
-- [ ] **E10-2** Export daily report as PDF (formatted, printable)
-- [ ] **E10-3** Share sheet integration — native share dialog (email, AirDrop, cloud…)
-
----
-
-## Suggested iteration order
-
-```
-Iteration 1 — Skeleton & data          ✅ done
-  E0 → E1 → E2
-
-Iteration 2 — Cart & report (no print) ✅ done
-  E4 → E5 (non-Bluetooth items)
-  → App is already usable without printing
-
-Iteration 3 — Bluetooth printing       ✅ done (pending E3-1 POC on device)
-  E3-1 (POC) → E3-2 to E3-8
-  → Validate BLE on iOS first
-
-Iteration 4 — Polish                   🔲 in progress
-  E999 (statistics + iOS/BLE — deferred)
-```
+- [ ] **E9-1** Export daily report as CSV (revenue, sale count, breakdown by product)
+- [ ] **E9-2** Export daily report as PDF (formatted, printable)
+- [ ] **E9-3** Share sheet integration — native share dialog (email, AirDrop, cloud…)
 
 ---
 
-## EPIC 9 — Statistics
+## EPIC 10 — Advanced interactions
 
-- [x] **E9-1** Hourly breakdown by product (peak hours chart) — grouped bar chart 9h–18h with multi-select filter (E4-10)
+- [ ] **E10-1** Direct quantity input — long-press on `+` or the quantity counter to type a number directly (useful for bulk orders)
 
 ---
 
@@ -202,6 +184,25 @@ Iteration 4 — Polish                   🔲 in progress
 - [ ] **E999-2** Bluetooth error handling (connection loss during print) — blocked on E999-1
 - [ ] **E999-3** Test on physical iOS device (BLE validation) _(requires Mac)_
 - [ ] **E999-4** iOS build (`.ipa`) _(requires Mac)_
+
+---
+
+## Périmètre produit — décisions fermes
+
+Ces features sont **exclues** : ne pas les proposer, ne pas les implémenter.
+
+| Fonctionnalité | Décision |
+|---|---|
+| Multi-modes de paiement (CB, chèque…) | ❌ Hors scope — espèces uniquement |
+| Gestion des stocks | ❌ Hors scope |
+| Mode sombre | ❌ Hors scope |
+| Produit offert / remise | ❌ Hors scope |
+| TVA / comptabilité | ❌ Hors scope |
+| Backend / synchronisation multi-caisse | ❌ Hors scope — 100 % offline par principe |
+| Authentification / multi-opérateur | ❌ Hors scope — par principe |
+| Récapitulatif multi-jours / fin de festival | ❌ Hors scope — festival = 1 journée |
+| Statistiques de panier (taille moyenne, heure de pointe…) | ❌ Hors scope |
+| Filtre par plage de dates dans le rapport | ❌ Hors scope — festival = 1 journée 
 
 ---
 
