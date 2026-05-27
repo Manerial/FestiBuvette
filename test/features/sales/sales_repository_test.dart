@@ -135,6 +135,22 @@ void main() {
     expect(sales.length, 2);
   });
 
+  test('getSalesByDay returns sales ordered by date_time DESC', () async {
+    final day = await repo.getOrCreateToday();
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, dateTime: '2026-01-01T10:00:00.000'),
+      lines: [buildLine()],
+    );
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, dateTime: '2026-01-01T11:00:00.000'),
+      lines: [buildLine()],
+    );
+
+    final sales = await repo.getSalesByDay(day.id!);
+    expect(sales[0].dateTime, '2026-01-01T11:00:00.000');
+    expect(sales[1].dateTime, '2026-01-01T10:00:00.000');
+  });
+
   test('getSalesByDay returns empty list for unknown business day', () async {
     expect(await repo.getSalesByDay(999), isEmpty);
   });
