@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'core/constants/app_constants.dart';
-import 'core/theme/app_theme.dart';
-import 'features/cart/presentation/screens/cart_screen.dart';
-import 'features/printer/presentation/screens/printer_screen.dart';
-import 'features/products/presentation/screens/products_screen.dart';
-import 'features/report/presentation/screens/report_screen.dart';
-import 'l10n/app_localizations.dart';
-import 'shared/widgets/app_bottom_nav.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ludo_pay_app/core/constants/app_constants.dart';
+import 'package:ludo_pay_app/core/theme/app_theme.dart';
+import 'package:ludo_pay_app/features/cart/presentation/screens/cart_screen.dart';
+import 'package:ludo_pay_app/features/printer/presentation/screens/printer_screen.dart';
+import 'package:ludo_pay_app/features/products/presentation/screens/products_screen.dart';
+import 'package:ludo_pay_app/features/report/presentation/screens/report_screen.dart';
+import 'package:ludo_pay_app/features/report/providers/report_provider.dart';
+import 'package:ludo_pay_app/l10n/app_localizations.dart';
+import 'package:ludo_pay_app/shared/widgets/app_bottom_nav.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -24,14 +26,14 @@ class App extends StatelessWidget {
   }
 }
 
-class MainScaffold extends StatefulWidget {
+class MainScaffold extends ConsumerStatefulWidget {
   const MainScaffold({super.key});
 
   @override
-  State<MainScaffold> createState() => _MainScaffoldState();
+  ConsumerState<MainScaffold> createState() => _MainScaffoldState();
 }
 
-class _MainScaffoldState extends State<MainScaffold> {
+class _MainScaffoldState extends ConsumerState<MainScaffold> {
   int _currentIndex = 0;
 
   static const _screens = [
@@ -39,6 +41,16 @@ class _MainScaffoldState extends State<MainScaffold> {
     ProductsScreen(),
     ReportScreen(),
   ];
+
+  static const _reportTabIndex = 2;
+
+  void _onTabTap(int index) {
+    // Reload report data each time the user opens the Report tab.
+    if (index == _reportTabIndex) {
+      ref.invalidate(reportProvider);
+    }
+    setState(() => _currentIndex = index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +77,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+        onTap: _onTabTap,
       ),
     );
   }

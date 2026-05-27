@@ -128,6 +128,12 @@ abstract class AppLocalizations {
   /// **'Add'**
   String get add;
 
+  /// Generic confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
   /// Cart tab label and page title
   ///
   /// In en, this message translates to:
@@ -308,11 +314,53 @@ abstract class AppLocalizations {
   /// **'Printer settings — to be implemented (E3)'**
   String get printerSettingsPlaceholder;
 
-  /// Report screen placeholder
+  /// Report: empty state when no business day exists
   ///
   /// In en, this message translates to:
-  /// **'Report — to be implemented (E4)'**
-  String get reportPlaceholder;
+  /// **'No sales recorded today'**
+  String get reportNoSalesToday;
+
+  /// Number of sales for the day
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 sale} other{{count} sales}}'**
+  String reportSaleCount(num count);
+
+  /// Report section header: product breakdown
+  ///
+  /// In en, this message translates to:
+  /// **'By product'**
+  String get reportByProduct;
+
+  /// Report table column header: quantity
+  ///
+  /// In en, this message translates to:
+  /// **'Qty'**
+  String get reportQtyHeader;
+
+  /// Button to close the business day
+  ///
+  /// In en, this message translates to:
+  /// **'Close day'**
+  String get reportCloseDay;
+
+  /// Badge shown when the business day is already closed
+  ///
+  /// In en, this message translates to:
+  /// **'Closed at {time}'**
+  String reportDayClosed(String time);
+
+  /// Close day confirmation dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Close today\'s session?'**
+  String get reportCloseDayTitle;
+
+  /// Close day confirmation dialog body
+  ///
+  /// In en, this message translates to:
+  /// **'Once closed, no more sales can be added for today.'**
+  String get reportCloseDayMessage;
 }
 
 class _AppLocalizationsDelegate

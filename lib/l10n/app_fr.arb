@@ -6,6 +6,7 @@
   "delete": "Supprimer",
   "save": "Enregistrer",
   "add": "Ajouter",
+  "confirm": "Confirmer",
 
   "cartTab": "Panier",
   "productsTab": "Produits",
@@ -41,5 +42,13 @@
 
   "printerScreenTitle": "Imprimante Bluetooth",
   "printerSettingsPlaceholder": "Paramètres imprimante — à implémenter (E3)",
-  "reportPlaceholder": "Rapport — à implémenter (E4)"
+
+  "reportNoSalesToday": "Aucune vente enregistrée aujourd'hui",
+  "reportSaleCount": "{count, plural, =1{1 vente} other{{count} ventes}}",
+  "reportByProduct": "Par produit",
+  "reportQtyHeader": "Qté",
+  "reportCloseDay": "Clôturer la journée",
+  "reportDayClosed": "Clôturée à {time}",
+  "reportCloseDayTitle": "Clôturer la session ?",
+  "reportCloseDayMessage": "Une fois clôturée, les ventes ne pourront plus être ajoutées pour aujourd'hui."
 }

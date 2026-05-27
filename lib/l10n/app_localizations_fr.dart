@@ -26,6 +26,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get add => 'Ajouter';
 
   @override
+  String get confirm => 'Confirmer';
+
+  @override
   String get cartTab => 'Panier';
 
   @override
@@ -124,5 +127,37 @@ class AppLocalizationsFr extends AppLocalizations {
       'Paramètres imprimante — à implémenter (E3)';
 
   @override
-  String get reportPlaceholder => 'Rapport — à implémenter (E4)';
+  String get reportNoSalesToday => 'Aucune vente enregistrée aujourd\'hui';
+
+  @override
+  String reportSaleCount(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count ventes',
+      one: '1 vente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get reportByProduct => 'Par produit';
+
+  @override
+  String get reportQtyHeader => 'Qté';
+
+  @override
+  String get reportCloseDay => 'Clôturer la journée';
+
+  @override
+  String reportDayClosed(String time) {
+    return 'Clôturée à $time';
+  }
+
+  @override
+  String get reportCloseDayTitle => 'Clôturer la session ?';
+
+  @override
+  String get reportCloseDayMessage =>
+      'Une fois clôturée, les ventes ne pourront plus être ajoutées pour aujourd\'hui.';
 }

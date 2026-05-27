@@ -21,6 +21,9 @@
   "add": "Add",
   "@add": { "description": "Add button in create mode" },
 
+  "confirm": "Confirm",
+  "@confirm": { "description": "Generic confirm button" },
+
   "cartTab": "Cart",
   "@cartTab": { "description": "Cart tab label and page title" },
 
@@ -121,6 +124,37 @@
   "printerSettingsPlaceholder": "Printer settings — to be implemented (E3)",
   "@printerSettingsPlaceholder": { "description": "Printer settings placeholder" },
 
-  "reportPlaceholder": "Report — to be implemented (E4)",
-  "@reportPlaceholder": { "description": "Report screen placeholder" }
+  "reportNoSalesToday": "No sales recorded today",
+  "@reportNoSalesToday": { "description": "Report: empty state when no business day exists" },
+
+  "reportSaleCount": "{count, plural, =1{1 sale} other{{count} sales}}",
+  "@reportSaleCount": {
+    "description": "Number of sales for the day",
+    "placeholders": {
+      "count": { "type": "num" }
+    }
+  },
+
+  "reportByProduct": "By product",
+  "@reportByProduct": { "description": "Report section header: product breakdown" },
+
+  "reportQtyHeader": "Qty",
+  "@reportQtyHeader": { "description": "Report table column header: quantity" },
+
+  "reportCloseDay": "Close day",
+  "@reportCloseDay": { "description": "Button to close the business day" },
+
+  "reportDayClosed": "Closed at {time}",
+  "@reportDayClosed": {
+    "description": "Badge shown when the business day is already closed",
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+
+  "reportCloseDayTitle": "Close today's session?",
+  "@reportCloseDayTitle": { "description": "Close day confirmation dialog title" },
+
+  "reportCloseDayMessage": "Once closed, no more sales can be added for today.",
+  "@reportCloseDayMessage": { "description": "Close day confirmation dialog body" }
 }
