@@ -113,7 +113,24 @@ flutter run
 ```
 
 > Nécessite Android Studio installé avec le SDK Android (API 33+).
+
+---
+
+## Générer l'APK
+
+```bash
+flutter build apk --split-per-abi
+```
+
 > Build iOS uniquement depuis macOS.
+
+Apk dans build\app\outputs\flutter-apk\
+
+| APK | Architecture | Taille | Usage |
+|---|---|---|---|
+|app-arm64-v8a-release.apk | Android récent 64-bit | 17.8 MB | 👈 ton téléphone (quasi certain) |
+| app-armeabi-v7a-release.apk | Android ancien 32-bit | 15.4 MB | appareils < 2015 |
+| app-x86_64-release.apk | Émulateur | 19.2 MB | tests sur émulateur |
 
 ---
 
