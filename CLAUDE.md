@@ -60,6 +60,8 @@ Les couches inférieures ne connaissent jamais les couches supérieures.
 - **Toujours** utiliser des chemins de package si possible — **jamais** de chemins relatifs (`../`) (exception pour les helpers de test (`test/helpers/`) car les fichiers `test/` ne sont pas accessibles via `package:`).
 - **Toujours** faire des phrases de commit concises : `feat(products): [short description]`.
 - **Toujours** alimenter le BACKLOG.md avant une nouvelle feature afin de planifier son développement.
+- **Toujours** lire quelques fichiers de code avant de commencer afin de comprendre l'architecture, la structure et la façon de coder.
+- **Toujours** vérifier si le code peut être factorisé de manière performante et intelligente.
 - **Toujours** `flutter analyze` avant de tester une feature. Corriger les éléments remontés, zéro warning toléré.
 - **Toujours** `flutter test` avant de livrer une feature. Une feature sans tests n'est pas considérée comme terminée.
 - **Toujours** vérifier l'état du BACKLOG.md après la livraison d'une feature.

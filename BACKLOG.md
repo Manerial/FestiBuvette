@@ -154,7 +154,7 @@
 - [x] **E8-1** Collapsible cart footer — drag handle + total always visible, swipe up/down or tap to expand (`AnimatedAlign` + `heightFactor`, widget stays in tree)
 - [x] **E8-2** AppBar orange (#FFA946), no tint on scroll (`scrolledUnderElevation: 0`, `surfaceTintColor: transparent`, `systemOverlayStyle`)
 - [x] **E8-3** Bottom nav selected color aligned with `colorScheme.primary` (was hardcoded seed value)
-- [ ] **E8-4** Product grid view — large tap tiles as alternative to list in cart screen (toggle in toolbar, preference persisted in SharedPreferences); easier to use with large fingers or outdoor conditions
+- [x] **E8-4** Product grid view — large tap tiles as alternative to list in cart screen (toggle in toolbar, preference persisted in SharedPreferences); easier to use with large fingers or outdoor conditions
 - [x] **E8-5** End-of-day report — daily summary (revenue, sale count, breakdown by product and by cart) with day close; covered by E4 report screen
 - [ ] **E8-6** Cancel last sale — one-tap undo from report screen (delete sale + revert business day aggregates)
 - [ ] **E8-7** Reprint last ticket — targeted at printer disconnection scenarios: if the printer drops during a sale, allow reprinting the last recorded ticket without re-entering the sale flow
