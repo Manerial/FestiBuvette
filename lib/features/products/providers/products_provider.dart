@@ -40,14 +40,43 @@ class ProductsNotifier extends AsyncNotifier<List<Product>> {
 
   /// Reorders the list after drag & drop and persists the new order.
   /// Uses [onReorderItem] from Flutter 3.41+: [newIndex] is already adjusted.
-  Future<void> reorder(int oldIndex, int newIndex) async {
-    final products = List<Product>.from(state.valueOrNull ?? []);
-    final item = products.removeAt(oldIndex);
-    products.insert(newIndex, item);
-    // Optimistic update → UI does not "jump"
-    state = AsyncData(products);
-    // Persist in background
-    await _repo.updateOrders(products);
+  ///
+  /// [visibleProducts] is the list actually shown in the UI (may be a filtered
+  /// subset of the full catalogue).  When a category filter is active the
+  /// indices [oldIndex]/[newIndex] refer to positions inside that subset, so
+  /// the method redistributes only those slots in the complete list while
+  /// leaving non-visible products in place.
+  Future<void> reorder(
+    int oldIndex,
+    int newIndex, {
+    required List<Product> visibleProducts,
+  }) async {
+    // Apply the move inside the visible slice.
+    final newVisible = List<Product>.from(visibleProducts);
+    final moved = newVisible.removeAt(oldIndex);
+    newVisible.insert(newIndex, moved);
+
+    final allProducts = List<Product>.from(state.valueOrNull ?? []);
+
+    if (newVisible.length == allProducts.length) {
+      // No filter active — newVisible IS the full list.
+      state = AsyncData(newVisible);
+      await _repo.updateOrders(newVisible);
+    } else {
+      // Filter active: replace each "slot" that belonged to a visible product
+      // with the next item from the reordered visible list, preserving the
+      // relative positions of non-visible products.
+      final visibleIds = {for (final p in visibleProducts) p.id};
+      int vi = 0;
+      final newAll = allProducts.map((p) {
+        if (visibleIds.contains(p.id)) return newVisible[vi++];
+        return p;
+      }).toList();
+
+      // Optimistic update → UI does not "jump".
+      state = AsyncData(newAll);
+      await _repo.updateOrders(newAll);
+    }
   }
 
   /// Deletes (physically or logically) a product.

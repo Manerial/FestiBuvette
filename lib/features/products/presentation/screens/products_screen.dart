@@ -232,8 +232,9 @@ class _ProductList extends StatelessWidget {
     return ReorderableListView.builder(
       padding: const EdgeInsets.only(bottom: 88),
       itemCount: products.length,
-      onReorderItem: (oldIndex, newIndex) =>
-          ref.read(productsProvider.notifier).reorder(oldIndex, newIndex),
+      onReorderItem: (oldIndex, newIndex) => ref
+          .read(productsProvider.notifier)
+          .reorder(oldIndex, newIndex, visibleProducts: products),
       itemBuilder: (context, index) {
         final product = products[index];
         return _ProductTile(
