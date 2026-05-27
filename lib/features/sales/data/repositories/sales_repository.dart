@@ -148,4 +148,14 @@ class SalesRepository {
     );
     return rows.isEmpty ? null : BusinessDay.fromMap(rows.first);
   }
+
+  /// Returns all business days ordered by date descending (most recent first).
+  Future<List<BusinessDay>> getAllBusinessDays() async {
+    final db = await _dbHelper.database;
+    final rows = await db.query(
+      'business_days',
+      orderBy: 'date DESC',
+    );
+    return rows.map(BusinessDay.fromMap).toList();
+  }
 }

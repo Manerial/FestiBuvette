@@ -165,6 +165,83 @@ void main() {
     expect(closed.day!.closedAt, isNotNull);
   });
 
+  // ─── Day navigation ──────────────────────────────────────────────────────
+
+  test('canGoPrevious and canGoNext are false with a single day', () async {
+    final helper = await createTestDatabaseHelper();
+    final repo = SalesRepository(helper);
+    final day = await repo.getOrCreateToday();
+    await repo.updateBusinessDay(day.id!, totalRevenue: 5.0, saleCount: 1);
+    final container = makeContainer(repo);
+
+    final state = await awaitData(container);
+
+    expect(state.canGoPrevious, isFalse);
+    expect(state.canGoNext, isFalse);
+  });
+
+  test('goToPreviousDay loads the older day', () async {
+    final helper = await createTestDatabaseHelper();
+    final db = await helper.database;
+    // Insert two days: yesterday and today.
+    await db.insert('business_days', {
+      'date': '2026-01-01',
+      'total_revenue': 10.0,
+      'sale_count': 1,
+      'closed_at': null,
+    });
+    await db.insert('business_days', {
+      'date': '2026-01-02',
+      'total_revenue': 20.0,
+      'sale_count': 2,
+      'closed_at': null,
+    });
+    final repo = SalesRepository(helper);
+    final container = makeContainer(repo);
+
+    // Starts on index 0 = most recent (Jan 2).
+    final initial = await awaitData(container);
+    expect(initial.day!.date, '2026-01-02');
+    expect(initial.canGoPrevious, isTrue);
+    expect(initial.canGoNext, isFalse);
+
+    // Navigate to Jan 1.
+    await container.read(reportProvider.notifier).goToPreviousDay();
+    final prev = await container.read(reportProvider.future);
+
+    expect(prev.day!.date, '2026-01-01');
+    expect(prev.canGoPrevious, isFalse);
+    expect(prev.canGoNext, isTrue);
+  });
+
+  test('goToNextDay returns to the more recent day', () async {
+    final helper = await createTestDatabaseHelper();
+    final db = await helper.database;
+    await db.insert('business_days', {
+      'date': '2026-01-01',
+      'total_revenue': 10.0,
+      'sale_count': 1,
+      'closed_at': null,
+    });
+    await db.insert('business_days', {
+      'date': '2026-01-02',
+      'total_revenue': 20.0,
+      'sale_count': 2,
+      'closed_at': null,
+    });
+    final repo = SalesRepository(helper);
+    final container = makeContainer(repo);
+    await awaitData(container);
+
+    // Go back to Jan 1, then forward to Jan 2.
+    await container.read(reportProvider.notifier).goToPreviousDay();
+    await container.read(reportProvider.notifier).goToNextDay();
+    final state = await container.read(reportProvider.future);
+
+    expect(state.day!.date, '2026-01-02');
+    expect(state.currentDayIndex, 0);
+  });
+
   test('closeDay is a no-op when day is already closed', () async {
     final helper = await createTestDatabaseHelper();
     final repo = SalesRepository(helper);

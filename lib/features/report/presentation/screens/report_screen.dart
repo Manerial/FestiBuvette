@@ -15,7 +15,7 @@ class ReportScreen extends ConsumerWidget {
     return reportAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text(l10n.errorMessage(e))),
-      data: (report) => report.hasData
+      data: (report) => report.allDays.isNotEmpty
           ? _ReportContent(report: report)
           : _EmptyState(),
     );
@@ -54,6 +54,7 @@ class _ReportContent extends ConsumerWidget {
   final ReportState report;
   const _ReportContent({required this.report});
 
+
   static final _currencyFmt = NumberFormat.currency(
     locale: 'fr_FR',
     symbol: '€',
@@ -79,15 +80,48 @@ class _ReportContent extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Date
-                Text(
-                  dateStr,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                // ── Date row with navigation arrows ──────────────────────
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left),
+                      tooltip: '←',
+                      iconSize: 20,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: report.canGoPrevious
+                          ? () => ref
+                              .read(reportProvider.notifier)
+                              .goToPreviousDay()
+                          : null,
+                    ),
+                    Expanded(
+                      child: Text(
+                        dateStr,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                       ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_right),
+                      tooltip: '→',
+                      iconSize: 20,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: report.canGoNext
+                          ? () => ref
+                              .read(reportProvider.notifier)
+                              .goToNextDay()
+                          : null,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
-                // Revenue + count
+                // ── Revenue + count ───────────────────────────────────────
                 Row(
                   children: [
                     Expanded(
@@ -119,10 +153,10 @@ class _ReportContent extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    // Close day status / button
+                    // Close day status / button — only relevant for today.
                     if (day.isClosed)
                       _ClosedBadge(closedAt: day.closedAt!)
-                    else
+                    else if (report.isDayToday)
                       _CloseDayButton(day: day),
                   ],
                 ),
