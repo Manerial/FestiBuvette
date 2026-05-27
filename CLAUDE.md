@@ -7,8 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Projet
 
 **FestiBuvette** — application mobile de caisse simplifiée (Android + iOS).
-Catalogue de produits, panier avec quantités, total, impression ticket via imprimante thermique Bluetooth (NETUM NT-1809DD, protocole ESC/POS).
+Catalogue de produits (~20 articles), panier avec quantités, total, impression ticket de commande via imprimante thermique Bluetooth (NETUM NT-1809DD, protocole ESC/POS).
 100 % hors ligne. Aucun backend. Aucune authentification.
+
+**Contexte d'usage :** festival d'une journée. Le ticket imprimé est un **ticket de commande** remis à la buvette pour préparer la commande — ce n'est pas un reçu client. Le rapport journalier suffit ; l'export CSV/PDF est la seule sortie de données envisagée.
 
 **Flutter 3.44 · Dart 3.12 · Riverpod 2.6 · sqflite · intl · shared_preferences**
 
@@ -117,23 +119,7 @@ La langue est détectée automatiquement depuis les paramètres du device. Fallb
 **Ce qu'il faut couvrir par couche :**
 - Repository : toutes les opérations CRUD + cas limites (soft delete, contraintes…) avec une BDD en mémoire via `sqflite_common_ffi`
 - Notifier : toutes les transitions d'état (valeur initiale, chaque méthode publique)
-- Service : logique métier (cas nominal + cas d'erreur)
-
----
-
-## Périmètre produit — décisions fermes
-
-Ces features sont **exclues** : ne pas les proposer, ne pas les implémenter.
-
-| Fonctionnalité | Décision |
-|---|---|
-| Multi-modes de paiement (CB, chèque…) | ❌ Hors scope — espèces uniquement |
-| Gestion des stocks | ❌ Hors scope |
-| Mode sombre | ❌ Hors scope |
-| Produit offert / remise | ❌ Hors scope |
-| TVA / comptabilité | ❌ Hors scope |
-| Backend / synchronisation multi-caisse | ❌ Hors scope — 100 % offline par principe |
-| Authentification / multi-opérateur | ❌ Hors scope — par principe |
+- Service : logique métier (cas nominal + cas d'erreur)|
 
 ---
 
