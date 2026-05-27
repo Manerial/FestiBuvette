@@ -103,4 +103,44 @@ void main() {
 
     expect(sale.total, closeTo(5.0, 0.001));
   });
+
+  // ─── Auto-reopen closed day ─────────────────────────────────────────────────
+
+  test('record reopens a closed business day', () async {
+    // Close today's day
+    final day = await repo.getOrCreateToday();
+    await repo.closeBusinessDay(day.id!);
+    expect((await repo.getToday())!.isClosed, isTrue);
+
+    // Recording a new sale should reopen it
+    await service.record(
+      products: [product(1, price: 2.0)],
+      quantities: {1: 1},
+    );
+
+    final reopened = await repo.getToday();
+    expect(reopened!.isClosed, isFalse);
+    expect(reopened.closedAt, isNull);
+  });
+
+  test('record updates aggregates correctly after reopening', () async {
+    // Close after a first sale
+    await service.record(
+      products: [product(1, price: 3.0)],
+      quantities: {1: 2}, // total = 6.0
+    );
+    final day = await repo.getToday();
+    await repo.closeBusinessDay(day!.id!);
+
+    // Second sale after closure
+    await service.record(
+      products: [product(1, price: 3.0)],
+      quantities: {1: 1}, // total = 3.0
+    );
+
+    final updated = await repo.getToday();
+    expect(updated!.isClosed, isFalse);
+    expect(updated.totalRevenue, closeTo(9.0, 0.001)); // 6.0 + 3.0
+    expect(updated.saleCount, 2);
+  });
 }

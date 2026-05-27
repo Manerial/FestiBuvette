@@ -45,6 +45,11 @@ class SaleService {
     // 3. Get / create today's business day
     final businessDay = await _repo.getOrCreateToday();
 
+    // 3b. Reopen the day automatically if it was closed
+    if (businessDay.isClosed) {
+      await _repo.reopenBusinessDay(businessDay.id!);
+    }
+
     // 4. Build objects
     final now = DateTime.now().toIso8601String();
     final sale = Sale(

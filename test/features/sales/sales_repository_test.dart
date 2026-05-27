@@ -82,6 +82,18 @@ void main() {
     expect(closed.closedAt, isNotNull);
   });
 
+  test('reopenBusinessDay clears closed_at', () async {
+    final day = await repo.getOrCreateToday();
+    await repo.closeBusinessDay(day.id!);
+    expect((await repo.getToday())!.isClosed, isTrue);
+
+    await repo.reopenBusinessDay(day.id!);
+
+    final reopened = await repo.getToday();
+    expect(reopened!.isClosed, isFalse);
+    expect(reopened.closedAt, isNull);
+  });
+
   // ─── Sales ─────────────────────────────────────────────────────────────────
 
   test('insertSaleWithLines creates sale and lines and returns sale with id',

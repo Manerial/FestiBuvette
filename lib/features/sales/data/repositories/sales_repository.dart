@@ -63,6 +63,17 @@ class SalesRepository {
     );
   }
 
+  /// Reopens a previously closed business day (sets closed_at back to NULL).
+  Future<void> reopenBusinessDay(int businessDayId) async {
+    final db = await _dbHelper.database;
+    await db.update(
+      'business_days',
+      {'closed_at': null},
+      where: 'id = ?',
+      whereArgs: [businessDayId],
+    );
+  }
+
   // ─── Sales ─────────────────────────────────────────────────────────────────
 
   /// Inserts a sale AND its lines in an atomic transaction.
