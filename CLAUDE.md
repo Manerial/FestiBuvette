@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Projet
 
-**LudoPay** — application mobile de caisse simplifiée (Android + iOS).
+**FestiBuvette** — application mobile de caisse simplifiée (Android + iOS).
 Catalogue de produits, panier avec quantités, total, impression ticket via imprimante thermique Bluetooth (NETUM NT-1809DD, protocole ESC/POS).
 100 % hors ligne. Aucun backend. Aucune authentification.
 

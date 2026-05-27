@@ -1,4 +1,4 @@
-# LudoPay
+# FestiBuvette
 
 Application mobile de caisse simplifiée avec impression thermique Bluetooth.
 Fonctionne entièrement hors ligne (sauf connexion Bluetooth à l'imprimante).
@@ -136,28 +136,28 @@ Modifiable à tout moment, persisté en local (`SharedPreferences`).
 
 ```dart
 // lib/core/constants/app_constants.dart
-static const String appName = 'LudoPay';   // ← modifier ici
+static const String appName = 'FestiBuvette';   // ← modifier ici
 ```
 
 ### 3. Nom de l'icône sur l'écran d'accueil (launcher label)
 
 **Android** — `android/app/src/main/AndroidManifest.xml` :
 ```xml
-<application android:label="LudoPay" ...>
+<application android:label="FestiBuvette" ...>
 ```
 
 **iOS** — `ios/Runner/Info.plist` :
 ```xml
 <key>CFBundleDisplayName</key>
-<string>LudoPay</string>
+<string>FestiBuvette</string>
 ```
 
 ### 4. Nom du fichier APK généré
 
 ```kotlin
 // android/app/build.gradle.kts — bloc applicationVariants.all { ... }
-"arm64-v8a"   -> "LudoPay_64.apk"    // ← modifier le préfixe ici
-"armeabi-v7a" -> "LudoPay_32.apk"
+"arm64-v8a"   -> "FestiBuvette_64.apk"    // ← modifier le préfixe ici
+"armeabi-v7a" -> "FestiBuvette_32.apk"
 ```
 
 ---
@@ -172,9 +172,9 @@ Les fichiers sont dans `build/app/outputs/flutter-apk/` :
 
 | Fichier | Architecture | Taille | Usage |
 |---|---|---|---|
-| `LudoPay_64.apk` | arm64-v8a — Android récent 64-bit | ~17.8 MB | 👈 quasi tous les téléphones actuels |
-| `LudoPay_32.apk` | armeabi-v7a — Android ancien 32-bit | ~15.4 MB | appareils antérieurs à 2015 |
-| `LudoPay_x86_64.apk` | x86_64 — émulateur | ~19.2 MB | tests sur émulateur Android Studio |
+| `FestiBuvette_64.apk` | arm64-v8a — Android récent 64-bit | ~17.8 MB | 👈 quasi tous les téléphones actuels |
+| `FestiBuvette_32.apk` | armeabi-v7a — Android ancien 32-bit | ~15.4 MB | appareils antérieurs à 2015 |
+| `FestiBuvette_x86_64.apk` | x86_64 — émulateur | ~19.2 MB | tests sur émulateur Android Studio |
 
 > **iOS** : build uniquement depuis macOS (`flutter build ios`).
 

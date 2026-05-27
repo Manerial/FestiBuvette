@@ -1,7 +1,7 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'LudoPay';
+  static const String appName = 'FestiBuvette';
 
   // SharedPreferences keys
   static const String keyAppName = 'app_name';
@@ -9,7 +9,7 @@ class AppConstants {
   static const String keyPrinterAddress = 'printer_address';
   static const String keyPrinterName = 'printer_name';
 
-  // Database
-  static const String dbName = 'ludopay.db';
+  // Database — nom volontairement indépendant du nom de l'app
+  static const String dbName = 'caisse.db';
   static const int dbVersion = 1;
 }

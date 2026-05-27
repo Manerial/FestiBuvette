@@ -1,4 +1,4 @@
-# Backlog — LudoPayApp
+# Backlog — FestiBuvetteApp
 
 > Flutter mobile app (Android + iOS) — simplified POS with Bluetooth thermal printing.
 > All data stored locally (SQLite). Zero network dependency.

@@ -8,16 +8,16 @@
 	     se connecter à l'imprimante thermique NETUM.
 	     ═══════════════════════════════════════════════ -->
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>LudoPay utilise le Bluetooth pour se connecter à l'imprimante thermique et imprimer les tickets de caisse.</string>
+	<string>FestiBuvette utilise le Bluetooth pour se connecter à l'imprimante thermique et imprimer les tickets de caisse.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>LudoPay utilise le Bluetooth pour se connecter à l'imprimante thermique et imprimer les tickets de caisse.</string>
+	<string>FestiBuvette utilise le Bluetooth pour se connecter à l'imprimante thermique et imprimer les tickets de caisse.</string>
 
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>LudoPay</string>
+	<string>FestiBuvette</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -25,7 +25,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>LudoPay</string>
+	<string>FestiBuvette</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

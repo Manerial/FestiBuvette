@@ -33,17 +33,17 @@ android {
         }
     }
 
-    // Rename split APKs: LudoPay_64.apk / LudoPay_32.apk
+    // Rename split APKs: FestiBuvette_64.apk / FestiBuvette_32.apk
     applicationVariants.all {
         outputs.forEach { output ->
             val apkOutput = output as? com.android.build.gradle.internal.api.ApkVariantOutputImpl
             val abi = apkOutput?.getFilter(com.android.build.OutputFile.ABI)
             if (abi != null) {
                 apkOutput.outputFileName = when (abi) {
-                    "arm64-v8a"    -> "LudoPay_64.apk"
-                    "armeabi-v7a"  -> "LudoPay_32.apk"
-                    "x86_64"       -> "LudoPay_x86_64.apk"
-                    else           -> "LudoPay_${abi}.apk"
+                    "arm64-v8a"    -> "FestiBuvette_64.apk"
+                    "armeabi-v7a"  -> "FestiBuvette_32.apk"
+                    "x86_64"       -> "FestiBuvette_x86_64.apk"
+                    else           -> "FestiBuvette_${abi}.apk"
                 }
             }
         }

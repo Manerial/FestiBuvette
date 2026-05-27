@@ -56,13 +56,13 @@ void main() {
   // ─── buildTestPage ───────────────────────────────────────────────────────
 
   test('buildTestPage returns non-empty bytes', () async {
-    final bytes = await service.buildTestPage('LudoPay');
+    final bytes = await service.buildTestPage('FestiBuvette');
     expect(bytes, isNotEmpty);
   });
 
   test('buildTestPage with different business names returns different bytes',
       () async {
-    final bytes1 = await service.buildTestPage('LudoPay');
+    final bytes1 = await service.buildTestPage('FestiBuvette');
     final bytes2 = await service.buildTestPage('Mon Bistrot');
     expect(bytes1, isNot(equals(bytes2)));
   });
