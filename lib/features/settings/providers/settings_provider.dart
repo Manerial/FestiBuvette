@@ -12,7 +12,15 @@ class SettingsState {
   /// `'en'`  → English
   final String? locale;
 
-  const SettingsState({required this.appName, this.locale});
+  /// `true`  → grid view (default)
+  /// `false` → list view
+  final bool cartGridView;
+
+  const SettingsState({
+    required this.appName,
+    this.locale,
+    this.cartGridView = true,
+  });
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
@@ -27,9 +35,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
   Future<SettingsState> build() async {
     final prefs = await SharedPreferences.getInstance();
     return SettingsState(
-      appName:
-          prefs.getString(AppConstants.keyAppName) ?? AppConstants.appName,
+      appName: prefs.getString(AppConstants.keyAppName) ?? AppConstants.appName,
       locale: prefs.getString(AppConstants.keyLocale),
+      cartGridView: prefs.getBool(AppConstants.keyCartGridView) ?? true,
     );
   }
 
@@ -58,6 +66,18 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     state = AsyncData(SettingsState(
       appName: state.valueOrNull?.appName ?? AppConstants.appName,
       locale: locale,
+      cartGridView: state.valueOrNull?.cartGridView ?? true,
+    ));
+  }
+
+  /// Persists [value] and updates the state immediately.
+  Future<void> setCartGridView(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppConstants.keyCartGridView, value);
+    state = AsyncData(SettingsState(
+      appName: state.valueOrNull?.appName ?? AppConstants.appName,
+      locale: state.valueOrNull?.locale,
+      cartGridView: value,
     ));
   }
 }

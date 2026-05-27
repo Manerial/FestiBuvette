@@ -82,6 +82,9 @@
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
 
+  "settingsCartGridView": "Vue en grille",
+  "settingsCartGridViewSubtitle": "Afficher les produits en tuiles dans le panier",
+
   "allCategories": "Tout",
   "manageCategories": "Gérer les catégories",
   "noCategoriesYet": "Aucune catégorie pour l'instant",

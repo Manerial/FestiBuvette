@@ -88,6 +88,9 @@
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
 
+  "settingsCartGridView": "Grid view",
+  "settingsCartGridViewSubtitle": "Display products as tiles in the cart",
+
   "allCategories": "All",
   "manageCategories": "Manage categories",
   "noCategoriesYet": "No categories yet",

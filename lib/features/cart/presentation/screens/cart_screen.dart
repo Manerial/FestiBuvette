@@ -48,6 +48,8 @@ class _CartContentState extends ConsumerState<_CartContent> {
   Widget build(BuildContext context) {
     final cartState = ref.watch(cartProvider);
     final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
+    final gridView =
+        ref.watch(settingsProvider).valueOrNull?.cartGridView ?? true;
 
     // If selected category was deleted, fall back to "All".
     final effectiveCategoryId =
@@ -63,20 +65,38 @@ class _CartContentState extends ConsumerState<_CartContent> {
 
     return Column(
       children: [
+        // ── Category filter ────────────────────────────────────────────
         if (categories.isNotEmpty)
           CategoryFilterBar(
             categories: categories,
             selectedCategoryId: effectiveCategoryId,
             onSelect: (id) => setState(() => _selectedCategoryId = id),
           ),
+        // ── Product list or grid ───────────────────────────────────────
         Expanded(
-          child: ListView.builder(
-            itemCount: filtered.length,
-            itemBuilder: (context, index) => _ProductRow(
-              product: filtered[index],
-              quantity: cartState.quantities[filtered[index].id] ?? 0,
-            ),
-          ),
+          child: gridView
+              ? GridView.builder(
+                  padding: const EdgeInsets.all(8),
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 1.1,
+                  ),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) => _ProductGridTile(
+                    product: filtered[index],
+                    quantity: cartState.quantities[filtered[index].id] ?? 0,
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) => _ProductRow(
+                    product: filtered[index],
+                    quantity: cartState.quantities[filtered[index].id] ?? 0,
+                  ),
+                ),
         ),
         // Footer always uses all products to compute total correctly,
         // regardless of the active category filter.
@@ -141,6 +161,101 @@ class _ProductRow extends ConsumerWidget {
             color: Theme.of(context).colorScheme.primary,
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Product grid tile ────────────────────────────────────────────────────────
+
+class _ProductGridTile extends ConsumerWidget {
+  final Product product;
+  final int quantity;
+
+  const _ProductGridTile({required this.product, required this.quantity});
+
+  static final _priceFmt = NumberFormat.currency(
+    locale: 'fr_FR',
+    symbol: '€',
+    decimalDigits: 2,
+  );
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(cartProvider.notifier);
+    final inCart = quantity > 0;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      elevation: inCart ? 3 : 1,
+      color: inCart ? colorScheme.primaryContainer : colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // ── Name + price ─────────────────────────────────────────
+            Column(
+              children: [
+                Text(
+                  product.name,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight:
+                        inCart ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 14,
+                    color: inCart
+                        ? colorScheme.onPrimaryContainer
+                        : colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _priceFmt.format(product.price),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: inCart
+                        ? colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
+                        : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+            // ── Controls ─────────────────────────────────────────────
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.remove_circle_outline, size: 28),
+                  onPressed:
+                      inCart ? () => notifier.decrement(product.id!) : null,
+                  color: colorScheme.primary,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '$quantity',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: inCart ? colorScheme.primary : Colors.grey,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: const Icon(Icons.add_circle_outline, size: 28),
+                  onPressed: () => notifier.increment(product.id!),
+                  color: colorScheme.primary,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
