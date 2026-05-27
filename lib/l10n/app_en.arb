@@ -116,5 +116,8 @@
 
   "tenderedAmount": "Amount tendered",
   "changeDue": "Change",
-  "insufficientAmount": "Insufficient amount"
+  "insufficientAmount": "Insufficient amount",
+
+  "ticketOtherCategory": "OTHER",
+  "ticketThankYou": "Thank you!"
 }

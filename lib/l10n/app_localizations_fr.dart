@@ -325,4 +325,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get insufficientAmount => 'Montant insuffisant';
+
+  @override
+  String get ticketOtherCategory => 'AUTRES';
+
+  @override
+  String get ticketThankYou => 'Merci !';
 }

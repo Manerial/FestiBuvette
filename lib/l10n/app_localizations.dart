@@ -673,6 +673,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Insufficient amount'**
   String get insufficientAmount;
+
+  /// No description provided for @ticketOtherCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'OTHER'**
+  String get ticketOtherCategory;
+
+  /// No description provided for @ticketThankYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you!'**
+  String get ticketThankYou;
 }
 
 class _AppLocalizationsDelegate
