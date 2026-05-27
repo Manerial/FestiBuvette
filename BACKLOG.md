@@ -20,7 +20,7 @@
 
 - [x] **E0-1** Create Flutter project (`flutter create --org com.jcbpartner --platforms android,ios`)
 - [x] **E0-2** Configure `pubspec.yaml` dependencies
-  - `flutter_riverpod 2.6.1`, `sqflite 2.4.2`, `path 1.9.1`, `intl 0.20.2`, `shared_preferences 2.5.3`
+  - `flutter_riverpod 2.6.1`, `sqflite 2.4.2`, `path 1.9.1`, `intl 0.20.2`, `shared_preferences 2.5.3`, `permission_handler 11.3.0`
   - _(Bluetooth printing: deferred to E3 after POC)_
 - [x] **E0-3** Folder architecture (`features/`, `core/`, `shared/`)
 - [x] **E0-4** SQLite database init (schema: `products`, `business_days`, `sales`, `sale_lines`)
@@ -76,19 +76,31 @@
   - Record sale (`SaleService`)
   - Clear cart
   - Confirmation snackbar
+- [x] **E3-8** Runtime Bluetooth permissions
+  - Android 12+: `BLUETOOTH_SCAN` + `BLUETOOTH_CONNECT` via `permission_handler`
+  - iOS: `NSBluetooth` permission
+  - `BluetoothPermissions` abstract class (injected into `PrinterNotifier` for testability)
+  - Silent check on launch; prompt on scan/connect; "Open Settings" button if denied
 
 ---
 
 ## EPIC 4 — Daily report
 
 - [x] **E4-1** Aggregated SQLite queries: daily revenue, sale count, qty by product
+  - `getTotalsByProduct()` — GROUP BY product, sorted by qty DESC
+  - `getSalesWithLinesByDay()` — 2-query pattern (no N+1)
+  - `getAllBusinessDays()` — all days ORDER BY date DESC
 - [x] **E4-2** Riverpod `ReportNotifier`
+  - `_load([index])` — parallel fetch of totals + sales via `Future.wait`
+  - `goToPreviousDay()` / `goToNextDay()` — silent navigation (no full-screen spinner)
+  - `closeDay()` / `refresh()` — preserve current day index across reloads
 - [x] **E4-3** Report screen:
-  - Header: today's date, total revenue, sale count
-  - "By product" section: name × qty → product total, sorted by qty desc
-- [ ] **E4-4** "Sales history" section: chronological list (time + total)
-- [ ] **E4-5** Tap a sale → bottom sheet with line details
+  - `_SummaryCard`: navigation arrows ← date →, revenue, sale count, `_ClosedBadge` / `_CloseDayButton`
+  - `SegmentedButton` to switch between "By product" and "By cart" views
+- [x] **E4-4** "By product" view — product totals (name × qty → amount), sorted by qty desc
+- [x] **E4-5** "By cart" view — chronological list of sales (time + total header, lines expanded inline)
 - [x] **E4-6** "Close day" button: confirmation dialog + archive (`closed_at = NOW`)
+- [x] **E4-7** Day-by-day history navigation (← → arrows in summary card; `canGoPrevious` / `canGoNext` guards)
 
 ---
 
@@ -96,32 +108,37 @@
 
 - [x] **E5-1** Form validation (name required, price > 0, numeric format)
 - [x] **E5-2** Empty states (empty product list → message + CTA, empty cart → message, no sales today → message)
-- [ ] **E5-3** Configurable business name (app bar + receipt)
+- [x] **E5-3** Configurable business name (settings screen + printed on receipt)
 - [ ] **E5-4** App icon (Android + iOS)
-- [!] **E5-5** Bluetooth error handling (connection loss during print) — blocked on E3
-- [ ] **E5-6** Test on physical Android device
+- [!] **E5-5** Bluetooth error handling (connection loss during print) — blocked on E3-1
+- [x] **E5-6** Test on physical Android device (APK installed, core flows validated)
 - [ ] **E5-7** Test on physical iOS device (BLE validation)
-- [ ] **E5-8** Android build (`.apk` / `.aab`)
+- [x] **E5-8** Android build — `flutter build apk --split-per-abi` → arm64-v8a 17.8 MB
 - [ ] **E5-9** iOS build (`.ipa`)
+- [x] **E5-10** In-app language switcher (system / français / English) in settings screen
+- [x] **E5-11** Widget refactoring — high priority extractions:
+  - `report_screen.dart`: `_SummaryCard`, `_ReportLineRow` (deduplicates product & cart rows)
+  - `cart_screen.dart`: `_TotalRow`, `_ActionRow`
 
 ---
 
 ## Suggested iteration order
 
 ```
-Iteration 1 — Skeleton & data
+Iteration 1 — Skeleton & data          ✅ done
   E0 → E1 → E2
 
-Iteration 2 — Cart & report (no printing)
+Iteration 2 — Cart & report (no print) ✅ done
   E4 → E5 (non-Bluetooth items)
   → App is already usable without printing
 
-Iteration 3 — Bluetooth printing
-  E3-1 (POC) → E3-2 to E3-7
+Iteration 3 — Bluetooth printing       ✅ done (pending E3-1 POC on device)
+  E3-1 (POC) → E3-2 to E3-8
   → Validate BLE on iOS first
 
-Iteration 4 — Polish
-  E4-4, E4-5, remaining E5
+Iteration 4 — Polish                   🔲 in progress
+  E5-4, E5-7, E5-9
+  Resolve E3-1 + E5-5 (BLE UUIDs on NETUM NT-1809DD)
 ```
 
 ---
@@ -131,4 +148,6 @@ Iteration 4 — Polish
 - **Price/name snapshot**: `sale_lines` stores name and price at time of sale. Later price changes do not alter history.
 - **Product delete**: if `sale_lines` reference the product → `active = 0` (hidden from cart and list) instead of `DELETE`.
 - **Current business day**: determined by `DATE('now')`. Auto-created if absent on first use of the day.
-- **BLE iOS**: GATT UUIDs of the NETUM NT-1809DD must be validated via POC (E3-1) before proceeding with E3-2+.
+- **BLE iOS**: GATT UUIDs of the NETUM NT-1809DD must be validated via POC (E3-1) before proceeding with E5-5.
+- **APK size**: `--split-per-abi` mandatory — fat APK ≈ 50 MB, arm64-v8a split ≈ 17.8 MB.
+- **Bluetooth permissions**: `BluetoothPermissions` interface (injected) keeps `PrinterNotifier` testable without mocking `permission_handler` directly.
