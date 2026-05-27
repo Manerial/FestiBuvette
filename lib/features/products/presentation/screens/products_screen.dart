@@ -59,7 +59,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   else if (filtered.isEmpty)
                     const _EmptyCategoryState()
                   else
-                    _ProductList(products: filtered, ref: ref),
+                    _ProductList(products: filtered),
                   Positioned(
                     bottom: 24,
                     right: 16,
@@ -169,37 +169,72 @@ class _CategoryTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    return _ReorderableTile(
+      index: index,
+      title: category.name,
+      deleteDialogTitle: l10n.deleteCategoryTitle,
+      deleteDialogMessage: l10n.deleteCategoryMessage,
+      onEdit: () => showCategoryFormDialog(context, ref, category: category),
+      onDeleteConfirmed: () =>
+          ref.read(categoriesProvider.notifier).delete(category.id!),
+    );
+  }
+}
+
+// ─── Shared reorderable tile ──────────────────────────────────────────────────
+
+class _ReorderableTile extends StatelessWidget {
+  final int index;
+  final String title;
+  final String? subtitle;
+  final String deleteDialogTitle;
+  final String deleteDialogMessage;
+  final VoidCallback onEdit;
+  final VoidCallback onDeleteConfirmed;
+
+  const _ReorderableTile({
+    required this.index,
+    required this.title,
+    this.subtitle,
+    required this.deleteDialogTitle,
+    required this.deleteDialogMessage,
+    required this.onEdit,
+    required this.onDeleteConfirmed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
       leading: ReorderableDragStartListener(
         index: index,
         child: const Icon(Icons.drag_handle, color: Colors.grey),
       ),
-      title: Text(category.name),
+      title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle!) : null,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
             icon: const Icon(Icons.edit_outlined),
-            onPressed: () =>
-                showCategoryFormDialog(context, ref, category: category),
+            onPressed: onEdit,
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             color: Colors.red,
-            onPressed: () => _confirmDelete(context, ref, l10n),
+            onPressed: () => _handleDelete(context),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _confirmDelete(
-      BuildContext context, WidgetRef ref, AppLocalizations l10n) async {
+  Future<void> _handleDelete(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteCategoryTitle),
-        content: Text(l10n.deleteCategoryMessage),
+        title: Text(deleteDialogTitle),
+        content: Text(deleteDialogMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -214,21 +249,20 @@ class _CategoryTile extends ConsumerWidget {
       ),
     );
     if (confirmed == true) {
-      await ref.read(categoriesProvider.notifier).delete(category.id!);
+      onDeleteConfirmed();
     }
   }
 }
 
 // ─── Reorderable list ─────────────────────────────────────────────────────────
 
-class _ProductList extends StatelessWidget {
+class _ProductList extends ConsumerWidget {
   final List<Product> products;
-  final WidgetRef ref;
 
-  const _ProductList({required this.products, required this.ref});
+  const _ProductList({required this.products});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ReorderableListView.builder(
       padding: const EdgeInsets.only(bottom: 88),
       itemCount: products.length,
@@ -241,7 +275,6 @@ class _ProductList extends StatelessWidget {
           key: ValueKey(product.id),
           product: product,
           index: index,
-          ref: ref,
         );
       },
     );
@@ -250,16 +283,14 @@ class _ProductList extends StatelessWidget {
 
 // ─── Product tile ─────────────────────────────────────────────────────────────
 
-class _ProductTile extends StatelessWidget {
+class _ProductTile extends ConsumerWidget {
   final Product product;
   final int index;
-  final WidgetRef ref;
 
   const _ProductTile({
     super.key,
     required this.product,
     required this.index,
-    required this.ref,
   });
 
   static final _priceFmt = NumberFormat.currency(
@@ -268,54 +299,18 @@ class _ProductTile extends StatelessWidget {
     decimalDigits: 2,
   );
 
-  Future<bool?> _confirmDelete(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteProductTitle),
-        content: Text(l10n.deleteProductMessage(product.name)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.delete),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return Dismissible(
-      key: ValueKey(product.id),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (_) => _confirmDelete(context),
-      onDismissed: (_) =>
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    return _ReorderableTile(
+      index: index,
+      title: product.name,
+      subtitle: _priceFmt.format(product.price),
+      deleteDialogTitle: l10n.deleteProductTitle,
+      deleteDialogMessage: l10n.deleteProductMessage(product.name),
+      onEdit: () => showProductFormDialog(context, product: product),
+      onDeleteConfirmed: () =>
           ref.read(productsProvider.notifier).delete(product.id!),
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        color: Colors.red,
-        child: const Icon(Icons.delete_outline, color: Colors.white),
-      ),
-      child: ListTile(
-        title: Text(
-          product.name,
-          style: const TextStyle(fontWeight: FontWeight.w500),
-        ),
-        subtitle: Text(_priceFmt.format(product.price)),
-        trailing: ReorderableDragStartListener(
-          index: index,
-          child: const Icon(Icons.drag_handle, color: Colors.grey),
-        ),
-        onTap: () => showProductFormDialog(context, product: product),
-      ),
     );
   }
 }
