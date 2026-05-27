@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ludo_pay_app/core/constants/app_constants.dart';
@@ -138,7 +139,12 @@ class _ProductRow extends ConsumerWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.remove_circle_outline),
-            onPressed: inCart ? () => notifier.decrement(product.id!) : null,
+            onPressed: inCart
+                ? () {
+                    HapticFeedback.lightImpact();
+                    notifier.decrement(product.id!);
+                  }
+                : null,
             color: Theme.of(context).colorScheme.primary,
           ),
           SizedBox(
@@ -157,7 +163,10 @@ class _ProductRow extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
-            onPressed: () => notifier.increment(product.id!),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              notifier.increment(product.id!);
+            },
             color: Theme.of(context).colorScheme.primary,
           ),
         ],
@@ -229,8 +238,12 @@ class _ProductGridTile extends ConsumerWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.remove_circle_outline, size: 28),
-                  onPressed:
-                      inCart ? () => notifier.decrement(product.id!) : null,
+                  onPressed: inCart
+                      ? () {
+                          HapticFeedback.lightImpact();
+                          notifier.decrement(product.id!);
+                        }
+                      : null,
                   color: colorScheme.primary,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -247,7 +260,10 @@ class _ProductGridTile extends ConsumerWidget {
                 const SizedBox(width: 10),
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline, size: 28),
-                  onPressed: () => notifier.increment(product.id!),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    notifier.increment(product.id!);
+                  },
                   color: colorScheme.primary,
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),

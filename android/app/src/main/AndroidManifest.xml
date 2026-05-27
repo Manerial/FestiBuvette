@@ -21,6 +21,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
         android:maxSdkVersion="30" />
 
+    <!-- Haptic feedback -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <!-- Feature déclarée comme optionnelle pour ne pas bloquer les appareils sans BT -->
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
