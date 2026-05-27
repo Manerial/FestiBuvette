@@ -124,12 +124,6 @@ class _Footer extends ConsumerWidget {
 
   const _Footer({required this.products, required this.quantities});
 
-  static final _totalFmt = NumberFormat.currency(
-    locale: 'fr_FR',
-    symbol: '€',
-    decimalDigits: 2,
-  );
-
   // ── Record sale (shared by print+record and record-only flows) ────────────
 
   Future<void> _recordSale(BuildContext context, WidgetRef ref) async {
@@ -254,7 +248,6 @@ class _Footer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final total = ref.read(cartProvider.notifier).calculateTotal(products);
     final empty = ref.watch(cartProvider).isEmpty;
     final isPrinting =
@@ -278,66 +271,105 @@ class _Footer extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Total row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.total,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                  ),
-                  Text(
-                    _totalFmt.format(total),
-                    style:
-                        Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                  ),
-                ],
-              ),
+              _TotalRow(total: total),
               const SizedBox(height: 12),
-              // Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.delete_outline),
-                      label: Text(l10n.clear),
-                      onPressed: empty || isPrinting
-                          ? null
-                          : () => _confirmClear(context, ref),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: FilledButton.icon(
-                      icon: isPrinting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.print_outlined),
-                      label: Text(l10n.print),
-                      onPressed: empty || isPrinting
-                          ? null
-                          : () => _printAndRecord(context, ref),
-                    ),
-                  ),
-                ],
+              _ActionRow(
+                empty: empty,
+                isPrinting: isPrinting,
+                onClear: () => _confirmClear(context, ref),
+                onPrint: () => _printAndRecord(context, ref),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+// ─── Total row ────────────────────────────────────────────────────────────────
+
+class _TotalRow extends StatelessWidget {
+  final double total;
+  const _TotalRow({required this.total});
+
+  static final _fmt = NumberFormat.currency(
+    locale: 'fr_FR',
+    symbol: '€',
+    decimalDigits: 2,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          l10n.total,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+        ),
+        Text(
+          _fmt.format(total),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Action row ───────────────────────────────────────────────────────────────
+
+class _ActionRow extends StatelessWidget {
+  final bool empty;
+  final bool isPrinting;
+  final VoidCallback onClear;
+  final VoidCallback onPrint;
+
+  const _ActionRow({
+    required this.empty,
+    required this.isPrinting,
+    required this.onClear,
+    required this.onPrint,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            icon: const Icon(Icons.delete_outline),
+            label: Text(l10n.clear),
+            onPressed: empty || isPrinting ? null : onClear,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 2,
+          child: FilledButton.icon(
+            icon: isPrinting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.print_outlined),
+            label: Text(l10n.print),
+            onPressed: empty || isPrinting ? null : onPrint,
+          ),
+        ),
+      ],
     );
   }
 }

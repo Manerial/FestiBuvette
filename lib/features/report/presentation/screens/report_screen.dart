@@ -25,9 +25,9 @@ class ReportScreen extends ConsumerWidget {
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
-class _EmptyState extends ConsumerWidget {
+class _EmptyState extends StatelessWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
@@ -53,7 +53,7 @@ class _EmptyState extends ConsumerWidget {
 
 enum _ReportView { byProduct, byCart }
 
-// Shared formatters (used by both _ReportContentState and _CartView).
+// Shared formatters (used by _SummaryCard, _ProductView, and _CartView).
 final _kCurrencyFmt = NumberFormat.currency(
   locale: 'fr_FR',
   symbol: '€',
@@ -78,106 +78,11 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
   Widget build(BuildContext context) {
     final report = widget.report;
     final l10n = AppLocalizations.of(context)!;
-    final day = report.day!;
-    final locale = Localizations.localeOf(context).toString();
-    final dateStr = DateFormat.yMMMMEEEEd(locale).format(
-      DateFormat('yyyy-MM-dd').parse(day.date),
-    );
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        // ── Summary card ────────────────────────────────────────────────────
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Date row with navigation arrows ──────────────────────
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      tooltip: '←',
-                      iconSize: 20,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      onPressed: report.canGoPrevious
-                          ? () => ref
-                              .read(reportProvider.notifier)
-                              .goToPreviousDay()
-                          : null,
-                    ),
-                    Expanded(
-                      child: Text(
-                        dateStr,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      tooltip: '→',
-                      iconSize: 20,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      onPressed: report.canGoNext
-                          ? () => ref
-                              .read(reportProvider.notifier)
-                              .goToNextDay()
-                          : null,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // ── Revenue + count ───────────────────────────────────────
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _kCurrencyFmt.format(day.totalRevenue),
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      Theme.of(context).colorScheme.primary,
-                                ),
-                          ),
-                          Text(
-                            l10n.reportSaleCount(day.saleCount),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Close day status / button — only relevant for today.
-                    if (day.isClosed)
-                      _ClosedBadge(closedAt: day.closedAt!)
-                    else if (report.isDayToday)
-                      _CloseDayButton(day: day),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+        _SummaryCard(report: report),
 
         const SizedBox(height: 16),
 
@@ -211,6 +116,149 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
   }
 }
 
+// ─── Summary card ─────────────────────────────────────────────────────────────
+
+class _SummaryCard extends ConsumerWidget {
+  final ReportState report;
+  const _SummaryCard({required this.report});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final day = report.day!;
+    final locale = Localizations.localeOf(context).toString();
+    final dateStr = DateFormat.yMMMMEEEEd(locale).format(
+      DateFormat('yyyy-MM-dd').parse(day.date),
+    );
+    final notifier = ref.read(reportProvider.notifier);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Navigation row ──────────────────────────────────────────────
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: report.canGoPrevious
+                      ? () => notifier.goToPreviousDay()
+                      : null,
+                ),
+                Expanded(
+                  child: Text(
+                    dateStr,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: report.canGoNext
+                      ? () => notifier.goToNextDay()
+                      : null,
+                ),
+              ],
+            ),
+            const Divider(height: 16),
+            // ── Revenue ─────────────────────────────────────────────────────
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.reportSaleCount(day.saleCount),
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text(
+                  _kCurrencyFmt.format(day.totalRevenue),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+              ],
+            ),
+            // ── Status ──────────────────────────────────────────────────────
+            if (day.isClosed) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: _ClosedBadge(closedAt: day.closedAt!),
+              ),
+            ] else if (report.isDayToday) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: const _CloseDayButton(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Shared line row ──────────────────────────────────────────────────────────
+
+class _ReportLineRow extends StatelessWidget {
+  final String name;
+  final String qty;
+  final String amount;
+  final bool nameSemibold;
+  final double verticalPadding;
+
+  const _ReportLineRow({
+    required this.name,
+    required this.qty,
+    required this.amount,
+    this.nameSemibold = false,
+    this.verticalPadding = 12,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: verticalPadding),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              name,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: nameSemibold ? FontWeight.w500 : null,
+                  ),
+            ),
+          ),
+          SizedBox(
+            width: 48,
+            child: Text(
+              qty,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+          SizedBox(
+            width: 80,
+            child: Text(
+              amount,
+              textAlign: TextAlign.right,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Product view ─────────────────────────────────────────────────────────────
 
 class _ProductView extends StatelessWidget {
@@ -229,12 +277,7 @@ class _ProductView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                Expanded(
-                  child: Text(
-                    '',
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
-                ),
+                const Expanded(child: SizedBox.shrink()),
                 SizedBox(
                   width: 48,
                   child: Text(
@@ -266,48 +309,11 @@ class _ProductView extends StatelessWidget {
             final isLast = i == productTotals.length - 1;
             return Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          row['name_snapshot'] as String,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 48,
-                        child: Text(
-                          '× ${row['total_quantity']}',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 80,
-                        child: Text(
-                          _kCurrencyFmt.format(row['product_total'] as num),
-                          textAlign: TextAlign.right,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
+                _ReportLineRow(
+                  name: row['name_snapshot'] as String,
+                  qty: '× ${row['total_quantity']}',
+                  amount: _kCurrencyFmt.format(row['product_total'] as num),
+                  nameSemibold: true,
                 ),
                 if (!isLast) const Divider(height: 1, indent: 16),
               ],
@@ -357,10 +363,7 @@ class _CartView extends StatelessWidget {
                       const Spacer(),
                       Text(
                         _kCurrencyFmt.format(sale.total),
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).colorScheme.primary,
                             ),
@@ -376,46 +379,11 @@ class _CartView extends StatelessWidget {
                   final isLastLine = j == sale.lines.length - 1;
                   return Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 10),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                line.nameSnapshot,
-                                style:
-                                    Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ),
-                            SizedBox(
-                              width: 48,
-                              child: Text(
-                                '× ${line.quantity}',
-                                textAlign: TextAlign.center,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                    ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 80,
-                              child: Text(
-                                _kCurrencyFmt.format(line.subtotal),
-                                textAlign: TextAlign.right,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ],
-                        ),
+                      _ReportLineRow(
+                        name: line.nameSnapshot,
+                        qty: '× ${line.quantity}',
+                        amount: _kCurrencyFmt.format(line.subtotal),
+                        verticalPadding: 10,
                       ),
                       if (!isLastLine) const Divider(height: 1, indent: 16),
                     ],
@@ -433,8 +401,7 @@ class _CartView extends StatelessWidget {
 // ─── Close day button ─────────────────────────────────────────────────────────
 
 class _CloseDayButton extends ConsumerWidget {
-  final dynamic day;
-  const _CloseDayButton({required this.day});
+  const _CloseDayButton();
 
   Future<void> _confirm(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context)!;
@@ -483,8 +450,7 @@ class _ClosedBadge extends StatelessWidget {
     return Chip(
       avatar: const Icon(Icons.lock_outline, size: 16),
       label: Text(l10n.reportDayClosed(time)),
-      backgroundColor:
-          Theme.of(context).colorScheme.surfaceContainerHighest,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
     );
   }
 }
