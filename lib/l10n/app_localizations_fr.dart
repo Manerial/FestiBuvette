@@ -218,7 +218,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reportCloseDayMessage =>
-      'Une fois clôturée, les ventes ne pourront plus être ajoutées pour aujourd\'hui.';
+      'Une journée cloturée pourra être rouverte si une nouvelle vente est faite le même jour.';
 
   @override
   String get settingsAppSection => 'Paramètres de l\'application';

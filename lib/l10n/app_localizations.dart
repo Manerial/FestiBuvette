@@ -467,7 +467,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportCloseDayMessage.
   ///
   /// In en, this message translates to:
-  /// **'Once closed, no more sales can be added for today.'**
+  /// **'A closed day can be reopen if an other sale is done the same day.'**
   String get reportCloseDayMessage;
 
   /// No description provided for @settingsAppSection.

@@ -214,7 +214,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportCloseDayMessage =>
-      'Once closed, no more sales can be added for today.';
+      'A closed day can be reopen if an other sale is done the same day.';
 
   @override
   String get settingsAppSection => 'App settings';
