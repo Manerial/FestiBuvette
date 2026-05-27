@@ -99,6 +99,7 @@
   - `SegmentedButton` to switch between "By product" and "By cart" views
 - [x] **E4-4** "By product" view — product totals (name × qty → amount), sorted by qty desc
 - [x] **E4-5** "By cart" view — chronological list of sales (time + total header, lines expanded inline)
+- [x] **E4-10** "By hour" view — grouped bar chart 9h–18h, one series per product, multi-select filter; `fl_chart 0.69`
 - [x] **E4-8** "By cart" view — delete a sale (confirmation dialog, cascade delete lines, recalc business day aggregates)
 - [x] **E4-9** "By cart" view — reprint receipt from a past sale (`buildReceiptFromSale` via snapshots)
 - [x] **E4-6** "Close day" button: confirmation dialog + archive (`closed_at = NOW`)

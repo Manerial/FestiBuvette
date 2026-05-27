@@ -55,16 +55,17 @@ Les couches inférieures ne connaissent jamais les couches supérieures.
 
 ## Règles
 
-- **Toujours** coder en anglais : noms de classes, de méthodes, de champs, chaînes UI, commentaires.
-- **Toujours** mettre les noms de tables et colonnes SQL en anglais `snake_case`.
-- **Toujours** utiliser des chemins de package si possible — **jamais** de chemins relatifs (`../`) (exception pour les helpers de test (`test/helpers/`) car les fichiers `test/` ne sont pas accessibles via `package:`).
-- **Toujours** faire des phrases de commit concises : `feat(products): [short description]`.
+- **Toujours** clarifier au maximum la demande de l'utilisateur avant d'en faire une feature.
 - **Toujours** alimenter le BACKLOG.md avant une nouvelle feature afin de planifier son développement.
 - **Toujours** lire quelques fichiers de code avant de commencer afin de comprendre l'architecture, la structure et la façon de coder.
+- **Toujours** coder en anglais : noms de classes, de méthodes, de champs, chaînes UI, commentaires.
+- **Toujours** utiliser des chemins de package si possible — **jamais** de chemins relatifs (`../`) (exception pour les helpers de test (`test/helpers/`) car les fichiers `test/` ne sont pas accessibles via `package:`).
+- **Toujours** mettre les noms de tables et colonnes SQL en anglais `snake_case`.
 - **Toujours** vérifier si le code peut être factorisé de manière performante et intelligente.
 - **Toujours** `flutter analyze` avant de tester une feature. Corriger les éléments remontés, zéro warning toléré.
 - **Toujours** `flutter test` avant de livrer une feature. Une feature sans tests n'est pas considérée comme terminée.
 - **Toujours** vérifier l'état du BACKLOG.md après la livraison d'une feature.
+- **Toujours** faire des phrases de commit concises : `feat(products): [short description]`.
 - **Toujours** faire un `flutter gen-l10n` après modification des ARB.
 - **Jamais** de `String` en dur — toujours passer par `l10n`.
 - **Jamais** de SQL sur les écrans `presentation/`, **toujours** passer par le provider.

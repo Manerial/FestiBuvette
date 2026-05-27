@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -55,7 +59,7 @@ class _EmptyState extends StatelessWidget {
 
 // ─── Report view mode ─────────────────────────────────────────────────────────
 
-enum _ReportView { byProduct, byCart }
+enum _ReportView { byProduct, byCart, byHour }
 
 // Shared formatters (used by _SummaryCard, _ProductView, and _CartView).
 final _kCurrencyFmt = NumberFormat.currency(
@@ -76,7 +80,7 @@ class _ReportContent extends ConsumerStatefulWidget {
 }
 
 class _ReportContentState extends ConsumerState<_ReportContent> {
-  _ReportView _view = _ReportView.byProduct;
+  _ReportView _view = _ReportView.byCart;
 
   @override
   Widget build(BuildContext context) {
@@ -92,16 +96,19 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
 
         // ── View selector ───────────────────────────────────────────────────
         SegmentedButton<_ReportView>(
+          showSelectedIcon: false,
           segments: [
             ButtonSegment(
-              value: _ReportView.byProduct,
-              label: Text(l10n.reportByProduct),
-              icon: const Icon(Icons.bar_chart_outlined),
+                value: _ReportView.byCart,
+                label: Text(l10n.reportByCart)
             ),
             ButtonSegment(
-              value: _ReportView.byCart,
-              label: Text(l10n.reportByCart),
-              icon: const Icon(Icons.shopping_cart_outlined),
+              value: _ReportView.byProduct,
+              label: Text(l10n.reportByProduct)
+            ),
+            ButtonSegment(
+              value: _ReportView.byHour,
+              label: Text(l10n.reportByHour)
             ),
           ],
           selected: {_view},
@@ -113,8 +120,13 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
         // ── Breakdown ───────────────────────────────────────────────────────
         if (_view == _ReportView.byProduct)
           _ProductView(productTotals: report.productTotals)
+        else if (_view == _ReportView.byCart)
+          _CartView(sales: report.sales)
         else
-          _CartView(sales: report.sales),
+          _HourlyView(
+            products: report.hourlyProducts,
+            hourlyData: report.hourlyData,
+          ),
       ],
     );
   }
@@ -512,6 +524,288 @@ class _SaleTile extends ConsumerWidget {
             );
           }),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Hourly chart view ────────────────────────────────────────────────────────
+
+class _HourlyView extends StatefulWidget {
+  final List<String> products;
+  final Map<int, Map<String, int>> hourlyData;
+
+  const _HourlyView({required this.products, required this.hourlyData});
+
+  @override
+  State<_HourlyView> createState() => _HourlyViewState();
+}
+
+class _HourlyViewState extends State<_HourlyView> {
+  late Set<String> _selected;
+
+  static const _kHours = [9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+  static const _kColors = [
+    Color(0xFF2196F3),
+    Color(0xFFE91E63),
+    Color(0xFF4CAF50),
+    Color(0xFFFF9800),
+    Color(0xFF9C27B0),
+    Color(0xFF00BCD4),
+    Color(0xFFFF5722),
+    Color(0xFF8BC34A),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = Set.from(widget.products);
+  }
+
+  @override
+  void didUpdateWidget(_HourlyView old) {
+    super.didUpdateWidget(old);
+    if (!setEquals(Set.from(widget.products), Set.from(old.products))) {
+      setState(() => _selected = Set.from(widget.products));
+    }
+  }
+
+  Color _colorFor(int index) => _kColors[index % _kColors.length];
+
+  double _barWidth(int count) => switch (count) {
+        1 => 16,
+        2 => 12,
+        3 => 9,
+        _ => math.max(4.0, 36.0 / count),
+      };
+
+  List<BarChartGroupData> _buildGroups(List<String> ordered) {
+    return _kHours.asMap().entries.map((e) {
+      final xIndex = e.key;
+      final hour = e.value;
+      final hourData = widget.hourlyData[hour] ?? {};
+
+      return BarChartGroupData(
+        x: xIndex,
+        barsSpace: 2,
+        barRods: ordered.asMap().entries.map((pe) {
+          return BarChartRodData(
+            toY: (hourData[pe.value] ?? 0).toDouble(),
+            color: _colorFor(pe.key),
+            width: _barWidth(ordered.length),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+          );
+        }).toList(),
+      );
+    }).toList();
+  }
+
+  void _showFilter(BuildContext context, AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) {
+        var localSelected = Set<String>.from(_selected);
+        return StatefulBuilder(
+          builder: (ctx, setStateSheet) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
+                child: Row(
+                  children: [
+                    Text(l10n.reportHourlyFilterTitle,
+                        style: Theme.of(ctx).textTheme.titleMedium),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () {
+                        final all = Set<String>.from(widget.products);
+                        setStateSheet(() => localSelected = all);
+                        setState(() => _selected = Set.from(all));
+                      },
+                      child: Text(l10n.reportHourlySelectAll),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: widget.products
+                      .map((p) => CheckboxListTile(
+                            value: localSelected.contains(p),
+                            title: Text(p),
+                            onChanged: (v) {
+                              setStateSheet(() {
+                                if (v == true) {
+                                  localSelected.add(p);
+                                } else {
+                                  localSelected.remove(p);
+                                }
+                              });
+                              setState(() {
+                                if (v == true) {
+                                  _selected.add(p);
+                                } else {
+                                  _selected.remove(p);
+                                }
+                              });
+                            },
+                          ))
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final ordered = widget.products.where(_selected.contains).toList();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ── Filter button ──────────────────────────────────────────────
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.tune_outlined, size: 18),
+                label: Text('${ordered.length} / ${widget.products.length}'),
+                onPressed: widget.products.isEmpty
+                    ? null
+                    : () => _showFilter(context, l10n),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            if (widget.products.isEmpty || ordered.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Text(l10n.reportHourlyNoData,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          )),
+                ),
+              )
+            else ...[
+              // ── Chart ──────────────────────────────────────────────────
+              SizedBox(
+                height: 220,
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    minY: 0,
+                    barGroups: _buildGroups(ordered),
+                    barTouchData: BarTouchData(
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipColor: (_) =>
+                            Theme.of(context).colorScheme.inverseSurface,
+                        getTooltipItem: (group, _, rod, rodIndex) {
+                          final hour = _kHours[group.x];
+                          final product = ordered[rodIndex];
+                          final qty = rod.toY.toInt();
+                          return BarTooltipItem(
+                            '$product\n${hour}h : $qty',
+                            TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onInverseSurface,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    titlesData: FlTitlesData(
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 24,
+                          getTitlesWidget: (value, _) => Text(
+                            '${value.toInt() + 9}h',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 28,
+                          getTitlesWidget: (value, meta) {
+                            if (value == meta.max) {
+                              return const SizedBox.shrink();
+                            }
+                            if (value % 1 != 0) return const SizedBox.shrink();
+                            return Text(
+                              value.toInt().toString(),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false)),
+                    ),
+                    borderData: FlBorderData(show: false),
+                    gridData: const FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // ── Legend ─────────────────────────────────────────────────
+              Wrap(
+                spacing: 12,
+                runSpacing: 6,
+                children: ordered.asMap().entries.map((e) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: _colorFor(e.key),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(e.value,
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -199,6 +199,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportByCart => 'By cart';
 
   @override
+  String get reportByHour => 'By hour';
+
+  @override
+  String get reportHourlyFilterTitle => 'Products to display';
+
+  @override
+  String get reportHourlySelectAll => 'Select all';
+
+  @override
+  String get reportHourlyNoData => 'No sales in this period';
+
+  @override
   String get reportQtyHeader => 'Qty';
 
   @override
