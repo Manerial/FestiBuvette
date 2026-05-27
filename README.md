@@ -26,7 +26,7 @@ flutter pub get          # installer les dépendances
 flutter analyze          # linter — doit retourner "No issues found"
 flutter test             # tous les tests unitaires
 flutter run              # lancer sur device/émulateur connecté
-flutter build apk --split-per-abi   # build Android (voir section APK)
+.\build_apk.ps1          # build Android + copie renommée dans APK/ (voir section APK)
 flutter gen-l10n         # régénérer les fichiers de localisation après édition des .arb
 ```
 
@@ -154,21 +154,22 @@ static const String appName = 'FestiBuvette';   // ← modifier ici
 
 ### 4. Nom du fichier APK généré
 
-```kotlin
-// android/app/build.gradle.kts — bloc applicationVariants.all { ... }
-"arm64-v8a"   -> "FestiBuvette_64.apk"    // ← modifier le préfixe ici
-"armeabi-v7a" -> "FestiBuvette_32.apk"
+```powershell
+# build_apk.ps1 — table $renames
+"app-arm64-v8a-release.apk"   = "FestiBuvette_64.apk"    # ← modifier le préfixe ici
+"app-armeabi-v7a-release.apk" = "FestiBuvette_32.apk"
+"app-x86_64-release.apk"      = "FestiBuvette_x86_64.apk"
 ```
 
 ---
 
 ## Générer l'APK Android
 
-```bash
-flutter build apk --split-per-abi
+```powershell
+.\build_apk.ps1
 ```
 
-Les fichiers sont dans `build/app/outputs/flutter-apk/` :
+Le script build les APKs, puis les copie renommés dans `APK/` à la racine du projet (gitignoré) :
 
 | Fichier | Architecture | Taille | Usage |
 |---|---|---|---|

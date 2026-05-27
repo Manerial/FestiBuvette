@@ -39,6 +39,9 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
+# Release APKs (générés par build_apk.ps1)
+/APK/
+
 # Android Studio will place build artifacts here
 /android/app/debug
 /android/app/profile
