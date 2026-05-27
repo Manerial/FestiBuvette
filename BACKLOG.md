@@ -59,7 +59,6 @@
 
 ## EPIC 3 — Bluetooth thermal printing
 
-- [!] **E3-1** POC: BLE scan, connect to NETUM NT-1809DD, identify GATT UUIDs — validate with nRF Connect on physical device
 - [x] **E3-2** `PrinterService`: scan, connect, disconnect, persist device choice
 - [x] **E3-3** Printer settings screen (BT device list, scan button, connection status)
 - [x] **E3-4** "Test print" button (print a test receipt)
@@ -113,11 +112,8 @@
 - [x] **E5-2** Empty states (empty product list → message + CTA, empty cart → message, no sales today → message)
 - [x] **E5-3** Configurable business name (settings screen + printed on receipt)
 - [x] **E5-4** App icon (Android + iOS)
-- [!] **E5-5** Bluetooth error handling (connection loss during print) — blocked on E3-1
 - [x] **E5-6** Test on physical Android device (APK installed, core flows validated)
-- [ ] **E5-7** Test on physical iOS device (BLE validation)
 - [x] **E5-8** Android build — `flutter build apk --split-per-abi` → arm64-v8a 17.8 MB
-- [ ] **E5-9** iOS build (`.ipa`)
 - [x] **E5-10** In-app language switcher (system / français / English) in settings screen
 - [x] **E5-11** Widget refactoring — high priority extractions:
   - `report_screen.dart`: `_SummaryCard`, `_ReportLineRow` (deduplicates product & cart rows)
@@ -159,8 +155,8 @@
 - [x] **E8-3** Bottom nav selected color aligned with `colorScheme.primary` (was hardcoded seed value)
 - [x] **E8-4** Product grid view — large tap tiles as alternative to list in cart screen (toggle in toolbar, preference persisted in SharedPreferences); easier to use with large fingers or outdoor conditions
 - [x] **E8-5** End-of-day report — daily summary (revenue, sale count, breakdown by product and by cart) with day close; covered by E4 report screen
-- [ ] **E8-6** Cancel last sale — one-tap undo from report screen (delete sale + revert business day aggregates)
-- [ ] **E8-7** Reprint last ticket — targeted at printer disconnection scenarios: if the printer drops during a sale, allow reprinting the last recorded ticket without re-entering the sale flow
+- [x] **E8-6** Cancel last sale — delete any sale from "By cart" view with confirmation dialog + business day aggregate recompute (E4-8)
+- [x] **E8-7** Reprint last ticket — reprint any past sale from "By cart" view using ESC/POS snapshots (E4-9)
 
 ---
 
@@ -179,20 +175,23 @@ Iteration 3 — Bluetooth printing       ✅ done (pending E3-1 POC on device)
   → Validate BLE on iOS first
 
 Iteration 4 — Polish                   🔲 in progress
-  E5-7, E5-9 (iOS)
-  E3-1 + E5-5 (BLE UUIDs on NETUM NT-1809DD)
-  E8-4, E8-6, E8-7 (UX improvements)
-  E9 (statistics — lower priority)
+  E999 (statistics + iOS/BLE — deferred)
 ```
 
 ---
 
 ## EPIC 9 — Statistics
 
-- [ ] **E9-1** Hourly revenue breakdown (peak hours chart) — computed from `sales.date_time`
-- [ ] **E9-2** Average basket per day / per period
-- [ ] **E9-3** Top products ranking — quantity and revenue, per day or all-time
-- [ ] **E9-4** Per-category revenue breakdown
+- [x] **E9-1** Hourly breakdown by product (peak hours chart) — grouped bar chart 9h–18h with multi-select filter (E4-10)
+
+---
+
+## EPIC 999 — Deferred (requires Mac / low priority)
+
+- [ ] **E999-1** POC BLE iOS — scan, connect to NETUM NT-1809DD, identify GATT UUIDs via nRF Connect _(requires Mac + physical iOS device)_
+- [ ] **E999-2** Bluetooth error handling (connection loss during print) — blocked on E999-1
+- [ ] **E999-3** Test on physical iOS device (BLE validation) _(requires Mac)_
+- [ ] **E999-4** iOS build (`.ipa`) _(requires Mac)_
 
 ---
 
