@@ -72,7 +72,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            tooltip: l10n.settingsTooltip,
+            tooltip: l10n.settings,
             onPressed: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const PrinterScreen()),

@@ -38,7 +38,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportTab => 'Rapport';
 
   @override
-  String get settingsTooltip => 'Paramètres';
+  String get settings => 'Paramètres';
 
   @override
   String get noProductsInCatalogue => 'Aucun produit dans le catalogue';
@@ -243,9 +243,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsLanguageEn => 'English';
-
-  @override
-  String get settingsPrinterSection => 'Imprimante Bluetooth';
 
   @override
   String get allCategories => 'Tout';
