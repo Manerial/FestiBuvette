@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ludo_pay_app/core/constants/app_constants.dart';
+import 'package:ludo_pay_app/core/services/bluetooth_permissions.dart';
 import 'package:ludo_pay_app/features/printer/data/models/printer_device.dart';
 import 'package:ludo_pay_app/features/printer/data/services/printer_service.dart';
 import 'package:ludo_pay_app/features/printer/providers/printer_provider.dart';
@@ -43,10 +44,19 @@ class MockPrinterService implements PrinterService {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-ProviderContainer makeContainer(MockPrinterService mock) {
+ProviderContainer makeContainer(
+  MockPrinterService mock, {
+  BluetoothPermissions? permissions,
+}) {
   final container = ProviderContainer(
     overrides: [
-      printerProvider.overrideWith(() => PrinterNotifier.withService(mock)),
+      printerProvider.overrideWith(
+        () => PrinterNotifier.withService(
+          mock,
+          // Default to always-granted so existing tests are unaffected.
+          permissions: permissions ?? const AlwaysGrantedBluetoothPermissions(),
+        ),
+      ),
     ],
   );
   addTearDown(container.dispose);
@@ -222,5 +232,69 @@ void main() {
 
     final state = await container.read(printerProvider.future);
     expect(state.isPrinting, isFalse);
+  });
+
+  // ── Bluetooth permissions ──────────────────────────────────────────────────
+
+  test('build stays idle when permissions are denied (no saved device)', () async {
+    final mock = MockPrinterService();
+    final container = makeContainer(
+      mock,
+      permissions: const AlwaysDeniedBluetoothPermissions(),
+    );
+
+    final state = await container.read(printerProvider.future);
+    expect(state.status, PrinterConnectionStatus.idle);
+    expect(state.connectedDevice, isNull);
+  });
+
+  test('build stays idle when permissions are denied (saved device present)',
+      () async {
+    SharedPreferences.setMockInitialValues({
+      AppConstants.keyPrinterAddress: '00:11:22:33:44:55',
+      AppConstants.keyPrinterName: 'NETUM',
+    });
+    final mock = MockPrinterService()..connectResult = true;
+    final container = makeContainer(
+      mock,
+      permissions: const AlwaysDeniedBluetoothPermissions(),
+    );
+
+    final state = await container.read(printerProvider.future);
+    // Must not auto-reconnect — just restore saved device info.
+    expect(state.status, PrinterConnectionStatus.idle);
+    expect(state.connectedDevice?.name, 'NETUM');
+  });
+
+  test('scanDevices sets error permission_denied when permissions denied',
+      () async {
+    final mock = MockPrinterService();
+    final container = makeContainer(
+      mock,
+      permissions: const AlwaysDeniedBluetoothPermissions(),
+    );
+    await container.read(printerProvider.future);
+
+    await container.read(printerProvider.notifier).scanDevices();
+
+    final state = await container.read(printerProvider.future);
+    expect(state.status, PrinterConnectionStatus.error);
+    expect(state.errorMessage, 'permission_denied');
+  });
+
+  test('connect sets error permission_denied when permissions denied', () async {
+    final mock = MockPrinterService();
+    final container = makeContainer(
+      mock,
+      permissions: const AlwaysDeniedBluetoothPermissions(),
+    );
+    await container.read(printerProvider.future);
+
+    const device = PrinterDevice(name: 'NETUM', address: '00:11:22:33:44:55');
+    await container.read(printerProvider.notifier).connect(device);
+
+    final state = await container.read(printerProvider.future);
+    expect(state.status, PrinterConnectionStatus.error);
+    expect(state.errorMessage, 'permission_denied');
   });
 }

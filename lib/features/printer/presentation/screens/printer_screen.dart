@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:ludo_pay_app/core/constants/app_constants.dart';
 import 'package:ludo_pay_app/features/printer/data/models/printer_device.dart';
 import 'package:ludo_pay_app/features/printer/data/services/ticket_service.dart';
@@ -139,7 +140,8 @@ class _BluetoothSection extends ConsumerWidget {
             const Center(child: CircularProgressIndicator()),
           ] else if (!printer.isConnected &&
               !printer.isBusy &&
-              printer.availableDevices.isEmpty) ...[
+              printer.availableDevices.isEmpty &&
+              printer.errorMessage != 'permission_denied') ...[
             const SizedBox(height: 8),
             // Android pairing hint (shown when device list is empty after scan
             // attempt, or before first scan)
@@ -219,6 +221,7 @@ class _StatusRow extends StatelessWidget {
 
   String _errorLabel(AppLocalizations l10n, String? msg) {
     if (msg == 'bluetooth_disabled') return l10n.printerBluetoothDisabled;
+    if (msg == 'permission_denied') return l10n.printerPermissionDenied;
     if (msg == 'connection_failed') return l10n.printerConnectionFailed;
     return l10n.printerConnectionFailed;
   }
@@ -244,6 +247,15 @@ class _ActionButtons extends ConsumerWidget {
             icon: const Icon(Icons.bluetooth_searching),
             label: Text(l10n.printerScanDevices),
             onPressed: printer.isBusy ? null : notifier.scanDevices,
+          ),
+        // Shown when the user permanently denied permissions: deep-link to
+        // app settings so they can grant BLUETOOTH_CONNECT / BLUETOOTH_SCAN.
+        if (printer.status == PrinterConnectionStatus.error &&
+            printer.errorMessage == 'permission_denied')
+          OutlinedButton.icon(
+            icon: const Icon(Icons.settings_outlined),
+            label: Text(l10n.printerOpenSettings),
+            onPressed: () => openAppSettings(),
           ),
         if (printer.isConnected) ...[
           OutlinedButton.icon(

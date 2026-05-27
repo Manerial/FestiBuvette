@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ludo_pay_app/core/constants/app_constants.dart';
+import 'package:ludo_pay_app/core/services/bluetooth_permissions.dart';
 import 'package:ludo_pay_app/features/printer/data/models/printer_device.dart';
 import 'package:ludo_pay_app/features/printer/data/services/printer_service.dart';
 
@@ -67,15 +68,25 @@ final printerProvider =
 
 class PrinterNotifier extends AsyncNotifier<PrinterState> {
   final PrinterService? _serviceOverride;
+  final BluetoothPermissions? _permissionsOverride;
 
-  PrinterNotifier() : _serviceOverride = null;
+  PrinterNotifier()
+      : _serviceOverride = null,
+        _permissionsOverride = null;
 
-  /// For unit tests: inject a mock [PrinterService].
-  PrinterNotifier.withService(PrinterService service)
-      : _serviceOverride = service;
+  /// For unit tests: inject a [PrinterService] mock and optional
+  /// [BluetoothPermissions] stub.
+  PrinterNotifier.withService(
+    PrinterService service, {
+    BluetoothPermissions? permissions,
+  })  : _serviceOverride = service,
+        _permissionsOverride = permissions;
 
   PrinterService get _service =>
       _serviceOverride ?? const BluetoothPrinterService();
+
+  BluetoothPermissions get _permissions =>
+      _permissionsOverride ?? const DefaultBluetoothPermissions();
 
   // ── Build (auto-reconnect E3-5) ──────────────────────────────────────────
 
@@ -91,6 +102,16 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
     }
 
     final savedDevice = PrinterDevice(name: savedName, address: savedAddress);
+
+    // Don't prompt for permissions at startup — check silently and skip
+    // the reconnect attempt if they haven't been granted yet.
+    final hasPerms = await _permissions.hasPermissions();
+    if (!hasPerms) {
+      return PrinterState(
+        status: PrinterConnectionStatus.idle,
+        connectedDevice: savedDevice,
+      );
+    }
 
     // Check if already connected (e.g. after hot-reload or screen navigation).
     try {
@@ -135,6 +156,16 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
       errorMessage: null,
     ));
 
+    // Request permissions before scanning — triggers the OS dialog on first use.
+    final granted = await _permissions.requestPermissions();
+    if (!granted) {
+      state = AsyncData(current.copyWith(
+        status: PrinterConnectionStatus.error,
+        errorMessage: 'permission_denied',
+      ));
+      return;
+    }
+
     try {
       final btEnabled = await _service.isBluetoothEnabled();
       if (!btEnabled) {
@@ -162,6 +193,18 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
 
   Future<void> connect(PrinterDevice device) async {
     final current = state.valueOrNull ?? const PrinterState();
+
+    // Permissions should already be granted after a scan, but re-check to
+    // guard against edge cases (e.g. user revoked from Settings mid-session).
+    final hasPerms = await _permissions.hasPermissions();
+    if (!hasPerms) {
+      state = AsyncData(current.copyWith(
+        status: PrinterConnectionStatus.error,
+        errorMessage: 'permission_denied',
+      ));
+      return;
+    }
+
     state = AsyncData(current.copyWith(
       status: PrinterConnectionStatus.connecting,
       errorMessage: null,

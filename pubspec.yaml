@@ -31,6 +31,9 @@ dependencies:
   print_bluetooth_thermal: ^1.2.2
   esc_pos_utils_plus: ^2.0.4
 
+  # Runtime permissions (Bluetooth scan/connect on Android 12+, Bluetooth on iOS)
+  permission_handler: ^11.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

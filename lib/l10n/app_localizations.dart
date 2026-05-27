@@ -380,6 +380,18 @@ abstract class AppLocalizations {
   /// **'Android: pair your printer in Bluetooth Settings first'**
   String get printerAndroidHint;
 
+  /// No description provided for @printerPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth permission denied. Open Settings to allow it.'**
+  String get printerPermissionDenied;
+
+  /// No description provided for @printerOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get printerOpenSettings;
+
   /// No description provided for @printerNotConnectedTitle.
   ///
   /// In en, this message translates to:

@@ -159,6 +159,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Android: pair your printer in Bluetooth Settings first';
 
   @override
+  String get printerPermissionDenied =>
+      'Bluetooth permission denied. Open Settings to allow it.';
+
+  @override
+  String get printerOpenSettings => 'Open Settings';
+
+  @override
   String get printerNotConnectedTitle => 'No printer connected';
 
   @override

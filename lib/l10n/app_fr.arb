@@ -55,6 +55,8 @@
   "printerConnect": "Connecter",
   "printerNoDevicesFound": "Aucun appareil trouvé",
   "printerAndroidHint": "Android : associez d'abord l'imprimante dans les Paramètres Bluetooth",
+  "printerPermissionDenied": "Permission Bluetooth refusée. Ouvrez les Réglages pour l'autoriser.",
+  "printerOpenSettings": "Ouvrir les Réglages",
   "printerNotConnectedTitle": "Aucune imprimante connectée",
   "printerNotConnectedMessage": "Aucune imprimante n'est connectée. Enregistrer la vente sans imprimer ?",
   "printerRecordWithoutPrinting": "Enregistrer seulement",

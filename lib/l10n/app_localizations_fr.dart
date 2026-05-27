@@ -162,6 +162,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Android : associez d\'abord l\'imprimante dans les Paramètres Bluetooth';
 
   @override
+  String get printerPermissionDenied =>
+      'Permission Bluetooth refusée. Ouvrez les Réglages pour l\'autoriser.';
+
+  @override
+  String get printerOpenSettings => 'Ouvrir les Réglages';
+
+  @override
   String get printerNotConnectedTitle => 'Aucune imprimante connectée';
 
   @override

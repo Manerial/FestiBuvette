@@ -59,6 +59,8 @@
   "printerConnect": "Connect",
   "printerNoDevicesFound": "No devices found",
   "printerAndroidHint": "Android: pair your printer in Bluetooth Settings first",
+  "printerPermissionDenied": "Bluetooth permission denied. Open Settings to allow it.",
+  "printerOpenSettings": "Open Settings",
   "printerNotConnectedTitle": "No printer connected",
   "printerNotConnectedMessage": "No printer is connected. Do you want to record the sale without printing?",
   "printerRecordWithoutPrinting": "Record only",
