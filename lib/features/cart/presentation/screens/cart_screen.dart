@@ -534,18 +534,13 @@ class _TotalRow extends StatelessWidget {
 
 // ─── Tendered amount row ──────────────────────────────────────────────────────
 
-class _TenderedRow extends ConsumerStatefulWidget {
+class _TenderedRow extends ConsumerWidget {
   final double total;
   final bool empty;
 
   const _TenderedRow({required this.total, required this.empty});
 
-  @override
-  ConsumerState<_TenderedRow> createState() => _TenderedRowState();
-}
-
-class _TenderedRowState extends ConsumerState<_TenderedRow> {
-  final _controller = TextEditingController();
+  static const _kBillAmounts = [5, 10, 20, 50];
 
   static final _fmt = NumberFormat.currency(
     locale: 'fr_FR',
@@ -553,56 +548,105 @@ class _TenderedRowState extends ConsumerState<_TenderedRow> {
     decimalDigits: 2,
   );
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void _selectBill(WidgetRef ref, int amount) {
+    final current = ref.read(cartProvider).tenderedAmount;
+    ref.read(cartProvider.notifier).setTenderedAmount(
+          current == amount.toDouble() ? null : amount.toDouble(),
+        );
+  }
+
+  Future<void> _showCustomInput(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final previousAmount = ref.read(cartProvider).tenderedAmount;
+    final controller = TextEditingController(
+      text: previousAmount != null ? previousAmount.toStringAsFixed(2) : '',
+    );
+
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.tenderedAmount),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          textAlign: TextAlign.end,
+          decoration: const InputDecoration(suffixText: '€', isDense: true),
+          onChanged: (value) {
+            final parsed = double.tryParse(value.replaceAll(',', '.').trim());
+            ref.read(cartProvider.notifier).setTenderedAmount(parsed);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              ref.read(cartProvider.notifier).setTenderedAmount(previousAmount);
+              Navigator.pop(ctx);
+            },
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-
-    // Reset the input field when the cart (and therefore tenderedAmount) is cleared.
-    ref.listen(
-      cartProvider.select((s) => s.tenderedAmount),
-      (_, next) {
-        if (next == null && _controller.text.isNotEmpty) {
-          _controller.clear();
-        }
-      },
-    );
-
     final cartState = ref.watch(cartProvider);
-    final change = cartState.change(widget.total);
-    final isInsufficient = cartState.insufficientTendered(widget.total);
+    final change = cartState.change(total);
+    final isInsufficient = cartState.insufficientTendered(total);
+    final tendered = cartState.tenderedAmount;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ── Label ──────────────────────────────────────────────────────────
+        Text(
+          l10n.tenderedAmount,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 6),
+        // ── Bill buttons + custom input ────────────────────────────────────
         Row(
           children: [
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                enabled: !widget.empty,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                textAlign: TextAlign.end,
-                decoration: InputDecoration(
-                  labelText: l10n.tenderedAmount,
-                  suffixText: '€',
-                  isDense: true,
-                  errorText: isInsufficient ? l10n.insufficientAmount : null,
-                ),
-                onChanged: (value) {
-                  final parsed =
-                      double.tryParse(value.replaceAll(',', '.').trim());
-                  ref.read(cartProvider.notifier).setTenderedAmount(parsed);
-                },
-              ),
+            ..._kBillAmounts.map((amount) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: _BillButton(
+                      label: '$amount €',
+                      isSelected: tendered == amount.toDouble(),
+                      enabled: !empty,
+                      onTap: () => _selectBill(ref, amount),
+                    ),
+                  ),
+                )),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, size: 20),
+              onPressed: empty ? null : () => _showCustomInput(context, ref),
+              visualDensity: VisualDensity.compact,
+              tooltip: l10n.tenderedAmount,
             ),
           ],
         ),
+        // ── Validation error ───────────────────────────────────────────────
+        if (isInsufficient) ...[
+          const SizedBox(height: 4),
+          Text(
+            l10n.insufficientAmount,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+          ),
+        ],
+        // ── Change ─────────────────────────────────────────────────────────
         if (change != null) ...[
           const SizedBox(height: 8),
           Row(
@@ -626,6 +670,45 @@ class _TenderedRowState extends ConsumerState<_TenderedRow> {
           ),
         ],
       ],
+    );
+  }
+}
+
+// ─── Bill button ──────────────────────────────────────────────────────────────
+
+class _BillButton extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _BillButton({
+    required this.label,
+    required this.isSelected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  static const _kStyle = ButtonStyle(
+    padding: WidgetStatePropertyAll(EdgeInsets.zero),
+    minimumSize: WidgetStatePropertyAll(Size(0, 36)),
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13)),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    if (isSelected) {
+      return FilledButton(
+        onPressed: enabled ? onTap : null,
+        style: _kStyle,
+        child: Text(label),
+      );
+    }
+    return OutlinedButton(
+      onPressed: enabled ? onTap : null,
+      style: _kStyle,
+      child: Text(label),
     );
   }
 }

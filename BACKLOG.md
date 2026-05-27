@@ -158,7 +158,7 @@
 - [x] **E8-5** End-of-day report — daily summary (revenue, sale count, breakdown by product and by cart) with day close; covered by E4 report screen
 - [x] **E8-6** Cancel last sale — delete any sale from "By cart" view with confirmation dialog + business day aggregate recompute (E4-8)
 - [x] **E8-7** Reprint last ticket — reprint any past sale from "By cart" view using ESC/POS snapshots (E4-9)
-- [ ] **E8-8** Quick bill buttons in change calculator — inline row `[ 5€ ][ 10€ ][ 20€ ][ 50€ ][ ✏️ ]` replacing the text field; tap a button to fill the tendered amount, tap ✏️ to open keyboard for custom amount
+- [x] **E8-8** Quick bill buttons in change calculator — inline row `[ 5€ ][ 10€ ][ 20€ ][ 50€ ][ ✏️ ]` replacing the text field; tap a button to fill the tendered amount (toggle off = re-tap), tap ✏️ for custom amount via dialog
 
 ---
 
