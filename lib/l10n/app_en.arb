@@ -76,7 +76,7 @@
   "reportDayClosed": "Closed at {time}",
   "@reportDayClosed": { "placeholders": { "time": { "type": "String" } } },
   "reportCloseDayTitle": "Close today's session?",
-  "reportCloseDayMessage": "Once closed, no more sales can be added for today.",
+  "reportCloseDayMessage": "A closed day can be reopen if an other sale is done the same day.",
 
   "settingsAppSection": "App settings",
   "settingsAppNameLabel": "Business name",
