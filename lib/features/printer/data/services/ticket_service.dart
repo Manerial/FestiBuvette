@@ -1,6 +1,7 @@
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:ludo_pay_app/features/products/data/models/product.dart';
+import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
 
 /// Builds ESC/POS byte sequences for the 58mm NETUM NT-1809DD thermal printer.
 class TicketService {
@@ -79,6 +80,82 @@ class TicketService {
       ),
       PosColumn(
         text: _price(total),
+        width: 5,
+        styles: const PosStyles(align: PosAlign.right, bold: true),
+      ),
+    ]));
+    bytes.addAll(gen.emptyLines(1));
+
+    // ── Footer ────────────────────────────────────────────────────────────
+    bytes.addAll(gen.text(
+      'Merci !',
+      styles: const PosStyles(align: PosAlign.center),
+    ));
+    bytes.addAll(gen.feed(3));
+    bytes.addAll(gen.cut());
+
+    return bytes;
+  }
+
+  // ─── Reprint from sale ─────────────────────────────────────────────────────
+
+  /// Builds a receipt from a previously recorded [Sale] (uses snapshots).
+  Future<List<int>> buildReceiptFromSale({
+    required String businessName,
+    required Sale sale,
+  }) async {
+    final profile = await CapabilityProfile.load();
+    final gen = Generator(PaperSize.mm58, profile);
+    final bytes = <int>[];
+    final dateTime = DateTime.parse(sale.dateTime);
+
+    // ── Header ────────────────────────────────────────────────────────────
+    bytes.addAll(gen.text(
+      businessName,
+      styles: const PosStyles(
+        align: PosAlign.center,
+        bold: true,
+        height: PosTextSize.size2,
+        width: PosTextSize.size2,
+      ),
+      linesAfter: 1,
+    ));
+    bytes.addAll(gen.text(
+      _dateFmt.format(dateTime),
+      styles: const PosStyles(align: PosAlign.center),
+    ));
+    bytes.addAll(gen.text(
+      _timeFmt.format(dateTime),
+      styles: const PosStyles(align: PosAlign.center),
+    ));
+    bytes.addAll(gen.hr());
+
+    // ── Sale lines ────────────────────────────────────────────────────────
+    for (final line in sale.lines) {
+      bytes.addAll(gen.row([
+        PosColumn(
+          text: '${line.quantity}x ${line.nameSnapshot}',
+          width: 8,
+          styles: const PosStyles(align: PosAlign.left),
+        ),
+        PosColumn(
+          text: _price(line.subtotal),
+          width: 4,
+          styles: const PosStyles(align: PosAlign.right),
+        ),
+      ]));
+    }
+
+    // ── Total ─────────────────────────────────────────────────────────────
+    bytes.addAll(gen.hr());
+    bytes.addAll(gen.row([
+      PosColumn(
+        text: 'TOTAL',
+        width: 7,
+        styles: const PosStyles(bold: true),
+      ),
+      PosColumn(
+        text: _price(sale.total),
         width: 5,
         styles: const PosStyles(align: PosAlign.right, bold: true),
       ),

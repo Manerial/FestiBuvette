@@ -77,6 +77,12 @@
   "@reportDayClosed": { "placeholders": { "time": { "type": "String" } } },
   "reportCloseDayTitle": "Close today's session?",
   "reportCloseDayMessage": "A closed day can be reopen if an other sale is done the same day.",
+  "reportDeleteSaleTitle": "Delete sale?",
+  "reportDeleteSaleMessage": "Delete this sale of {amount}?\n\nThis cannot be undone.",
+  "@reportDeleteSaleMessage": { "placeholders": { "amount": { "type": "String" } } },
+  "reportDeleteSaleSuccess": "Sale deleted",
+  "reportReprintSuccess": "Receipt printed",
+  "reportReprintError": "Print failed",
 
   "settingsAppSection": "App settings",
   "settingsAppNameLabel": "Business name",

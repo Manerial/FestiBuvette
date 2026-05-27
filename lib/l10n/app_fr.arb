@@ -71,6 +71,11 @@
   "reportDayClosed": "Clôturée à {time}",
   "reportCloseDayTitle": "Clôturer la session ?",
   "reportCloseDayMessage": "Une journée cloturée pourra être rouverte si une nouvelle vente est faite le même jour.",
+  "reportDeleteSaleTitle": "Supprimer la vente ?",
+  "reportDeleteSaleMessage": "Supprimer cette vente de {amount} ?\n\nCette action est irréversible.",
+  "reportDeleteSaleSuccess": "Vente supprimée",
+  "reportReprintSuccess": "Facturette imprimée",
+  "reportReprintError": "Échec de l'impression",
 
   "settingsAppSection": "Paramètres de l'application",
   "settingsAppNameLabel": "Nom de l'établissement",

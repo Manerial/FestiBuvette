@@ -120,6 +120,12 @@ class ReportNotifier extends AsyncNotifier<ReportState> {
     state = next;
   }
 
+  /// Deletes [sale] and refreshes the current day view.
+  Future<void> deleteSale(Sale sale) async {
+    await _repo.deleteSale(sale);
+    state = await AsyncValue.guard(_load);
+  }
+
   /// Closes the current business day and reloads.
   Future<void> closeDay() async {
     final current = state.valueOrNull;

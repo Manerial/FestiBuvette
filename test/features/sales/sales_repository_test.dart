@@ -148,6 +148,61 @@ void main() {
     expect(lines.first.subtotal, 5.0);
   });
 
+  // ─── deleteSale ────────────────────────────────────────────────────────────
+
+  test('deleteSale removes the sale and its lines', () async {
+    final day = await repo.getOrCreateToday();
+    final sale = await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!),
+      lines: [buildLine()],
+    );
+
+    await repo.deleteSale(sale);
+
+    expect(await repo.getSalesByDay(day.id!), isEmpty);
+    expect(await repo.getLinesBySale(sale.id!), isEmpty);
+  });
+
+  test('deleteSale updates business day aggregates', () async {
+    final day = await repo.getOrCreateToday();
+    await repo.updateBusinessDay(day.id!, totalRevenue: 20.0, saleCount: 2);
+
+    final sale = await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, total: 10.0),
+      lines: [buildLine()],
+    );
+
+    await repo.deleteSale(sale);
+
+    // After deletion, only the first two sales that were manually set are gone —
+    // the aggregates should reflect what is actually in the DB (empty after delete).
+    final updated = await repo.getToday();
+    expect(updated!.saleCount, 0);
+    expect(updated.totalRevenue, closeTo(0.0, 0.001));
+  });
+
+  test('deleteSale only removes the targeted sale when multiple exist', () async {
+    final day = await repo.getOrCreateToday();
+    final sale1 = await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, total: 5.0),
+      lines: [buildLine()],
+    );
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, total: 8.0),
+      lines: [buildLine()],
+    );
+
+    await repo.deleteSale(sale1);
+
+    final remaining = await repo.getSalesByDay(day.id!);
+    expect(remaining.length, 1);
+    expect(remaining.first.total, 8.0);
+
+    final updated = await repo.getToday();
+    expect(updated!.saleCount, 1);
+    expect(updated.totalRevenue, closeTo(8.0, 0.001));
+  });
+
   // ─── getTotalsByProduct ─────────────────────────────────────────────────────
 
   test('getTotalsByProduct returns aggregated data per product', () async {

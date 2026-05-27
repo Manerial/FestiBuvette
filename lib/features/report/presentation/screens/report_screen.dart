@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:ludo_pay_app/core/constants/app_constants.dart';
+import 'package:ludo_pay_app/features/printer/data/services/ticket_service.dart';
+import 'package:ludo_pay_app/features/printer/providers/printer_provider.dart';
 import 'package:ludo_pay_app/features/report/providers/report_provider.dart';
 import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
+import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
 import 'package:ludo_pay_app/l10n/app_localizations.dart';
 
 class ReportScreen extends ConsumerWidget {
@@ -348,74 +352,167 @@ class _ProductView extends StatelessWidget {
 
 // ─── Cart view ────────────────────────────────────────────────────────────────
 
-class _CartView extends StatelessWidget {
+class _CartView extends ConsumerWidget {
   final List<Sale> sales;
   const _CartView({required this.sales});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (sales.isEmpty) return const SizedBox.shrink();
 
     return Column(
       children: sales.asMap().entries.map((entry) {
         final i = entry.key;
         final sale = entry.value;
-        final time = _kTimeFmt.format(DateTime.parse(sale.dateTime));
         final isLastSale = i == sales.length - 1;
 
         return Padding(
           padding: EdgeInsets.only(bottom: isLastSale ? 0 : 12),
-          child: Card(
-            child: Column(
+          child: _SaleTile(sale: sale),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// ─── Sale tile ────────────────────────────────────────────────────────────────
+
+class _SaleTile extends ConsumerWidget {
+  final Sale sale;
+  const _SaleTile({required this.sale});
+
+  Future<void> _deleteSale(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.reportDeleteSaleTitle),
+        content: Text(l10n.reportDeleteSaleMessage(
+            _kCurrencyFmt.format(sale.total))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await ref.read(reportProvider.notifier).deleteSale(sale);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.reportDeleteSaleSuccess)),
+        );
+      }
+    }
+  }
+
+  Future<void> _reprintSale(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final printerState = ref.read(printerProvider).valueOrNull;
+
+    if (printerState == null || !printerState.isConnected) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.printerNotConnected)),
+        );
+      }
+      return;
+    }
+
+    final businessName =
+        ref.read(settingsProvider).valueOrNull?.appName ?? AppConstants.appName;
+    final bytes = await TicketService().buildReceiptFromSale(
+      businessName: businessName,
+      sale: sale,
+    );
+    final success =
+        await ref.read(printerProvider.notifier).printBytes(bytes);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success ? l10n.reportReprintSuccess : l10n.reportReprintError,
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final time = _kTimeFmt.format(DateTime.parse(sale.dateTime));
+
+    return Card(
+      child: Column(
+        children: [
+          // ── Sale header: time + total + actions ───────────────────────
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 4, top: 4, bottom: 4),
+            child: Row(
               children: [
-                // ── Sale header: time + total ─────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Text(
-                        time,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      const Spacer(),
-                      Text(
-                        _kCurrencyFmt.format(sale.total),
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                      ),
-                    ],
-                  ),
+                Text(
+                  time,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                const Divider(height: 1),
-                // ── Sale lines ────────────────────────────────────────────
-                ...sale.lines.asMap().entries.map((lineEntry) {
-                  final j = lineEntry.key;
-                  final line = lineEntry.value;
-                  final isLastLine = j == sale.lines.length - 1;
-                  return Column(
-                    children: [
-                      _ReportLineRow(
-                        name: line.nameSnapshot,
-                        unitPrice: _kCurrencyFmt.format(line.priceSnapshot),
-                        qty: '× ${line.quantity}',
-                        amount: _kCurrencyFmt.format(line.subtotal),
-                        verticalPadding: 10,
+                const SizedBox(width: 8),
+                Text(
+                  _kCurrencyFmt.format(sale.total),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
-                      if (!isLastLine) const Divider(height: 1, indent: 16),
-                    ],
-                  );
-                }),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.print_outlined),
+                  tooltip: AppLocalizations.of(context)!.print,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _reprintSale(context, ref),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.delete_outline,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  tooltip: AppLocalizations.of(context)!.delete,
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => _deleteSale(context, ref),
+                ),
               ],
             ),
           ),
-        );
-      }).toList(),
+          const Divider(height: 1),
+          // ── Sale lines ────────────────────────────────────────────────
+          ...sale.lines.asMap().entries.map((lineEntry) {
+            final j = lineEntry.key;
+            final line = lineEntry.value;
+            final isLastLine = j == sale.lines.length - 1;
+            return Column(
+              children: [
+                _ReportLineRow(
+                  name: line.nameSnapshot,
+                  unitPrice: _kCurrencyFmt.format(line.priceSnapshot),
+                  qty: '× ${line.quantity}',
+                  amount: _kCurrencyFmt.format(line.subtotal),
+                  verticalPadding: 10,
+                ),
+                if (!isLastLine) const Divider(height: 1, indent: 16),
+              ],
+            );
+          }),
+        ],
+      ),
     );
   }
 }

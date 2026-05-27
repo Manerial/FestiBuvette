@@ -217,6 +217,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'A closed day can be reopen if an other sale is done the same day.';
 
   @override
+  String get reportDeleteSaleTitle => 'Delete sale?';
+
+  @override
+  String reportDeleteSaleMessage(String amount) {
+    return 'Delete this sale of $amount?\n\nThis cannot be undone.';
+  }
+
+  @override
+  String get reportDeleteSaleSuccess => 'Sale deleted';
+
+  @override
+  String get reportReprintSuccess => 'Receipt printed';
+
+  @override
+  String get reportReprintError => 'Print failed';
+
+  @override
   String get settingsAppSection => 'App settings';
 
   @override

@@ -221,6 +221,23 @@ class AppLocalizationsFr extends AppLocalizations {
       'Une journée cloturée pourra être rouverte si une nouvelle vente est faite le même jour.';
 
   @override
+  String get reportDeleteSaleTitle => 'Supprimer la vente ?';
+
+  @override
+  String reportDeleteSaleMessage(String amount) {
+    return 'Supprimer cette vente de $amount ?\n\nCette action est irréversible.';
+  }
+
+  @override
+  String get reportDeleteSaleSuccess => 'Vente supprimée';
+
+  @override
+  String get reportReprintSuccess => 'Facturette imprimée';
+
+  @override
+  String get reportReprintError => 'Échec de l\'impression';
+
+  @override
   String get settingsAppSection => 'Paramètres de l\'application';
 
   @override
