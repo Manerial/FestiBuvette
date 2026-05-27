@@ -89,6 +89,9 @@ class _PrinterScreenState extends ConsumerState<PrinterScreen> {
             ],
           ),
 
+          const SizedBox(height: 16),
+          _CartGridViewTile(),
+
           const SizedBox(height: 32),
 
           // ── Language ─────────────────────────────────────────────────────
@@ -350,6 +353,26 @@ class _DeviceTile extends ConsumerWidget {
                       .connect(device),
               child: Text(l10n.printerConnect),
             ),
+    );
+  }
+}
+
+// ─── Cart grid view toggle ────────────────────────────────────────────────────
+
+class _CartGridViewTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final gridView =
+        ref.watch(settingsProvider).valueOrNull?.cartGridView ?? true;
+
+    return SwitchListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(l10n.settingsCartGridView),
+      subtitle: Text(l10n.settingsCartGridViewSubtitle),
+      value: gridView,
+      onChanged: (value) =>
+          ref.read(settingsProvider.notifier).setCartGridView(value),
     );
   }
 }

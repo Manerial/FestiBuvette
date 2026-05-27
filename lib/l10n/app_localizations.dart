@@ -518,6 +518,18 @@ abstract class AppLocalizations {
   /// **'English'**
   String get settingsLanguageEn;
 
+  /// No description provided for @settingsCartGridView.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get settingsCartGridView;
+
+  /// No description provided for @settingsCartGridViewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Display products as tiles in the cart'**
+  String get settingsCartGridViewSubtitle;
+
   /// No description provided for @allCategories.
   ///
   /// In en, this message translates to:

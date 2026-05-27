@@ -145,4 +145,55 @@ void main() {
     final state = await container.read(settingsProvider.future);
     expect(state.appName, 'Mon Café');
   });
+
+  // ─── setCartGridView ─────────────────────────────────────────────────────
+
+  test('cartGridView defaults to true when not persisted', () async {
+    final container = makeContainer();
+    final state = await container.read(settingsProvider.future);
+    expect(state.cartGridView, isTrue);
+  });
+
+  test('cartGridView returns persisted value on first load', () async {
+    SharedPreferences.setMockInitialValues(
+        {AppConstants.keyCartGridView: false});
+    final container = makeContainer();
+    final state = await container.read(settingsProvider.future);
+    expect(state.cartGridView, isFalse);
+  });
+
+  test('setCartGridView updates state immediately', () async {
+    final container = makeContainer();
+    await container.read(settingsProvider.future);
+
+    await container.read(settingsProvider.notifier).setCartGridView(false);
+
+    final state = await container.read(settingsProvider.future);
+    expect(state.cartGridView, isFalse);
+  });
+
+  test('setCartGridView persists across provider instances', () async {
+    final c1 = makeContainer();
+    await c1.read(settingsProvider.future);
+    await c1.read(settingsProvider.notifier).setCartGridView(false);
+
+    final c2 = makeContainer();
+    final state = await c2.read(settingsProvider.future);
+    expect(state.cartGridView, isFalse);
+  });
+
+  test('setCartGridView preserves existing appName and locale', () async {
+    SharedPreferences.setMockInitialValues({
+      AppConstants.keyAppName: 'Mon Bar',
+      AppConstants.keyLocale: 'fr',
+    });
+    final container = makeContainer();
+    await container.read(settingsProvider.future);
+
+    await container.read(settingsProvider.notifier).setCartGridView(false);
+
+    final state = await container.read(settingsProvider.future);
+    expect(state.appName, 'Mon Bar');
+    expect(state.locale, 'fr');
+  });
 }

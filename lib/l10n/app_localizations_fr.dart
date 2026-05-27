@@ -245,6 +245,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsLanguageEn => 'English';
 
   @override
+  String get settingsCartGridView => 'Vue en grille';
+
+  @override
+  String get settingsCartGridViewSubtitle =>
+      'Afficher les produits en tuiles dans le panier';
+
+  @override
   String get allCategories => 'Tout';
 
   @override
