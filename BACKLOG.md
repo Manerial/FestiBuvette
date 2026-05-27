@@ -159,7 +159,7 @@
 - [x] **E8-6** Cancel last sale — delete any sale from "By cart" view with confirmation dialog + business day aggregate recompute (E4-8)
 - [x] **E8-7** Reprint last ticket — reprint any past sale from "By cart" view using ESC/POS snapshots (E4-9)
 - [x] **E8-8** Quick bill buttons in change calculator — inline row `[ 5€ ][ 10€ ][ 20€ ][ 50€ ][ ✏️ ]` replacing the text field; tap a button to fill the tendered amount (toggle off = re-tap), tap ✏️ for custom amount via dialog
-- [ ] **E8-9** Haptic feedback — `HapticFeedback.lightImpact()` on `+` / `-` product buttons (list + grid views)
+- [x] **E8-9** Haptic feedback — `HapticFeedback.lightImpact()` on `+` / `-` product buttons (list + grid views)
 - [ ] **E8-10** Out-of-stock toggle — long-press on a product to mark it unavailable; grayed + non-clickable in cart; sorted last without altering `sort_order` (ORDER BY `is_out_of_stock ASC, sort_order ASC`); DB migration v2→v3
 - [x] **E8-11** Category grouping on ticket — group order lines by category on the printed ticket; categories ordered by their `sort_order` (same as in-app); uncategorized products printed last under a `** AUTRES **` / `** OTHER **` bold separator (i18n); categories with no items in the cart are skipped; flat layout preserved for reprints (`buildReceiptFromSale`) since category info is not snapshotted
 
