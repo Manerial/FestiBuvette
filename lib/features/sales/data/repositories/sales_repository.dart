@@ -137,8 +137,9 @@ class SalesRepository {
     return db.rawQuery('''
       SELECT
         sl.name_snapshot,
-        SUM(sl.quantity) AS total_quantity,
-        SUM(sl.subtotal) AS product_total
+        MIN(sl.price_snapshot) AS price_snapshot,
+        SUM(sl.quantity)       AS total_quantity,
+        SUM(sl.subtotal)       AS product_total
       FROM sale_lines sl
       JOIN sales s ON s.id = sl.sale_id
       WHERE s.business_day_id = ?

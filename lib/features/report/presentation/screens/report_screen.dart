@@ -205,6 +205,10 @@ class _SummaryCard extends ConsumerWidget {
 
 class _ReportLineRow extends StatelessWidget {
   final String name;
+
+  /// Optional unit price shown as a small subtitle under the product name.
+  final String? unitPrice;
+
   final String qty;
   final String amount;
   final bool nameSemibold;
@@ -212,6 +216,7 @@ class _ReportLineRow extends StatelessWidget {
 
   const _ReportLineRow({
     required this.name,
+    this.unitPrice,
     required this.qty,
     required this.amount,
     this.nameSemibold = false,
@@ -223,13 +228,27 @@ class _ReportLineRow extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: verticalPadding),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            child: Text(
-              name,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: nameSemibold ? FontWeight.w500 : null,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: nameSemibold ? FontWeight.w500 : null,
+                      ),
+                ),
+                if (unitPrice != null)
+                  Text(
+                    unitPrice!,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
+              ],
             ),
           ),
           SizedBox(
@@ -311,6 +330,8 @@ class _ProductView extends StatelessWidget {
               children: [
                 _ReportLineRow(
                   name: row['name_snapshot'] as String,
+                  unitPrice: _kCurrencyFmt.format(
+                      row['price_snapshot'] as num),
                   qty: '× ${row['total_quantity']}',
                   amount: _kCurrencyFmt.format(row['product_total'] as num),
                   nameSemibold: true,
@@ -381,6 +402,7 @@ class _CartView extends StatelessWidget {
                     children: [
                       _ReportLineRow(
                         name: line.nameSnapshot,
+                        unitPrice: _kCurrencyFmt.format(line.priceSnapshot),
                         qty: '× ${line.quantity}',
                         amount: _kCurrencyFmt.format(line.subtotal),
                         verticalPadding: 10,

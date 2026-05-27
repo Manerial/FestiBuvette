@@ -115,4 +115,21 @@ void main() {
     await repo.insert(buildCategory(order: 1));
     expect(await repo.nextOrder(), 2);
   });
+
+  // ─── updateOrders ───────────────────────────────────────────────────────────
+
+  test('updateOrders persists the new sort order', () async {
+    await repo.insert(buildCategory(name: 'A', order: 0));
+    await repo.insert(buildCategory(name: 'B', order: 1));
+    await repo.insert(buildCategory(name: 'C', order: 2));
+
+    final original = await repo.getAll(); // [A, B, C]
+
+    // Reverse the list
+    final reversed = original.reversed.toList(); // [C, B, A]
+    await repo.updateOrders(reversed);
+
+    final reloaded = await repo.getAll(); // should be [C, B, A] now
+    expect(reloaded.map((c) => c.name).toList(), ['C', 'B', 'A']);
+  });
 }

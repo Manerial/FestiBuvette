@@ -139,11 +139,18 @@ class _CategoryManagementSheet extends ConsumerWidget {
                 ),
               )
             else
-              ListView.builder(
+              ReorderableListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: categories.length,
-                itemBuilder: (_, i) => _CategoryTile(category: categories[i]),
+                onReorderItem: (oldIndex, newIndex) => ref
+                    .read(categoriesProvider.notifier)
+                    .reorder(oldIndex, newIndex),
+                itemBuilder: (_, i) => _CategoryTile(
+                  key: ValueKey(categories[i].id),
+                  category: categories[i],
+                  index: i,
+                ),
               ),
           ],
         ),
@@ -156,12 +163,17 @@ class _CategoryManagementSheet extends ConsumerWidget {
 
 class _CategoryTile extends ConsumerWidget {
   final Category category;
-  const _CategoryTile({required this.category});
+  final int index;
+  const _CategoryTile({super.key, required this.category, required this.index});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     return ListTile(
+      leading: ReorderableDragStartListener(
+        index: index,
+        child: const Icon(Icons.drag_handle, color: Colors.grey),
+      ),
       title: Text(category.name),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

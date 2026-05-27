@@ -45,6 +45,21 @@ class CategoriesRepository {
     });
   }
 
+  /// Saves the display order of the entire list in a single batch transaction.
+  Future<void> updateOrders(List<Category> categories) async {
+    final db = await _dbHelper.database;
+    final batch = db.batch();
+    for (int i = 0; i < categories.length; i++) {
+      batch.update(
+        'categories',
+        {'sort_order': i},
+        where: 'id = ?',
+        whereArgs: [categories[i].id],
+      );
+    }
+    await batch.commit(noResult: true);
+  }
+
   /// Returns the next order number (= current number of categories).
   Future<int> nextOrder() async {
     final db = await _dbHelper.database;
