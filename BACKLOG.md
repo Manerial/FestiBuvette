@@ -122,6 +122,16 @@
 
 ---
 
+## EPIC 6 — Change calculator
+
+- [ ] **E6-1** Add "Amount tendered" input field in the cart footer (numeric keyboard, shown after tapping [Print / Record])
+- [ ] **E6-2** Compute and display change in real time (`tendered − total`, hidden if tendered < total)
+- [ ] **E6-3** Block sale confirmation if tendered amount is set but less than total
+- [ ] **E6-4** i18n strings (EN + FR) for the new UI elements
+- [ ] **E6-5** Unit tests: `CartNotifier` change computation + edge cases (exact amount, overpay, underpay)
+
+---
+
 ## Suggested iteration order
 
 ```

@@ -82,5 +82,9 @@
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
 
-  "settingsPrinterSection": "Imprimante Bluetooth"
+  "settingsPrinterSection": "Imprimante Bluetooth",
+
+  "tenderedAmount": "Montant remis",
+  "changeDue": "Rendu",
+  "insufficientAmount": "Montant insuffisant"
 }

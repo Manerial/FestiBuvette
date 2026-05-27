@@ -242,4 +242,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPrinterSection => 'Bluetooth printer';
+
+  @override
+  String get tenderedAmount => 'Amount tendered';
+
+  @override
+  String get changeDue => 'Change';
+
+  @override
+  String get insufficientAmount => 'Insufficient amount';
 }

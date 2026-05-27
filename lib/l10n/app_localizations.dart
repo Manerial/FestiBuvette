@@ -523,6 +523,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bluetooth printer'**
   String get settingsPrinterSection;
+
+  /// Label for the cash amount given by the customer
+  ///
+  /// In en, this message translates to:
+  /// **'Amount tendered'**
+  String get tenderedAmount;
+
+  /// Money change to return to the customer
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get changeDue;
+
+  /// Error shown when the tendered amount is less than the total
+  ///
+  /// In en, this message translates to:
+  /// **'Insufficient amount'**
+  String get insufficientAmount;
 }
 
 class _AppLocalizationsDelegate

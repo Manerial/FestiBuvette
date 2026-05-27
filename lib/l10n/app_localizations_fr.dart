@@ -246,4 +246,13 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsPrinterSection => 'Imprimante Bluetooth';
+
+  @override
+  String get tenderedAmount => 'Montant remis';
+
+  @override
+  String get changeDue => 'Rendu';
+
+  @override
+  String get insufficientAmount => 'Montant insuffisant';
 }
