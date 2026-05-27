@@ -113,7 +113,7 @@ class SalesRepository {
       'sales',
       where: 'business_day_id = ?',
       whereArgs: [businessDayId],
-      orderBy: 'date_time ASC',
+      orderBy: 'date_time DESC',
     );
     return rows.map((r) => Sale.fromMap(r)).toList();
   }
