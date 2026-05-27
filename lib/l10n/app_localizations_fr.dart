@@ -160,4 +160,31 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get reportCloseDayMessage =>
       'Une fois clôturée, les ventes ne pourront plus être ajoutées pour aujourd\'hui.';
+
+  @override
+  String get settingsAppSection => 'Paramètres de l\'application';
+
+  @override
+  String get settingsAppNameLabel => 'Nom de l\'établissement';
+
+  @override
+  String get settingsAppNameHint => 'Ex : Mon café';
+
+  @override
+  String get settingsAppNameSaved => 'Nom enregistré';
+
+  @override
+  String get settingsLanguageSection => 'Langue';
+
+  @override
+  String get settingsLanguageSystem => 'Système';
+
+  @override
+  String get settingsLanguageFr => 'Français';
+
+  @override
+  String get settingsLanguageEn => 'English';
+
+  @override
+  String get settingsPrinterSection => 'Imprimante Bluetooth';
 }

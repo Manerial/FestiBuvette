@@ -157,4 +157,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get reportCloseDayMessage =>
       'Once closed, no more sales can be added for today.';
+
+  @override
+  String get settingsAppSection => 'App settings';
+
+  @override
+  String get settingsAppNameLabel => 'Business name';
+
+  @override
+  String get settingsAppNameHint => 'E.g.: My Coffee Shop';
+
+  @override
+  String get settingsAppNameSaved => 'Name saved';
+
+  @override
+  String get settingsLanguageSection => 'Language';
+
+  @override
+  String get settingsLanguageSystem => 'System';
+
+  @override
+  String get settingsLanguageFr => 'Français';
+
+  @override
+  String get settingsLanguageEn => 'English';
+
+  @override
+  String get settingsPrinterSection => 'Bluetooth printer';
 }

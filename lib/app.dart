@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo_pay_app/core/constants/app_constants.dart';
 import 'package:ludo_pay_app/core/theme/app_theme.dart';
+import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
 import 'package:ludo_pay_app/features/cart/presentation/screens/cart_screen.dart';
 import 'package:ludo_pay_app/features/printer/presentation/screens/printer_screen.dart';
 import 'package:ludo_pay_app/features/products/presentation/screens/products_screen.dart';
@@ -10,17 +11,19 @@ import 'package:ludo_pay_app/features/report/providers/report_provider.dart';
 import 'package:ludo_pay_app/l10n/app_localizations.dart';
 import 'package:ludo_pay_app/shared/widgets/app_bottom_nav.dart';
 
-class App extends StatelessWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final localeCode = ref.watch(settingsProvider).valueOrNull?.locale;
     return MaterialApp(
       title: AppConstants.appName,
       theme: AppTheme.light,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      locale: localeCode != null ? Locale(localeCode) : null,
       home: const MainScaffold(),
     );
   }
@@ -55,7 +58,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final titles = [l10n.cartTab, l10n.productsTab, l10n.reportTab];
+    final businessName = ref
+            .watch(settingsProvider)
+            .valueOrNull
+            ?.appName ??
+        AppConstants.appName;
+    // Cart tab shows the configured business name; other tabs show their own name.
+    final titles = [businessName, l10n.productsTab, l10n.reportTab];
 
     return Scaffold(
       appBar: AppBar(

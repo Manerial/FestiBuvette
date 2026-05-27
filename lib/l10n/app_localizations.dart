@@ -98,269 +98,323 @@ abstract class AppLocalizations {
     Locale('fr'),
   ];
 
-  /// Generic error with details
+  /// No description provided for @errorMessage.
   ///
   /// In en, this message translates to:
   /// **'Error: {message}'**
   String errorMessage(Object message);
 
-  /// Generic cancel button
+  /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
 
-  /// Generic delete button
+  /// No description provided for @delete.
   ///
   /// In en, this message translates to:
   /// **'Delete'**
   String get delete;
 
-  /// Save button in edit mode
+  /// No description provided for @save.
   ///
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
 
-  /// Add button in create mode
+  /// No description provided for @add.
   ///
   /// In en, this message translates to:
   /// **'Add'**
   String get add;
 
-  /// Generic confirm button
+  /// No description provided for @confirm.
   ///
   /// In en, this message translates to:
   /// **'Confirm'**
   String get confirm;
 
-  /// Cart tab label and page title
+  /// No description provided for @cartTab.
   ///
   /// In en, this message translates to:
   /// **'Cart'**
   String get cartTab;
 
-  /// Products tab label and page title
+  /// No description provided for @productsTab.
   ///
   /// In en, this message translates to:
   /// **'Products'**
   String get productsTab;
 
-  /// Report tab label and page title
+  /// No description provided for @reportTab.
   ///
   /// In en, this message translates to:
   /// **'Report'**
   String get reportTab;
 
-  /// App bar printer icon tooltip
+  /// No description provided for @printerTooltip.
   ///
   /// In en, this message translates to:
   /// **'Printer'**
   String get printerTooltip;
 
-  /// Cart: empty catalogue state title
+  /// No description provided for @noProductsInCatalogue.
   ///
   /// In en, this message translates to:
   /// **'No products in catalogue'**
   String get noProductsInCatalogue;
 
-  /// Cart: empty catalogue state hint
+  /// No description provided for @addProductsFromTab.
   ///
   /// In en, this message translates to:
   /// **'Add products from the Products tab'**
   String get addProductsFromTab;
 
-  /// Snackbar after a successful sale
+  /// No description provided for @saleRecorded.
   ///
   /// In en, this message translates to:
   /// **'✅ Sale recorded'**
   String get saleRecorded;
 
-  /// Clear cart dialog title
+  /// No description provided for @clearCartTitle.
   ///
   /// In en, this message translates to:
   /// **'Clear cart?'**
   String get clearCartTitle;
 
-  /// Clear cart dialog body
+  /// No description provided for @clearCartMessage.
   ///
   /// In en, this message translates to:
   /// **'All selected items will be removed.'**
   String get clearCartMessage;
 
-  /// Clear cart button label
+  /// No description provided for @clear.
   ///
   /// In en, this message translates to:
   /// **'Clear'**
   String get clear;
 
-  /// Total label in cart footer
+  /// No description provided for @total.
   ///
   /// In en, this message translates to:
   /// **'TOTAL'**
   String get total;
 
-  /// Print button label in cart footer
+  /// No description provided for @print.
   ///
   /// In en, this message translates to:
   /// **'Print'**
   String get print;
 
-  /// Products: empty list state title
+  /// No description provided for @noProducts.
   ///
   /// In en, this message translates to:
   /// **'No products'**
   String get noProducts;
 
-  /// Products: empty list state hint
+  /// No description provided for @tapPlusToAddProduct.
   ///
   /// In en, this message translates to:
   /// **'Tap + to add your first product'**
   String get tapPlusToAddProduct;
 
-  /// FAB tooltip in products screen
+  /// No description provided for @addProductTooltip.
   ///
   /// In en, this message translates to:
   /// **'Add a product'**
   String get addProductTooltip;
 
-  /// Delete product dialog title
+  /// No description provided for @deleteProductTitle.
   ///
   /// In en, this message translates to:
   /// **'Delete?'**
   String get deleteProductTitle;
 
-  /// Delete product dialog body
+  /// No description provided for @deleteProductMessage.
   ///
   /// In en, this message translates to:
   /// **'Delete \"{name}\"?\n\nIf this product has already been sold, it will only be deactivated to preserve history.'**
   String deleteProductMessage(String name);
 
-  /// Product form dialog title in edit mode
+  /// No description provided for @editProduct.
   ///
   /// In en, this message translates to:
   /// **'Edit product'**
   String get editProduct;
 
-  /// Product form dialog title in create mode
+  /// No description provided for @newProduct.
   ///
   /// In en, this message translates to:
   /// **'New product'**
   String get newProduct;
 
-  /// Name field label
+  /// No description provided for @productNameLabel.
   ///
   /// In en, this message translates to:
   /// **'Product name'**
   String get productNameLabel;
 
-  /// Name field hint
+  /// No description provided for @productNameHint.
   ///
   /// In en, this message translates to:
   /// **'E.g.: Coffee, Sandwich…'**
   String get productNameHint;
 
-  /// Validation: empty name
+  /// No description provided for @nameRequired.
   ///
   /// In en, this message translates to:
   /// **'Name required'**
   String get nameRequired;
 
-  /// Validation: name too long
+  /// No description provided for @maximumCharacters.
   ///
   /// In en, this message translates to:
   /// **'Maximum {count} characters'**
   String maximumCharacters(int count);
 
-  /// Price field label
+  /// No description provided for @priceLabel.
   ///
   /// In en, this message translates to:
   /// **'Price (€)'**
   String get priceLabel;
 
-  /// Price field hint
+  /// No description provided for @priceHint.
   ///
   /// In en, this message translates to:
   /// **'E.g.: 1.50'**
   String get priceHint;
 
-  /// Validation: empty price
+  /// No description provided for @priceRequired.
   ///
   /// In en, this message translates to:
   /// **'Price required'**
   String get priceRequired;
 
-  /// Validation: price cannot be parsed
+  /// No description provided for @invalidPrice.
   ///
   /// In en, this message translates to:
   /// **'Invalid price'**
   String get invalidPrice;
 
-  /// Validation: price ≤ 0
+  /// No description provided for @priceMustBePositive.
   ///
   /// In en, this message translates to:
   /// **'Price must be greater than 0'**
   String get priceMustBePositive;
 
-  /// Printer settings screen title
+  /// No description provided for @printerScreenTitle.
   ///
   /// In en, this message translates to:
   /// **'Bluetooth Printer'**
   String get printerScreenTitle;
 
-  /// Printer settings placeholder
+  /// No description provided for @printerSettingsPlaceholder.
   ///
   /// In en, this message translates to:
   /// **'Printer settings — to be implemented (E3)'**
   String get printerSettingsPlaceholder;
 
-  /// Report: empty state when no business day exists
+  /// No description provided for @reportNoSalesToday.
   ///
   /// In en, this message translates to:
   /// **'No sales recorded today'**
   String get reportNoSalesToday;
 
-  /// Number of sales for the day
+  /// No description provided for @reportSaleCount.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 sale} other{{count} sales}}'**
   String reportSaleCount(num count);
 
-  /// Report section header: product breakdown
+  /// No description provided for @reportByProduct.
   ///
   /// In en, this message translates to:
   /// **'By product'**
   String get reportByProduct;
 
-  /// Report table column header: quantity
+  /// No description provided for @reportQtyHeader.
   ///
   /// In en, this message translates to:
   /// **'Qty'**
   String get reportQtyHeader;
 
-  /// Button to close the business day
+  /// No description provided for @reportCloseDay.
   ///
   /// In en, this message translates to:
   /// **'Close day'**
   String get reportCloseDay;
 
-  /// Badge shown when the business day is already closed
+  /// No description provided for @reportDayClosed.
   ///
   /// In en, this message translates to:
   /// **'Closed at {time}'**
   String reportDayClosed(String time);
 
-  /// Close day confirmation dialog title
+  /// No description provided for @reportCloseDayTitle.
   ///
   /// In en, this message translates to:
   /// **'Close today\'s session?'**
   String get reportCloseDayTitle;
 
-  /// Close day confirmation dialog body
+  /// No description provided for @reportCloseDayMessage.
   ///
   /// In en, this message translates to:
   /// **'Once closed, no more sales can be added for today.'**
   String get reportCloseDayMessage;
+
+  /// No description provided for @settingsAppSection.
+  ///
+  /// In en, this message translates to:
+  /// **'App settings'**
+  String get settingsAppSection;
+
+  /// No description provided for @settingsAppNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Business name'**
+  String get settingsAppNameLabel;
+
+  /// No description provided for @settingsAppNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: My Coffee Shop'**
+  String get settingsAppNameHint;
+
+  /// No description provided for @settingsAppNameSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Name saved'**
+  String get settingsAppNameSaved;
+
+  /// No description provided for @settingsLanguageSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguageSection;
+
+  /// No description provided for @settingsLanguageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get settingsLanguageSystem;
+
+  /// No description provided for @settingsLanguageFr.
+  ///
+  /// In en, this message translates to:
+  /// **'Français'**
+  String get settingsLanguageFr;
+
+  /// No description provided for @settingsLanguageEn.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get settingsLanguageEn;
+
+  /// No description provided for @settingsPrinterSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth printer'**
+  String get settingsPrinterSection;
 }
 
 class _AppLocalizationsDelegate

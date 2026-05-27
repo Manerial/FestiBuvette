@@ -2,159 +2,71 @@
   "@@locale": "en",
 
   "errorMessage": "Error: {message}",
-  "@errorMessage": {
-    "description": "Generic error with details",
-    "placeholders": {
-      "message": { "type": "Object" }
-    }
-  },
+  "@errorMessage": { "placeholders": { "message": { "type": "Object" } } },
 
   "cancel": "Cancel",
-  "@cancel": { "description": "Generic cancel button" },
-
   "delete": "Delete",
-  "@delete": { "description": "Generic delete button" },
-
   "save": "Save",
-  "@save": { "description": "Save button in edit mode" },
-
   "add": "Add",
-  "@add": { "description": "Add button in create mode" },
-
   "confirm": "Confirm",
-  "@confirm": { "description": "Generic confirm button" },
 
   "cartTab": "Cart",
-  "@cartTab": { "description": "Cart tab label and page title" },
-
   "productsTab": "Products",
-  "@productsTab": { "description": "Products tab label and page title" },
-
   "reportTab": "Report",
-  "@reportTab": { "description": "Report tab label and page title" },
-
   "printerTooltip": "Printer",
-  "@printerTooltip": { "description": "App bar printer icon tooltip" },
 
   "noProductsInCatalogue": "No products in catalogue",
-  "@noProductsInCatalogue": { "description": "Cart: empty catalogue state title" },
-
   "addProductsFromTab": "Add products from the Products tab",
-  "@addProductsFromTab": { "description": "Cart: empty catalogue state hint" },
-
   "saleRecorded": "✅ Sale recorded",
-  "@saleRecorded": { "description": "Snackbar after a successful sale" },
-
   "clearCartTitle": "Clear cart?",
-  "@clearCartTitle": { "description": "Clear cart dialog title" },
-
   "clearCartMessage": "All selected items will be removed.",
-  "@clearCartMessage": { "description": "Clear cart dialog body" },
-
   "clear": "Clear",
-  "@clear": { "description": "Clear cart button label" },
-
   "total": "TOTAL",
-  "@total": { "description": "Total label in cart footer" },
-
   "print": "Print",
-  "@print": { "description": "Print button label in cart footer" },
 
   "noProducts": "No products",
-  "@noProducts": { "description": "Products: empty list state title" },
-
   "tapPlusToAddProduct": "Tap + to add your first product",
-  "@tapPlusToAddProduct": { "description": "Products: empty list state hint" },
-
   "addProductTooltip": "Add a product",
-  "@addProductTooltip": { "description": "FAB tooltip in products screen" },
-
   "deleteProductTitle": "Delete?",
-  "@deleteProductTitle": { "description": "Delete product dialog title" },
-
   "deleteProductMessage": "Delete \"{name}\"?\n\nIf this product has already been sold, it will only be deactivated to preserve history.",
-  "@deleteProductMessage": {
-    "description": "Delete product dialog body",
-    "placeholders": {
-      "name": { "type": "String" }
-    }
-  },
+  "@deleteProductMessage": { "placeholders": { "name": { "type": "String" } } },
 
   "editProduct": "Edit product",
-  "@editProduct": { "description": "Product form dialog title in edit mode" },
-
   "newProduct": "New product",
-  "@newProduct": { "description": "Product form dialog title in create mode" },
-
   "productNameLabel": "Product name",
-  "@productNameLabel": { "description": "Name field label" },
-
   "productNameHint": "E.g.: Coffee, Sandwich…",
-  "@productNameHint": { "description": "Name field hint" },
-
   "nameRequired": "Name required",
-  "@nameRequired": { "description": "Validation: empty name" },
-
   "maximumCharacters": "Maximum {count} characters",
-  "@maximumCharacters": {
-    "description": "Validation: name too long",
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-
+  "@maximumCharacters": { "placeholders": { "count": { "type": "int" } } },
   "priceLabel": "Price (€)",
-  "@priceLabel": { "description": "Price field label" },
-
   "priceHint": "E.g.: 1.50",
-  "@priceHint": { "description": "Price field hint" },
-
   "priceRequired": "Price required",
-  "@priceRequired": { "description": "Validation: empty price" },
-
   "invalidPrice": "Invalid price",
-  "@invalidPrice": { "description": "Validation: price cannot be parsed" },
-
   "priceMustBePositive": "Price must be greater than 0",
-  "@priceMustBePositive": { "description": "Validation: price ≤ 0" },
 
   "printerScreenTitle": "Bluetooth Printer",
-  "@printerScreenTitle": { "description": "Printer settings screen title" },
-
   "printerSettingsPlaceholder": "Printer settings — to be implemented (E3)",
-  "@printerSettingsPlaceholder": { "description": "Printer settings placeholder" },
 
   "reportNoSalesToday": "No sales recorded today",
-  "@reportNoSalesToday": { "description": "Report: empty state when no business day exists" },
-
   "reportSaleCount": "{count, plural, =1{1 sale} other{{count} sales}}",
-  "@reportSaleCount": {
-    "description": "Number of sales for the day",
-    "placeholders": {
-      "count": { "type": "num" }
-    }
-  },
-
+  "@reportSaleCount": { "placeholders": { "count": { "type": "num" } } },
   "reportByProduct": "By product",
-  "@reportByProduct": { "description": "Report section header: product breakdown" },
-
   "reportQtyHeader": "Qty",
-  "@reportQtyHeader": { "description": "Report table column header: quantity" },
-
   "reportCloseDay": "Close day",
-  "@reportCloseDay": { "description": "Button to close the business day" },
-
   "reportDayClosed": "Closed at {time}",
-  "@reportDayClosed": {
-    "description": "Badge shown when the business day is already closed",
-    "placeholders": {
-      "time": { "type": "String" }
-    }
-  },
-
+  "@reportDayClosed": { "placeholders": { "time": { "type": "String" } } },
   "reportCloseDayTitle": "Close today's session?",
-  "@reportCloseDayTitle": { "description": "Close day confirmation dialog title" },
-
   "reportCloseDayMessage": "Once closed, no more sales can be added for today.",
-  "@reportCloseDayMessage": { "description": "Close day confirmation dialog body" }
+
+  "settingsAppSection": "App settings",
+  "settingsAppNameLabel": "Business name",
+  "settingsAppNameHint": "E.g.: My Coffee Shop",
+  "settingsAppNameSaved": "Name saved",
+
+  "settingsLanguageSection": "Language",
+  "settingsLanguageSystem": "System",
+  "settingsLanguageFr": "Français",
+  "settingsLanguageEn": "English",
+
+  "settingsPrinterSection": "Bluetooth printer"
 }

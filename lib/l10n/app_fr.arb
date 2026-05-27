@@ -2,6 +2,7 @@
   "@@locale": "fr",
 
   "errorMessage": "Erreur : {message}",
+
   "cancel": "Annuler",
   "delete": "Supprimer",
   "save": "Enregistrer",
@@ -50,5 +51,17 @@
   "reportCloseDay": "Clôturer la journée",
   "reportDayClosed": "Clôturée à {time}",
   "reportCloseDayTitle": "Clôturer la session ?",
-  "reportCloseDayMessage": "Une fois clôturée, les ventes ne pourront plus être ajoutées pour aujourd'hui."
+  "reportCloseDayMessage": "Une fois clôturée, les ventes ne pourront plus être ajoutées pour aujourd'hui.",
+
+  "settingsAppSection": "Paramètres de l'application",
+  "settingsAppNameLabel": "Nom de l'établissement",
+  "settingsAppNameHint": "Ex : Mon café",
+  "settingsAppNameSaved": "Nom enregistré",
+
+  "settingsLanguageSection": "Langue",
+  "settingsLanguageSystem": "Système",
+  "settingsLanguageFr": "Français",
+  "settingsLanguageEn": "English",
+
+  "settingsPrinterSection": "Imprimante Bluetooth"
 }
