@@ -59,18 +59,19 @@
 
 ## EPIC 3 — Bluetooth thermal printing
 
-- [ ] **E3-1** POC: BLE scan, connect to NETUM NT-1809DD, identify GATT UUIDs
-- [ ] **E3-2** `PrinterService`: scan, connect, disconnect, persist device choice
-- [ ] **E3-3** Printer settings screen (BT device list, scan button, connection status)
-- [ ] **E3-4** "Test print" button (print a test receipt)
-- [ ] **E3-5** Auto-reconnect on launch if a printer is saved
-- [ ] **E3-6** `TicketService`: ESC/POS receipt formatting
+- [!] **E3-1** POC: BLE scan, connect to NETUM NT-1809DD, identify GATT UUIDs — validate with nRF Connect on physical device
+- [x] **E3-2** `PrinterService`: scan, connect, disconnect, persist device choice
+- [x] **E3-3** Printer settings screen (BT device list, scan button, connection status)
+- [x] **E3-4** "Test print" button (print a test receipt)
+- [x] **E3-5** Auto-reconnect on launch if a printer is saved
+- [x] **E3-6** `TicketService`: ESC/POS receipt formatting
   - Header (business name, date, time)
   - Product lines (name × qty → subtotal)
   - Separators, total, footer ("Thank you!"), paper cut
-- [ ] **E3-7** Full "Print" button flow:
+  - Note: prices formatted as `1,50 EUR` (ESC/POS Latin-1 encoding, `€` unsupported)
+- [x] **E3-7** Full "Print" button flow:
   - Check cart not empty
-  - Check printer connected (else: popup + link to ⚙️)
+  - Check printer connected (else: dialog → record only or cancel)
   - Print receipt
   - Record sale (`SaleService`)
   - Clear cart

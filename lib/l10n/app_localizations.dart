@@ -308,11 +308,101 @@ abstract class AppLocalizations {
   /// **'Bluetooth Printer'**
   String get printerScreenTitle;
 
-  /// No description provided for @printerSettingsPlaceholder.
+  /// No description provided for @printerNotConnected.
   ///
   /// In en, this message translates to:
-  /// **'Printer settings — to be implemented (E3)'**
-  String get printerSettingsPlaceholder;
+  /// **'Not connected'**
+  String get printerNotConnected;
+
+  /// No description provided for @printerConnectedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected: {name}'**
+  String printerConnectedTo(String name);
+
+  /// No description provided for @printerScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning...'**
+  String get printerScanning;
+
+  /// No description provided for @printerConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting...'**
+  String get printerConnecting;
+
+  /// No description provided for @printerBluetoothDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is disabled'**
+  String get printerBluetoothDisabled;
+
+  /// No description provided for @printerConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed'**
+  String get printerConnectionFailed;
+
+  /// No description provided for @printerScanDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get printerScanDevices;
+
+  /// No description provided for @printerDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get printerDisconnect;
+
+  /// No description provided for @printerTestPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Test print'**
+  String get printerTestPrint;
+
+  /// No description provided for @printerConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get printerConnect;
+
+  /// No description provided for @printerNoDevicesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices found'**
+  String get printerNoDevicesFound;
+
+  /// No description provided for @printerAndroidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Android: pair your printer in Bluetooth Settings first'**
+  String get printerAndroidHint;
+
+  /// No description provided for @printerNotConnectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No printer connected'**
+  String get printerNotConnectedTitle;
+
+  /// No description provided for @printerNotConnectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No printer is connected. Do you want to record the sale without printing?'**
+  String get printerNotConnectedMessage;
+
+  /// No description provided for @printerRecordWithoutPrinting.
+  ///
+  /// In en, this message translates to:
+  /// **'Record only'**
+  String get printerRecordWithoutPrinting;
+
+  /// No description provided for @printerPrintError.
+  ///
+  /// In en, this message translates to:
+  /// **'Print failed. Sale not recorded.'**
+  String get printerPrintError;
 
   /// No description provided for @reportNoSalesToday.
   ///

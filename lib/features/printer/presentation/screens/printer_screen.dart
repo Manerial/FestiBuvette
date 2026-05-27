@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ludo_pay_app/core/constants/app_constants.dart';
+import 'package:ludo_pay_app/features/printer/data/models/printer_device.dart';
+import 'package:ludo_pay_app/features/printer/data/services/ticket_service.dart';
+import 'package:ludo_pay_app/features/printer/providers/printer_provider.dart';
 import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
 import 'package:ludo_pay_app/l10n/app_localizations.dart';
 
@@ -17,7 +20,6 @@ class _PrinterScreenState extends ConsumerState<PrinterScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill with the current persisted name if already loaded.
     final currentName =
         ref.read(settingsProvider).valueOrNull?.appName ?? AppConstants.appName;
     _nameController = TextEditingController(text: currentName);
@@ -97,19 +99,245 @@ class _PrinterScreenState extends ConsumerState<PrinterScreen> {
 
           // ── Bluetooth printer ────────────────────────────────────────────
           _SectionHeader(label: l10n.settingsPrinterSection),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              l10n.printerSettingsPlaceholder,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: Colors.grey.shade500),
-              textAlign: TextAlign.center,
-            ),
-          ),
+          const SizedBox(height: 12),
+          _BluetoothSection(),
         ],
       ),
+    );
+  }
+}
+
+// ─── Bluetooth section ────────────────────────────────────────────────────────
+
+class _BluetoothSection extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final printerAsync = ref.watch(printerProvider);
+
+    return printerAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Text(l10n.errorMessage(e)),
+      data: (printer) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ── Status row ────────────────────────────────────────────────
+          _StatusRow(printer: printer),
+          const SizedBox(height: 12),
+
+          // ── Action buttons ────────────────────────────────────────────
+          _ActionButtons(printer: printer),
+
+          // ── Device list (after scan) ──────────────────────────────────
+          if (printer.availableDevices.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            ...printer.availableDevices.map(
+              (d) => _DeviceTile(device: d, currentPrinter: printer),
+            ),
+          ] else if (printer.isScanning) ...[
+            const SizedBox(height: 16),
+            const Center(child: CircularProgressIndicator()),
+          ] else if (!printer.isConnected &&
+              !printer.isBusy &&
+              printer.availableDevices.isEmpty) ...[
+            const SizedBox(height: 8),
+            // Android pairing hint (shown when device list is empty after scan
+            // attempt, or before first scan)
+            Text(
+              l10n.printerAndroidHint,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Colors.grey.shade500),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Status row ───────────────────────────────────────────────────────────────
+
+class _StatusRow extends StatelessWidget {
+  final PrinterState printer;
+  const _StatusRow({required this.printer});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final (icon, color, label) = switch (printer.status) {
+      PrinterConnectionStatus.connected => (
+          Icons.bluetooth_connected,
+          colorScheme.primary,
+          l10n.printerConnectedTo(printer.connectedDevice?.name ?? ''),
+        ),
+      PrinterConnectionStatus.scanning => (
+          Icons.bluetooth_searching,
+          Colors.orange,
+          l10n.printerScanning,
+        ),
+      PrinterConnectionStatus.connecting => (
+          Icons.bluetooth_searching,
+          Colors.orange,
+          l10n.printerConnecting,
+        ),
+      PrinterConnectionStatus.error => (
+          Icons.bluetooth_disabled,
+          colorScheme.error,
+          _errorLabel(l10n, printer.errorMessage),
+        ),
+      PrinterConnectionStatus.idle => (
+          Icons.bluetooth,
+          Colors.grey,
+          _idleLabel(l10n, printer),
+        ),
+    };
+
+    return Row(
+      children: [
+        Icon(icon, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(color: color, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _idleLabel(AppLocalizations l10n, PrinterState printer) {
+    if (printer.connectedDevice != null) {
+      return '${l10n.printerNotConnected} — ${printer.connectedDevice!.name}';
+    }
+    return l10n.printerNotConnected;
+  }
+
+  String _errorLabel(AppLocalizations l10n, String? msg) {
+    if (msg == 'bluetooth_disabled') return l10n.printerBluetoothDisabled;
+    if (msg == 'connection_failed') return l10n.printerConnectionFailed;
+    return l10n.printerConnectionFailed;
+  }
+}
+
+// ─── Action buttons ───────────────────────────────────────────────────────────
+
+class _ActionButtons extends ConsumerWidget {
+  final PrinterState printer;
+  const _ActionButtons({required this.printer});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final notifier = ref.read(printerProvider.notifier);
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        if (!printer.isConnected)
+          OutlinedButton.icon(
+            icon: const Icon(Icons.bluetooth_searching),
+            label: Text(l10n.printerScanDevices),
+            onPressed: printer.isBusy ? null : notifier.scanDevices,
+          ),
+        if (printer.isConnected) ...[
+          OutlinedButton.icon(
+            icon: const Icon(Icons.bluetooth_disabled),
+            label: Text(l10n.printerDisconnect),
+            onPressed: printer.isBusy ? null : notifier.disconnect,
+          ),
+          FilledButton.icon(
+            icon: printer.isPrinting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.print_outlined),
+            label: Text(l10n.printerTestPrint),
+            onPressed: printer.isBusy
+                ? null
+                : () => _testPrint(context, ref),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Future<void> _testPrint(BuildContext context, WidgetRef ref) async {
+    final businessName = ref.read(settingsProvider).valueOrNull?.appName ??
+        AppConstants.appName;
+    final bytes = await TicketService().buildTestPage(businessName);
+    final ok = await ref.read(printerProvider.notifier).printBytes(bytes);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            ok
+                ? AppLocalizations.of(context)!.printerTestPrint
+                : AppLocalizations.of(context)!.printerPrintError,
+          ),
+          backgroundColor: ok ? Colors.green : Colors.red,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+}
+
+// ─── Device tile ──────────────────────────────────────────────────────────────
+
+class _DeviceTile extends ConsumerWidget {
+  final PrinterDevice device;
+  final PrinterState currentPrinter;
+
+  const _DeviceTile({required this.device, required this.currentPrinter});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final isActive =
+        currentPrinter.isConnected &&
+        currentPrinter.connectedDevice?.address == device.address;
+
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(
+        Icons.print_outlined,
+        color: isActive ? Theme.of(context).colorScheme.primary : null,
+      ),
+      title: Text(
+        device.name.isEmpty ? device.address : device.name,
+        style: TextStyle(
+          fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      subtitle: Text(
+        device.address,
+        style: Theme.of(context)
+            .textTheme
+            .bodySmall
+            ?.copyWith(color: Colors.grey.shade500),
+      ),
+      trailing: isActive
+          ? null
+          : TextButton(
+              onPressed: currentPrinter.isBusy
+                  ? null
+                  : () => ref
+                      .read(printerProvider.notifier)
+                      .connect(device),
+              child: Text(l10n.printerConnect),
+            ),
     );
   }
 }

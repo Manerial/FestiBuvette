@@ -120,8 +120,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get printerScreenTitle => 'Bluetooth Printer';
 
   @override
-  String get printerSettingsPlaceholder =>
-      'Printer settings — to be implemented (E3)';
+  String get printerNotConnected => 'Not connected';
+
+  @override
+  String printerConnectedTo(String name) {
+    return 'Connected: $name';
+  }
+
+  @override
+  String get printerScanning => 'Scanning...';
+
+  @override
+  String get printerConnecting => 'Connecting...';
+
+  @override
+  String get printerBluetoothDisabled => 'Bluetooth is disabled';
+
+  @override
+  String get printerConnectionFailed => 'Connection failed';
+
+  @override
+  String get printerScanDevices => 'Scan';
+
+  @override
+  String get printerDisconnect => 'Disconnect';
+
+  @override
+  String get printerTestPrint => 'Test print';
+
+  @override
+  String get printerConnect => 'Connect';
+
+  @override
+  String get printerNoDevicesFound => 'No devices found';
+
+  @override
+  String get printerAndroidHint =>
+      'Android: pair your printer in Bluetooth Settings first';
+
+  @override
+  String get printerNotConnectedTitle => 'No printer connected';
+
+  @override
+  String get printerNotConnectedMessage =>
+      'No printer is connected. Do you want to record the sale without printing?';
+
+  @override
+  String get printerRecordWithoutPrinting => 'Record only';
+
+  @override
+  String get printerPrintError => 'Print failed. Sale not recorded.';
 
   @override
   String get reportNoSalesToday => 'No sales recorded today';

@@ -27,9 +27,9 @@ dependencies:
   # Persistent preferences (adresse imprimante, nom app…)
   shared_preferences: ^2.5.3
 
-  # Bluetooth printing — ajouté en Epic 3 après validation POC BLE
-  # flutter_pos_printer_platform_image_2: ^3.x.x
-  # esc_pos_utils_plus: ^2.x.x
+  # Bluetooth thermal printing
+  print_bluetooth_thermal: ^1.2.2
+  esc_pos_utils_plus: ^2.0.4
 
 dev_dependencies:
   flutter_test:

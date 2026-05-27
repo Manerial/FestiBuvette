@@ -123,8 +123,57 @@ class AppLocalizationsFr extends AppLocalizations {
   String get printerScreenTitle => 'Imprimante Bluetooth';
 
   @override
-  String get printerSettingsPlaceholder =>
-      'Paramètres imprimante — à implémenter (E3)';
+  String get printerNotConnected => 'Non connectée';
+
+  @override
+  String printerConnectedTo(String name) {
+    return 'Connectée : $name';
+  }
+
+  @override
+  String get printerScanning => 'Recherche en cours…';
+
+  @override
+  String get printerConnecting => 'Connexion en cours…';
+
+  @override
+  String get printerBluetoothDisabled => 'Bluetooth désactivé';
+
+  @override
+  String get printerConnectionFailed => 'Échec de la connexion';
+
+  @override
+  String get printerScanDevices => 'Rechercher';
+
+  @override
+  String get printerDisconnect => 'Déconnecter';
+
+  @override
+  String get printerTestPrint => 'Impression test';
+
+  @override
+  String get printerConnect => 'Connecter';
+
+  @override
+  String get printerNoDevicesFound => 'Aucun appareil trouvé';
+
+  @override
+  String get printerAndroidHint =>
+      'Android : associez d\'abord l\'imprimante dans les Paramètres Bluetooth';
+
+  @override
+  String get printerNotConnectedTitle => 'Aucune imprimante connectée';
+
+  @override
+  String get printerNotConnectedMessage =>
+      'Aucune imprimante n\'est connectée. Enregistrer la vente sans imprimer ?';
+
+  @override
+  String get printerRecordWithoutPrinting => 'Enregistrer seulement';
+
+  @override
+  String get printerPrintError =>
+      'Échec de l\'impression. Vente non enregistrée.';
 
   @override
   String get reportNoSalesToday => 'Aucune vente enregistrée aujourd\'hui';
