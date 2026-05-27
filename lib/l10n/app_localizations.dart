@@ -470,6 +470,36 @@ abstract class AppLocalizations {
   /// **'A closed day can be reopen if an other sale is done the same day.'**
   String get reportCloseDayMessage;
 
+  /// No description provided for @reportDeleteSaleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete sale?'**
+  String get reportDeleteSaleTitle;
+
+  /// No description provided for @reportDeleteSaleMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this sale of {amount}?\n\nThis cannot be undone.'**
+  String reportDeleteSaleMessage(String amount);
+
+  /// No description provided for @reportDeleteSaleSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale deleted'**
+  String get reportDeleteSaleSuccess;
+
+  /// No description provided for @reportReprintSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt printed'**
+  String get reportReprintSuccess;
+
+  /// No description provided for @reportReprintError.
+  ///
+  /// In en, this message translates to:
+  /// **'Print failed'**
+  String get reportReprintError;
+
   /// No description provided for @settingsAppSection.
   ///
   /// In en, this message translates to:

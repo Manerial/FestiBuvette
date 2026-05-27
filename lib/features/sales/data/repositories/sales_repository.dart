@@ -189,6 +189,24 @@ class SalesRepository {
         .toList();
   }
 
+  /// Deletes a sale and its lines in an atomic transaction, then updates
+  /// the parent business day aggregates accordingly.
+  Future<void> deleteSale(Sale sale) async {
+    final db = await _dbHelper.database;
+    await db.transaction((txn) async {
+      await txn.delete('sale_lines', where: 'sale_id = ?', whereArgs: [sale.id]);
+      await txn.delete('sales', where: 'id = ?', whereArgs: [sale.id]);
+    });
+
+    final rows = await db.rawQuery(
+      'SELECT COALESCE(SUM(total), 0) AS rev, COUNT(*) AS cnt FROM sales WHERE business_day_id = ?',
+      [sale.businessDayId],
+    );
+    final rev = (rows.first['rev'] as num).toDouble();
+    final cnt = rows.first['cnt'] as int;
+    await updateBusinessDay(sale.businessDayId, totalRevenue: rev, saleCount: cnt);
+  }
+
   /// Returns all business days ordered by date descending (most recent first).
   Future<List<BusinessDay>> getAllBusinessDays() async {
     final db = await _dbHelper.database;
