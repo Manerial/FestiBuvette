@@ -161,6 +161,7 @@
 - [x] **E8-8** Quick bill buttons in change calculator — inline row `[ 5€ ][ 10€ ][ 20€ ][ 50€ ][ ✏️ ]` replacing the text field; tap a button to fill the tendered amount (toggle off = re-tap), tap ✏️ for custom amount via dialog
 - [ ] **E8-9** Haptic feedback — `HapticFeedback.lightImpact()` on `+` / `-` product buttons (list + grid views)
 - [ ] **E8-10** Out-of-stock toggle — long-press on a product to mark it unavailable; grayed + non-clickable in cart; sorted last without altering `sort_order` (ORDER BY `is_out_of_stock ASC, sort_order ASC`); DB migration v2→v3
+- [x] **E8-11** Category grouping on ticket — group order lines by category on the printed ticket; categories ordered by their `sort_order` (same as in-app); uncategorized products printed last under a `** AUTRES **` / `** OTHER **` bold separator (i18n); categories with no items in the cart are skipped; flat layout preserved for reprints (`buildReceiptFromSale`) since category info is not snapshotted
 
 ---
 
@@ -202,7 +203,8 @@ Ces features sont **exclues** : ne pas les proposer, ne pas les implémenter.
 | Authentification / multi-opérateur | ❌ Hors scope — par principe |
 | Récapitulatif multi-jours / fin de festival | ❌ Hors scope — festival = 1 journée |
 | Statistiques de panier (taille moyenne, heure de pointe…) | ❌ Hors scope |
-| Filtre par plage de dates dans le rapport | ❌ Hors scope — festival = 1 journée 
+| Filtre par plage de dates dans le rapport | ❌ Hors scope — festival = 1 journée |
+| Numéro de commande sur le ticket | ❌ Hors scope — le client porte lui-même son ticket à la buvette |
 
 ---
 

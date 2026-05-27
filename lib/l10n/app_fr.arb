@@ -109,5 +109,8 @@
 
   "tenderedAmount": "Montant remis",
   "changeDue": "Rendu",
-  "insufficientAmount": "Montant insuffisant"
+  "insufficientAmount": "Montant insuffisant",
+
+  "ticketOtherCategory": "AUTRES",
+  "ticketThankYou": "Merci !"
 }

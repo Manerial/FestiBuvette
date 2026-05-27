@@ -321,4 +321,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get insufficientAmount => 'Insufficient amount';
+
+  @override
+  String get ticketOtherCategory => 'OTHER';
+
+  @override
+  String get ticketThankYou => 'Thank you!';
 }

@@ -444,6 +444,7 @@ class _SaleTile extends ConsumerWidget {
     final bytes = await TicketService().buildReceiptFromSale(
       businessName: businessName,
       sale: sale,
+      thankYouLabel: l10n.ticketThankYou,
     );
     final success =
         await ref.read(printerProvider.notifier).printBytes(bytes);

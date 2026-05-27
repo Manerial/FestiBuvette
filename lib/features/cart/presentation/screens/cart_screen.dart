@@ -345,11 +345,16 @@ class _FooterState extends ConsumerState<_Footer> {
     try {
       final businessName = ref.read(settingsProvider).valueOrNull?.appName ??
           AppConstants.appName;
+      final categories =
+          ref.read(categoriesProvider).valueOrNull ?? [];
       final bytes = await TicketService().buildReceiptFromCart(
         businessName: businessName,
         dateTime: DateTime.now(),
         products: widget.products,
         quantities: widget.cartState.quantities,
+        categories: categories,
+        otherCategoryLabel: l10n.ticketOtherCategory,
+        thankYouLabel: l10n.ticketThankYou,
       );
 
       final printed =

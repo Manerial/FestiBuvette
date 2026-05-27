@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Catalogue de produits (~20 articles), panier avec quantités, total, impression ticket de commande via imprimante thermique Bluetooth (NETUM NT-1809DD, protocole ESC/POS).
 100 % hors ligne. Aucun backend. Aucune authentification.
 
-**Contexte d'usage :** festival d'une journée. Le ticket imprimé est un **ticket de commande** remis à la buvette pour préparer la commande — ce n'est pas un reçu client. Le rapport journalier suffit ; l'export CSV/PDF est la seule sortie de données envisagée.
+**Contexte d'usage :** festival d'une journée. Le ticket imprimé est un **ticket de commande** : le caissier l'imprime et le donne au client, qui le remet lui-même à la buvette pour que sa commande soit préparée. Ce n'est pas un reçu client. Le rapport journalier suffit ; l'export CSV/PDF est la seule sortie de données envisagée.
 
 **Flutter 3.44 · Dart 3.12 · Riverpod 2.6 · sqflite · intl · shared_preferences**
 
