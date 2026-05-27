@@ -38,7 +38,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportTab => 'Rapport';
 
   @override
-  String get printerTooltip => 'Imprimante';
+  String get settingsTooltip => 'Paramètres';
 
   @override
   String get noProductsInCatalogue => 'Aucun produit dans le catalogue';

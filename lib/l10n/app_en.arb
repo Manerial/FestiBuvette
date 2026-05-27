@@ -13,7 +13,7 @@
   "cartTab": "Cart",
   "productsTab": "Products",
   "reportTab": "Report",
-  "printerTooltip": "Printer",
+  "settingsTooltip": "Settings",
 
   "noProductsInCatalogue": "No products in catalogue",
   "addProductsFromTab": "Add products from the Products tab",

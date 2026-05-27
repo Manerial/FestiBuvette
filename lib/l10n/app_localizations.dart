@@ -152,11 +152,11 @@ abstract class AppLocalizations {
   /// **'Report'**
   String get reportTab;
 
-  /// No description provided for @printerTooltip.
+  /// No description provided for @settingsTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Printer'**
-  String get printerTooltip;
+  /// **'Settings'**
+  String get settingsTooltip;
 
   /// No description provided for @noProductsInCatalogue.
   ///

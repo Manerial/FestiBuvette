@@ -12,7 +12,7 @@
   "cartTab": "Panier",
   "productsTab": "Produits",
   "reportTab": "Rapport",
-  "printerTooltip": "Imprimante",
+  "settingsTooltip": "Paramètres",
 
   "noProductsInCatalogue": "Aucun produit dans le catalogue",
   "addProductsFromTab": "Ajoutez des produits depuis l'onglet Produits",
