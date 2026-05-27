@@ -25,8 +25,6 @@ flutter run              # lancer sur device/émulateur connecté
 flutter build apk        # build Android
 ```
 
-> `flutter analyze` est obligatoire avant tout commit. Zéro warning toléré.
-
 ---
 
 ## Architecture
@@ -39,14 +37,14 @@ data/models/       →  data/repositories/  →  providers/  →  presentation/
 ```
 
 Les couches inférieures ne connaissent jamais les couches supérieures.
-Les écrans (`presentation/`) ne font **jamais** de SQL — ils passent toujours par le provider.
 
 **Features actuelles :**
-- `products/` — CRUD catalogue, drag & drop, soft delete
-- `cart/` — état en mémoire (`Map<productId, quantity>`), non persisté
+- `products/` — CRUD catalogue, drag & drop, soft delete, catégories (filtre + gestion)
+- `cart/` — état en mémoire (`CartState` : quantities + tenderedAmount), footer rétractable (swipe/tap), calculateur de monnaie
 - `sales/` — modèles + repository + `SaleService` (transaction atomique)
-- `report/` — 🔲 à implémenter (E4)
-- `printer/` — 🔲 à implémenter (E3, Bluetooth BLE)
+- `report/` — navigation jour par jour, vue par produit (prix unitaire inclus) et par panier, clôture journée
+- `printer/` — scan BT, connexion, déconnexion, auto-reconnexion, impression ESC/POS, test page · POC BLE iOS (GATT NETUM NT-1809DD) encore à valider en E3-1
+- `settings/` — nom de l'établissement, langue (système / fr / en)
 
 **Couches transverses :**
 - `core/database/database_helper.dart` — singleton SQLite, schéma, migrations
@@ -55,24 +53,29 @@ Les écrans (`presentation/`) ne font **jamais** de SQL — ils passent toujours
 
 ---
 
+## Règles
+
+- **Toujours** coder en anglais : noms de classes, de méthodes, de champs, chaînes UI, commentaires.
+- **Toujours** mettre les noms de tables et colonnes SQL en anglais `snake_case`.
+- **Toujours** utiliser des chemins de package si possible — **jamais** de chemins relatifs (`../`) (exception pour les helpers de test (`test/helpers/`) car les fichiers `test/` ne sont pas accessibles via `package:`).
+- **Toujours** faire des phrases de commit concises : `feat(products): [short description]`.
+- **Toujours** alimenter le BACKLOG.md avant une nouvelle feature afin de planifier son développement.
+- **Toujours** `flutter analyze` avant de tester une feature. Corriger les éléments remontés, zéro warning toléré.
+- **Toujours** `flutter test` avant de livrer une feature. Une feature sans tests n'est pas considérée comme terminée.
+- **Toujours** vérifier l'état du BACKLOG.md après la livraison d'une feature.
+- **Toujours** faire un `flutter gen-l10n` après modification des ARB.
+- **Jamais** de `String` en dur — toujours passer par `l10n`.
+- **Jamais** de SQL sur les écrans `presentation/`, **toujours** passer par le provider.
+
+---
+
 ## Conventions
-
-**Langue du code**
-- Tout le code Dart doit être en anglais : noms de classes, de méthodes, de champs, chaînes UI, commentaires.
-- Les noms de tables et colonnes SQL sont également en anglais `snake_case`.
-
-**Imports**
-- Dans `lib/` : toujours `package:ludo_pay_app/...` — jamais de chemins relatifs (`../`).
-- Dans `test/` : `package:ludo_pay_app/...` pour les fichiers `lib/` ; chemins relatifs **uniquement** pour les helpers de test (`test/helpers/`) car les fichiers `test/` ne sont pas accessibles via `package:`.
 
 **Nommage**
 - Providers : `xxxProvider` + `XxxNotifier` dans le même fichier
 - Repositories : accès brut SQLite, aucune logique métier
 - Services (`sales/services/`) : orchestration multi-repository, logique métier complexe
 - Widgets privés dans un écran : préfixés `_` (ex: `_ProductTile`)
-
-**Commits**
-- Une phrase max, concise : `feat(products): add soft delete`.
 
 **État (Riverpod)**
 - État async (lecture BDD) → `AsyncNotifier` + `AsyncNotifierProvider`
@@ -83,18 +86,10 @@ Les écrans (`presentation/`) ne font **jamais** de SQL — ils passent toujours
 **Base de données**
 - `DatabaseHelper.instance` est le seul point d'entrée SQLite dans toute l'app
 - Toujours utiliser `db.transaction()` pour les écritures multi-tables
-- Tables : `products`, `business_days`, `sales`, `sale_lines`
+- Tables : `categories`, `products`, `business_days`, `sales`, `sale_lines`
 - `sale_lines` stocke `name_snapshot` et `price_snapshot` : ne jamais recalculer depuis les produits actuels
 - `sort_order` (et non `order`) pour la colonne de tri des produits — `ORDER` est un mot-clé SQL réservé
-
-**Suppression produit** : si `sale_lines` référence le produit → `active = 0` (soft delete), sinon `DELETE` physique.
-
-**Journée** : `SalesRepository.getOrCreateToday()` est le seul endroit qui crée une journée. Ne jamais insérer dans `business_days` ailleurs.
-
-**API Flutter**
-- `onReorderItem` (pas `onReorder`, déprécié depuis Flutter 3.41) — l'index est déjà ajusté, ne pas faire `newIndex--`
-- `AsyncNotifier` : ne pas nommer une méthode `update` (conflit avec `AsyncNotifierBase.update`)
-- `withValues(alpha: x)` à la place de `withOpacity(x)` (déprécié Flutter 3.44)
+- Schéma v2 : ajout de la table `categories` et colonne `category_id` (nullable FK) dans `products`
 
 ---
 
@@ -104,37 +99,44 @@ L'app supporte **français** et **anglais** via `flutter_localizations` + `gen_l
 La langue est détectée automatiquement depuis les paramètres du device. Fallback : anglais.
 
 **Fichiers à modifier pour ajouter/modifier une chaîne :**
-- `lib/l10n/app_en.arb` — chaîne anglaise + métadonnées (`@key` avec `description` et `placeholders`)
+- `lib/l10n/app_en.arb` — chaîne anglaise + métadonnées (`@key` pour les `placeholders` uniquement)
 - `lib/l10n/app_fr.arb` — traduction française (pas de `@key`, juste la valeur)
 
-**Après modification des ARB :**
-```bash
-flutter gen-l10n   # régénère lib/l10n/app_localizations*.dart
-```
-
 **Règles :**
-- Ne jamais mettre de `String` en dur dans les widgets — toujours passer par `l10n`
 - Les fichiers `app_localizations*.dart` sont générés : **ne pas les éditer à la main**
 - Import : `import 'package:ludo_pay_app/l10n/app_localizations.dart';`
-- Après modification des ARB : flutter gen-l10n
+- Vérifier que les fichiers contiennent les clés dans le même ordre.
 
 ---
 
 ## Tests
-
-> **Règle** : toute nouvelle feature doit être livrée avec ses tests. Une feature sans tests n'est pas considérée comme terminée.
 
 **Ce qu'il faut couvrir par couche :**
 - Repository : toutes les opérations CRUD + cas limites (soft delete, contraintes…) avec une BDD en mémoire via `sqflite_common_ffi`
 - Notifier : toutes les transitions d'état (valeur initiale, chaque méthode publique)
 - Service : logique métier (cas nominal + cas d'erreur)
 
+---
+
+## Périmètre produit — décisions fermes
+
+Ces features sont **exclues** : ne pas les proposer, ne pas les implémenter.
+
+| Fonctionnalité | Décision |
+|---|---|
+| Multi-modes de paiement (CB, chèque…) | ❌ Hors scope — espèces uniquement |
+| Gestion des stocks | ❌ Hors scope |
+| Mode sombre | ❌ Hors scope |
+| Produit offert / remise | ❌ Hors scope |
+| TVA / comptabilité | ❌ Hors scope |
+| Backend / synchronisation multi-caisse | ❌ Hors scope — 100 % offline par principe |
+| Authentification / multi-opérateur | ❌ Hors scope — par principe |
 
 ---
 
-## Bluetooth (E3 — pas encore implémenté)
+## Bluetooth (E3 — implémenté, POC iOS en attente)
 
 L'imprimante cible est la **NETUM NT-1809DD** (BLE sur iOS, SPP Classic sur Android).
-Les packages d'impression sont commentés dans `pubspec.yaml` en attente du POC BLE (E3-1).
-Avant d'implémenter E3, valider les UUID GATT de l'imprimante avec l'app **nRF Connect**.
-L'`ImprimanteService` doit persister l'adresse BT dans `shared_preferences` (clé : `AppConstants.keyPrinterAddress`).
+`PrinterService` / `PrinterNotifier` sont fonctionnels sur Android.
+Avant de valider iOS (E3-1), confirmer les UUID GATT de l'imprimante avec l'app **nRF Connect**.
+L'adresse BT est persistée dans `shared_preferences` (clé : `AppConstants.keyPrinterAddress`).

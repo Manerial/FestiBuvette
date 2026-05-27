@@ -109,7 +109,7 @@
 - [x] **E5-1** Form validation (name required, price > 0, numeric format)
 - [x] **E5-2** Empty states (empty product list → message + CTA, empty cart → message, no sales today → message)
 - [x] **E5-3** Configurable business name (settings screen + printed on receipt)
-- [ ] **E5-4** App icon (Android + iOS)
+- [x] **E5-4** App icon (Android + iOS)
 - [!] **E5-5** Bluetooth error handling (connection loss during print) — blocked on E3-1
 - [x] **E5-6** Test on physical Android device (APK installed, core flows validated)
 - [ ] **E5-7** Test on physical iOS device (BLE validation)
@@ -119,6 +119,7 @@
 - [x] **E5-11** Widget refactoring — high priority extractions:
   - `report_screen.dart`: `_SummaryCard`, `_ReportLineRow` (deduplicates product & cart rows)
   - `cart_screen.dart`: `_TotalRow`, `_ActionRow`
+- [x] **E5-12** Unit price displayed in report "By product" view (price_snapshot · qty · subtotal)
 
 ---
 
@@ -148,6 +149,18 @@
 
 ---
 
+## EPIC 8 — UX & polish
+
+- [x] **E8-1** Collapsible cart footer — drag handle + total always visible, swipe up/down or tap to expand (`AnimatedAlign` + `heightFactor`, widget stays in tree)
+- [x] **E8-2** AppBar orange (#FFA946), no tint on scroll (`scrolledUnderElevation: 0`, `surfaceTintColor: transparent`, `systemOverlayStyle`)
+- [x] **E8-3** Bottom nav selected color aligned with `colorScheme.primary` (was hardcoded seed value)
+- [ ] **E8-4** Product grid view — large tap tiles as alternative to list in cart screen (toggle in toolbar, preference persisted in SharedPreferences); easier to use with large fingers or outdoor conditions
+- [x] **E8-5** End-of-day report — daily summary (revenue, sale count, breakdown by product and by cart) with day close; covered by E4 report screen
+- [ ] **E8-6** Cancel last sale — one-tap undo from report screen (delete sale + revert business day aggregates)
+- [ ] **E8-7** Reprint last ticket — targeted at printer disconnection scenarios: if the printer drops during a sale, allow reprinting the last recorded ticket without re-entering the sale flow
+
+---
+
 ## Suggested iteration order
 
 ```
@@ -163,9 +176,20 @@ Iteration 3 — Bluetooth printing       ✅ done (pending E3-1 POC on device)
   → Validate BLE on iOS first
 
 Iteration 4 — Polish                   🔲 in progress
-  E5-4, E5-7, E5-9
-  Resolve E3-1 + E5-5 (BLE UUIDs on NETUM NT-1809DD)
+  E5-7, E5-9 (iOS)
+  E3-1 + E5-5 (BLE UUIDs on NETUM NT-1809DD)
+  E8-4, E8-6, E8-7 (UX improvements)
+  E9 (statistics — lower priority)
 ```
+
+---
+
+## EPIC 9 — Statistics
+
+- [ ] **E9-1** Hourly revenue breakdown (peak hours chart) — computed from `sales.date_time`
+- [ ] **E9-2** Average basket per day / per period
+- [ ] **E9-3** Top products ranking — quantity and revenue, per day or all-time
+- [ ] **E9-4** Per-category revenue breakdown
 
 ---
 
