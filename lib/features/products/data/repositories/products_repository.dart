@@ -25,12 +25,16 @@ class ProductsRepository {
     return db.insert('products', product.toMap());
   }
 
-  /// Updates name and price of an existing product.
+  /// Updates name, price and category of an existing product.
   Future<void> update(Product product) async {
     final db = await _dbHelper.database;
     await db.update(
       'products',
-      {'name': product.name, 'price': product.price},
+      {
+        'name': product.name,
+        'price': product.price,
+        'category_id': product.categoryId,
+      },
       where: 'id = ?',
       whereArgs: [product.id],
     );

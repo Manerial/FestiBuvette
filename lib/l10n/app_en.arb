@@ -88,5 +88,30 @@
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
 
-  "settingsPrinterSection": "Bluetooth printer"
+  "settingsPrinterSection": "Bluetooth printer",
+
+  "allCategories": "All",
+  "@allCategories": { "description": "Filter chip to show all products regardless of category" },
+  "manageCategories": "Manage categories",
+  "@manageCategories": { "description": "Tooltip for the category management button" },
+  "noCategoriesYet": "No categories yet",
+  "@noCategoriesYet": { "description": "Empty state in the category management sheet" },
+  "newCategory": "New category",
+  "@newCategory": { "description": "Title of the add-category dialog" },
+  "editCategory": "Edit category",
+  "@editCategory": { "description": "Title of the edit-category dialog" },
+  "deleteCategoryTitle": "Delete category?",
+  "@deleteCategoryTitle": { "description": "Confirmation dialog title when deleting a category" },
+  "deleteCategoryMessage": "Products in this category will become uncategorized.",
+  "@deleteCategoryMessage": { "description": "Confirmation dialog body when deleting a category" },
+  "categoryNameLabel": "Category name",
+  "@categoryNameLabel": { "description": "Label for the category name text field" },
+  "categoryNameHint": "E.g.: Drinks, Food…",
+  "@categoryNameHint": { "description": "Hint for the category name text field" },
+  "categoryLabel": "Category",
+  "@categoryLabel": { "description": "Label for the category dropdown in the product form" },
+  "noCategory": "Uncategorized",
+  "@noCategory": { "description": "Dropdown option meaning no category assigned" },
+  "noProductsInCategory": "No products in this category",
+  "@noProductsInCategory": { "description": "Empty state when a category filter returns no products" }
 }

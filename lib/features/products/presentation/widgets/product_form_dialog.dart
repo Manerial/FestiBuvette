@@ -1,37 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ludo_pay_app/l10n/app_localizations.dart';
 import 'package:ludo_pay_app/features/products/data/models/product.dart';
+import 'package:ludo_pay_app/features/products/providers/categories_provider.dart';
 import 'package:ludo_pay_app/features/products/providers/products_provider.dart';
+import 'package:ludo_pay_app/l10n/app_localizations.dart';
 
 /// Opens the add or edit product dialog.
 /// [product] == null → Add mode, otherwise → Edit mode.
+/// [defaultCategoryId] pre-selects a category for new products (e.g. from filter).
 Future<void> showProductFormDialog(
-  BuildContext context,
-  WidgetRef ref, {
+  BuildContext context, {
   Product? product,
+  int? defaultCategoryId,
 }) {
   return showDialog(
     context: context,
-    builder: (_) => ProductFormDialog(product: product, ref: ref),
+    builder: (_) => ProductFormDialog(
+      product: product,
+      defaultCategoryId: defaultCategoryId,
+    ),
   );
 }
 
-class ProductFormDialog extends StatefulWidget {
+class ProductFormDialog extends ConsumerStatefulWidget {
   final Product? product;
-  final WidgetRef ref;
+  final int? defaultCategoryId;
 
-  const ProductFormDialog({super.key, this.product, required this.ref});
+  const ProductFormDialog({super.key, this.product, this.defaultCategoryId});
 
   @override
-  State<ProductFormDialog> createState() => _ProductFormDialogState();
+  ConsumerState<ProductFormDialog> createState() => _ProductFormDialogState();
 }
 
-class _ProductFormDialogState extends State<ProductFormDialog> {
+class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameCtrl;
   late final TextEditingController _priceCtrl;
+  int? _selectedCategoryId;
   bool _loading = false;
 
   bool get _isEdit => widget.product != null;
@@ -45,6 +51,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
           ? widget.product!.price.toStringAsFixed(2).replaceAll('.', ',')
           : '',
     );
+    _selectedCategoryId =
+        widget.product?.categoryId ?? widget.defaultCategoryId;
   }
 
   @override
@@ -64,11 +72,17 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     final price = _parsePrice(_priceCtrl.text)!;
     try {
       if (_isEdit) {
-        await widget.ref
-            .read(productsProvider.notifier)
-            .edit(widget.product!.copyWith(name: name, price: price));
+        await ref.read(productsProvider.notifier).edit(
+              widget.product!.copyWith(
+                name: name,
+                price: price,
+                categoryId: _selectedCategoryId,
+              ),
+            );
       } else {
-        await widget.ref.read(productsProvider.notifier).add(name, price);
+        await ref
+            .read(productsProvider.notifier)
+            .add(name, price, categoryId: _selectedCategoryId);
       }
       if (mounted) Navigator.of(context).pop();
     } finally {
@@ -79,6 +93,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
+
     return AlertDialog(
       title: Text(_isEdit ? l10n.editProduct : l10n.newProduct),
       content: Form(
@@ -121,6 +137,29 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 return null;
               },
             ),
+            if (categories.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              DropdownButtonFormField<int?>(
+                initialValue: _selectedCategoryId,
+                decoration: InputDecoration(labelText: l10n.categoryLabel),
+                items: [
+                  DropdownMenuItem(
+                    value: null,
+                    child: Text(
+                      l10n.noCategory,
+                      style: TextStyle(color: Colors.grey.shade500),
+                    ),
+                  ),
+                  ...categories.map(
+                    (c) => DropdownMenuItem(
+                      value: c.id,
+                      child: Text(c.name),
+                    ),
+                  ),
+                ],
+                onChanged: (v) => setState(() => _selectedCategoryId = v),
+              ),
+            ],
           ],
         ),
       ),

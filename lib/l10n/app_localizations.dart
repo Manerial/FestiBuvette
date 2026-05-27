@@ -523,6 +523,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Bluetooth printer'**
   String get settingsPrinterSection;
+
+  /// Filter chip to show all products regardless of category
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allCategories;
+
+  /// Tooltip for the category management button
+  ///
+  /// In en, this message translates to:
+  /// **'Manage categories'**
+  String get manageCategories;
+
+  /// Empty state in the category management sheet
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get noCategoriesYet;
+
+  /// Title of the add-category dialog
+  ///
+  /// In en, this message translates to:
+  /// **'New category'**
+  String get newCategory;
+
+  /// Title of the edit-category dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Edit category'**
+  String get editCategory;
+
+  /// Confirmation dialog title when deleting a category
+  ///
+  /// In en, this message translates to:
+  /// **'Delete category?'**
+  String get deleteCategoryTitle;
+
+  /// Confirmation dialog body when deleting a category
+  ///
+  /// In en, this message translates to:
+  /// **'Products in this category will become uncategorized.'**
+  String get deleteCategoryMessage;
+
+  /// Label for the category name text field
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get categoryNameLabel;
+
+  /// Hint for the category name text field
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: Drinks, Food…'**
+  String get categoryNameHint;
+
+  /// Label for the category dropdown in the product form
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get categoryLabel;
+
+  /// Dropdown option meaning no category assigned
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get noCategory;
+
+  /// Empty state when a category filter returns no products
+  ///
+  /// In en, this message translates to:
+  /// **'No products in this category'**
+  String get noProductsInCategory;
 }
 
 class _AppLocalizationsDelegate

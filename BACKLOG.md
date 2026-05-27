@@ -122,6 +122,21 @@
 
 ---
 
+## EPIC 6 — Product categories
+
+- [x] **E6-1** `Category` model + `categories` SQLite table (DB migration v1→v2)
+- [x] **E6-2** `CategoriesRepository` — CRUD (insert, getAll, update, delete + uncategorize products)
+- [x] **E6-3** Riverpod `CategoriesNotifier` — reactive list
+- [x] **E6-4** `category_id` (nullable FK) added to `products` table and `Product` model
+- [x] **E6-5** `CategoryFilterBar` shared widget — filter chips (All + per category), optional manage button
+- [x] **E6-6** Products screen — filter bar + category management bottom sheet (add / rename / delete)
+- [x] **E6-7** Product form dialog — category dropdown (optional, defaults to current filter)
+- [x] **E6-8** Cart screen — category filter chips to quickly find products
+- [x] **E6-9** i18n strings (EN + FR)
+- [x] **E6-10** Tests: `CategoriesRepository` (CRUD + delete-uncategorizes)
+
+---
+
 ## Suggested iteration order
 
 ```

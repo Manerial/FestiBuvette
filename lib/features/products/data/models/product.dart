@@ -5,6 +5,7 @@ class Product {
   final int order;
   final bool active;
   final String createdAt;
+  final int? categoryId;
 
   const Product({
     this.id,
@@ -13,7 +14,11 @@ class Product {
     required this.order,
     this.active = true,
     required this.createdAt,
+    this.categoryId,
   });
+
+  // Sentinel used to allow explicitly setting categoryId to null via copyWith.
+  static const _noValue = Object();
 
   Product copyWith({
     int? id,
@@ -22,6 +27,7 @@ class Product {
     int? order,
     bool? active,
     String? createdAt,
+    Object? categoryId = _noValue,
   }) =>
       Product(
         id: id ?? this.id,
@@ -30,6 +36,9 @@ class Product {
         order: order ?? this.order,
         active: active ?? this.active,
         createdAt: createdAt ?? this.createdAt,
+        categoryId: identical(categoryId, _noValue)
+            ? this.categoryId
+            : categoryId as int?,
       );
 
   Map<String, dynamic> toMap() => {
@@ -39,6 +48,7 @@ class Product {
         'sort_order': order,
         'active': active ? 1 : 0,
         'created_at': createdAt,
+        'category_id': categoryId,
       };
 
   factory Product.fromMap(Map<String, dynamic> map) => Product(
@@ -48,9 +58,10 @@ class Product {
         order: map['sort_order'] as int,
         active: (map['active'] as int) == 1,
         createdAt: map['created_at'] as String,
+        categoryId: map['category_id'] as int?,
       );
 
   @override
   String toString() =>
-      'Product(id: $id, name: $name, price: $price, order: $order)';
+      'Product(id: $id, name: $name, price: $price, order: $order, categoryId: $categoryId)';
 }

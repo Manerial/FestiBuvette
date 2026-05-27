@@ -242,4 +242,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsPrinterSection => 'Bluetooth printer';
+
+  @override
+  String get allCategories => 'All';
+
+  @override
+  String get manageCategories => 'Manage categories';
+
+  @override
+  String get noCategoriesYet => 'No categories yet';
+
+  @override
+  String get newCategory => 'New category';
+
+  @override
+  String get editCategory => 'Edit category';
+
+  @override
+  String get deleteCategoryTitle => 'Delete category?';
+
+  @override
+  String get deleteCategoryMessage =>
+      'Products in this category will become uncategorized.';
+
+  @override
+  String get categoryNameLabel => 'Category name';
+
+  @override
+  String get categoryNameHint => 'E.g.: Drinks, Food…';
+
+  @override
+  String get categoryLabel => 'Category';
+
+  @override
+  String get noCategory => 'Uncategorized';
+
+  @override
+  String get noProductsInCategory => 'No products in this category';
 }

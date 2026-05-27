@@ -6,6 +6,8 @@ import 'package:ludo_pay_app/features/cart/providers/cart_provider.dart';
 import 'package:ludo_pay_app/features/printer/data/services/ticket_service.dart';
 import 'package:ludo_pay_app/features/printer/providers/printer_provider.dart';
 import 'package:ludo_pay_app/features/products/data/models/product.dart';
+import 'package:ludo_pay_app/features/products/presentation/widgets/category_filter_bar.dart';
+import 'package:ludo_pay_app/features/products/providers/categories_provider.dart';
 import 'package:ludo_pay_app/features/products/providers/products_provider.dart';
 import 'package:ludo_pay_app/features/sales/services/sale_service.dart';
 import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
@@ -31,26 +33,54 @@ class CartScreen extends ConsumerWidget {
 
 // ─── Main content ─────────────────────────────────────────────────────────────
 
-class _CartContent extends ConsumerWidget {
+class _CartContent extends ConsumerStatefulWidget {
   final List<Product> products;
   const _CartContent({required this.products});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_CartContent> createState() => _CartContentState();
+}
+
+class _CartContentState extends ConsumerState<_CartContent> {
+  int? _selectedCategoryId;
+
+  @override
+  Widget build(BuildContext context) {
     final quantities = ref.watch(cartProvider);
+    final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
+
+    // If selected category was deleted, fall back to "All".
+    final effectiveCategoryId =
+        categories.any((c) => c.id == _selectedCategoryId)
+            ? _selectedCategoryId
+            : null;
+
+    final filtered = effectiveCategoryId == null
+        ? widget.products
+        : widget.products
+            .where((p) => p.categoryId == effectiveCategoryId)
+            .toList();
 
     return Column(
       children: [
+        if (categories.isNotEmpty)
+          CategoryFilterBar(
+            categories: categories,
+            selectedCategoryId: effectiveCategoryId,
+            onSelect: (id) => setState(() => _selectedCategoryId = id),
+          ),
         Expanded(
           child: ListView.builder(
-            itemCount: products.length,
+            itemCount: filtered.length,
             itemBuilder: (context, index) => _ProductRow(
-              product: products[index],
-              quantity: quantities[products[index].id] ?? 0,
+              product: filtered[index],
+              quantity: quantities[filtered[index].id] ?? 0,
             ),
           ),
         ),
-        _Footer(products: products, quantities: quantities),
+        // Footer always uses all products to compute total correctly,
+        // regardless of the active category filter.
+        _Footer(products: widget.products, quantities: quantities),
       ],
     );
   }

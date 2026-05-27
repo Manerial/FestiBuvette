@@ -82,5 +82,18 @@
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
 
-  "settingsPrinterSection": "Imprimante Bluetooth"
+  "settingsPrinterSection": "Imprimante Bluetooth",
+
+  "allCategories": "Tout",
+  "manageCategories": "Gérer les catégories",
+  "noCategoriesYet": "Aucune catégorie pour l'instant",
+  "newCategory": "Nouvelle catégorie",
+  "editCategory": "Modifier la catégorie",
+  "deleteCategoryTitle": "Supprimer la catégorie ?",
+  "deleteCategoryMessage": "Les produits de cette catégorie passeront en non catégorisés.",
+  "categoryNameLabel": "Nom de la catégorie",
+  "categoryNameHint": "Ex : Boissons, Nourriture…",
+  "categoryLabel": "Catégorie",
+  "noCategory": "Non catégorisé",
+  "noProductsInCategory": "Aucun produit dans cette catégorie"
 }

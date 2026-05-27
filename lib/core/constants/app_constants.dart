@@ -11,5 +11,5 @@ class AppConstants {
 
   // Database — nom volontairement indépendant du nom de l'app
   static const String dbName = 'caisse.db';
-  static const int dbVersion = 1;
+  static const int dbVersion = 2;
 }

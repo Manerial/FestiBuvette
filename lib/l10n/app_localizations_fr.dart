@@ -246,4 +246,41 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get settingsPrinterSection => 'Imprimante Bluetooth';
+
+  @override
+  String get allCategories => 'Tout';
+
+  @override
+  String get manageCategories => 'Gérer les catégories';
+
+  @override
+  String get noCategoriesYet => 'Aucune catégorie pour l\'instant';
+
+  @override
+  String get newCategory => 'Nouvelle catégorie';
+
+  @override
+  String get editCategory => 'Modifier la catégorie';
+
+  @override
+  String get deleteCategoryTitle => 'Supprimer la catégorie ?';
+
+  @override
+  String get deleteCategoryMessage =>
+      'Les produits de cette catégorie passeront en non catégorisés.';
+
+  @override
+  String get categoryNameLabel => 'Nom de la catégorie';
+
+  @override
+  String get categoryNameHint => 'Ex : Boissons, Nourriture…';
+
+  @override
+  String get categoryLabel => 'Catégorie';
+
+  @override
+  String get noCategory => 'Non catégorisé';
+
+  @override
+  String get noProductsInCategory => 'Aucun produit dans cette catégorie';
 }

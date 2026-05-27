@@ -18,12 +18,13 @@ class ProductsNotifier extends AsyncNotifier<List<Product>> {
   }
 
   /// Adds a new product at the end of the list.
-  Future<void> add(String name, double price) async {
+  Future<void> add(String name, double price, {int? categoryId}) async {
     final order = await _repo.nextOrder();
     final product = Product(
       name: name,
       price: price,
       order: order,
+      categoryId: categoryId,
       createdAt: DateTime.now().toIso8601String(),
     );
     await _repo.insert(product);

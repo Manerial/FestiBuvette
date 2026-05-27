@@ -26,13 +26,22 @@ class DatabaseHelper {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
+      CREATE TABLE categories (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        name       TEXT    NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    await db.execute('''
       CREATE TABLE products (
         id          INTEGER PRIMARY KEY AUTOINCREMENT,
         name        TEXT    NOT NULL,
         price       REAL    NOT NULL,
         sort_order  INTEGER NOT NULL DEFAULT 0,
         active      INTEGER NOT NULL DEFAULT 1,
-        created_at  TEXT    NOT NULL
+        created_at  TEXT    NOT NULL,
+        category_id INTEGER REFERENCES categories(id)
       )
     ''');
 
@@ -72,7 +81,18 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Future migrations here
+    if (oldVersion < 2) {
+      await db.execute('''
+        CREATE TABLE categories (
+          id         INTEGER PRIMARY KEY AUTOINCREMENT,
+          name       TEXT    NOT NULL,
+          sort_order INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
+      await db.execute(
+        'ALTER TABLE products ADD COLUMN category_id INTEGER REFERENCES categories(id)',
+      );
+    }
   }
 
   /// Closes the underlying SQLite connection.
