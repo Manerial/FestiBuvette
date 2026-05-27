@@ -22,12 +22,20 @@ class ReportState {
   /// Index of the currently displayed day within [allDays].
   final int currentDayIndex;
 
+  /// Distinct product names that appear in the day's snapshots, sorted alphabetically.
+  final List<String> hourlyProducts;
+
+  /// Hourly breakdown: hour (9–18) → product name → quantity sold.
+  final Map<int, Map<String, int>> hourlyData;
+
   const ReportState({
     this.day,
     required this.productTotals,
     this.sales = const [],
     this.allDays = const [],
     this.currentDayIndex = 0,
+    this.hourlyProducts = const [],
+    this.hourlyData = const {},
   });
 
   /// True when there is a business day with at least one sale.
@@ -84,11 +92,24 @@ class ReportNotifier extends AsyncNotifier<ReportState> {
 
     final day = allDays[targetIndex];
 
-    // Load product totals and individual sales in parallel.
+    // Load product totals, individual sales, and hourly data in parallel.
     final results = await Future.wait([
       _repo.getTotalsByProduct(day.id!),
       _repo.getSalesWithLinesByDay(day.id!),
+      _repo.getHourlySalesByProduct(day.id!),
     ]);
+
+    final hourlyRaw = results[2] as List<Map<String, dynamic>>;
+    final productNames = <String>{};
+    final hourlyData = <int, Map<String, int>>{};
+    for (final row in hourlyRaw) {
+      final hour = (row['hour'] as num).toInt();
+      final name = row['name_snapshot'] as String;
+      final qty = (row['total_quantity'] as num).toInt();
+      productNames.add(name);
+      (hourlyData[hour] ??= {})[name] = qty;
+    }
+    final hourlyProducts = productNames.toList()..sort();
 
     return ReportState(
       day: day,
@@ -96,6 +117,8 @@ class ReportNotifier extends AsyncNotifier<ReportState> {
       sales: results[1] as List<Sale>,
       allDays: allDays,
       currentDayIndex: targetIndex,
+      hourlyProducts: hourlyProducts,
+      hourlyData: hourlyData,
     );
   }
 

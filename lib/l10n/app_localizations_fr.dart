@@ -203,6 +203,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportByCart => 'Par panier';
 
   @override
+  String get reportByHour => 'Par heure';
+
+  @override
+  String get reportHourlyFilterTitle => 'Produits à afficher';
+
+  @override
+  String get reportHourlySelectAll => 'Tout sélectionner';
+
+  @override
+  String get reportHourlyNoData => 'Aucune vente sur cette période';
+
+  @override
   String get reportQtyHeader => 'Qté';
 
   @override

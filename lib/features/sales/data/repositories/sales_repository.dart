@@ -207,6 +207,26 @@ class SalesRepository {
     await updateBusinessDay(sale.businessDayId, totalRevenue: rev, saleCount: cnt);
   }
 
+  /// Returns hourly sales per product for a given business day.
+  /// Each row: { hour (int 9–18), name_snapshot, total_quantity }.
+  /// Hours outside 9–18 are excluded.
+  Future<List<Map<String, dynamic>>> getHourlySalesByProduct(
+      int businessDayId) async {
+    final db = await _dbHelper.database;
+    return db.rawQuery('''
+      SELECT
+        CAST(strftime('%H', s.date_time) AS INTEGER) AS hour,
+        sl.name_snapshot,
+        SUM(sl.quantity) AS total_quantity
+      FROM sale_lines sl
+      JOIN sales s ON s.id = sl.sale_id
+      WHERE s.business_day_id = ?
+        AND CAST(strftime('%H', s.date_time) AS INTEGER) BETWEEN 9 AND 18
+      GROUP BY hour, sl.name_snapshot
+      ORDER BY hour ASC, sl.name_snapshot ASC
+    ''', [businessDayId]);
+  }
+
   /// Returns all business days ordered by date descending (most recent first).
   Future<List<BusinessDay>> getAllBusinessDays() async {
     final db = await _dbHelper.database;

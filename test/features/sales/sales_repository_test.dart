@@ -19,8 +19,13 @@ void main() {
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
-  Sale buildSale({int businessDayId = 1, double total = 10.0}) => Sale(
-        dateTime: '2026-01-01T12:00:00.000',
+  Sale buildSale({
+    int businessDayId = 1,
+    double total = 10.0,
+    String dateTime = '2026-01-01T12:00:00.000',
+  }) =>
+      Sale(
+        dateTime: dateTime,
         total: total,
         businessDayId: businessDayId,
       );
@@ -201,6 +206,91 @@ void main() {
     final updated = await repo.getToday();
     expect(updated!.saleCount, 1);
     expect(updated.totalRevenue, closeTo(8.0, 0.001));
+  });
+
+  // ─── getHourlySalesByProduct ────────────────────────────────────────────────
+
+  test('getHourlySalesByProduct returns empty list when no sales', () async {
+    final day = await repo.getOrCreateToday();
+    expect(await repo.getHourlySalesByProduct(day.id!), isEmpty);
+  });
+
+  test('getHourlySalesByProduct aggregates qty by hour and product', () async {
+    final day = await repo.getOrCreateToday();
+
+    // 10:30 — 2× Coffee
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, dateTime: '2026-01-01T10:30:00.000'),
+      lines: [
+        SaleLine(saleId: 0, productId: 1, nameSnapshot: 'Coffee',
+            priceSnapshot: 2.5, quantity: 2, subtotal: 5.0),
+      ],
+    );
+    // 10:45 — 1× Tea
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, total: 3.0,
+          dateTime: '2026-01-01T10:45:00.000'),
+      lines: [
+        SaleLine(saleId: 0, productId: 2, nameSnapshot: 'Tea',
+            priceSnapshot: 3.0, quantity: 1, subtotal: 3.0),
+      ],
+    );
+    // 11:00 — 1× Coffee
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, total: 2.5,
+          dateTime: '2026-01-01T11:00:00.000'),
+      lines: [
+        SaleLine(saleId: 0, productId: 1, nameSnapshot: 'Coffee',
+            priceSnapshot: 2.5, quantity: 1, subtotal: 2.5),
+      ],
+    );
+
+    final rows = await repo.getHourlySalesByProduct(day.id!);
+    expect(rows.length, 3); // Coffee@10, Tea@10, Coffee@11
+
+    final coffee10 = rows.firstWhere(
+        (r) => r['name_snapshot'] == 'Coffee' && r['hour'] == 10);
+    expect(coffee10['total_quantity'], 2);
+
+    final tea10 = rows.firstWhere(
+        (r) => r['name_snapshot'] == 'Tea' && r['hour'] == 10);
+    expect(tea10['total_quantity'], 1);
+
+    final coffee11 = rows.firstWhere(
+        (r) => r['name_snapshot'] == 'Coffee' && r['hour'] == 11);
+    expect(coffee11['total_quantity'], 1);
+  });
+
+  test('getHourlySalesByProduct excludes hours outside 9–18', () async {
+    final day = await repo.getOrCreateToday();
+
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, dateTime: '2026-01-01T08:00:00.000'),
+      lines: [buildLine()],
+    );
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, dateTime: '2026-01-01T20:00:00.000'),
+      lines: [buildLine()],
+    );
+
+    expect(await repo.getHourlySalesByProduct(day.id!), isEmpty);
+  });
+
+  test('getHourlySalesByProduct includes boundaries 9h and 18h', () async {
+    final day = await repo.getOrCreateToday();
+
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, dateTime: '2026-01-01T09:05:00.000'),
+      lines: [buildLine()],
+    );
+    await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!, dateTime: '2026-01-01T18:55:00.000'),
+      lines: [buildLine()],
+    );
+
+    final rows = await repo.getHourlySalesByProduct(day.id!);
+    final hours = rows.map((r) => r['hour'] as int).toSet();
+    expect(hours, containsAll([9, 18]));
   });
 
   // ─── getTotalsByProduct ─────────────────────────────────────────────────────

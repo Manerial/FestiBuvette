@@ -440,6 +440,30 @@ abstract class AppLocalizations {
   /// **'By cart'**
   String get reportByCart;
 
+  /// No description provided for @reportByHour.
+  ///
+  /// In en, this message translates to:
+  /// **'By hour'**
+  String get reportByHour;
+
+  /// No description provided for @reportHourlyFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Products to display'**
+  String get reportHourlyFilterTitle;
+
+  /// No description provided for @reportHourlySelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get reportHourlySelectAll;
+
+  /// No description provided for @reportHourlyNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No sales in this period'**
+  String get reportHourlyNoData;
+
   /// No description provided for @reportQtyHeader.
   ///
   /// In en, this message translates to:

@@ -24,6 +24,9 @@ dependencies:
   # Date & number formatting
   intl: ^0.20.2
 
+  # Charts
+  fl_chart: ^0.69.0
+
   # Persistent preferences (adresse imprimante, nom app…)
   shared_preferences: ^2.5.3
 
