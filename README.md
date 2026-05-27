@@ -11,11 +11,11 @@ Fonctionne entièrement hors ligne (sauf connexion Bluetooth à l'imprimante).
 
 | Écran | Rôle |
 |---|---|
-| **Panier** | Sélectionner des produits avec quantités, calculer le total, imprimer le ticket |
-| **Produits** | Gérer le catalogue (ajout, modification, suppression, réorganisation drag & drop) |
-| **Rapport** | Historique jour par jour — CA, nb ventes, détail par produit ou par panier, clôture journée |
-| **Imprimante** | Configurer la connexion Bluetooth (NETUM NT-1809DD ou compatible ESC/POS) |
-| **Paramètres** | Nom de l'établissement, langue (système / fr / en) |
+| **Panier** | Sélectionner des produits par catégorie, calculer le total, saisir le montant remis (rendu monnaie automatique), imprimer le ticket · Footer rétractable (swipe haut/bas) |
+| **Produits** | Gérer le catalogue (ajout, modification, suppression, drag & drop) et les catégories (ajout, renommage, suppression, réorganisation) |
+| **Rapport** | Historique jour par jour — CA, nb ventes, détail par produit (prix unitaire · quantité · sous-total) ou par panier (horodaté), clôture journée |
+| **Imprimante** | Configurer la connexion Bluetooth (NETUM NT-1809DD ou compatible ESC/POS 58 mm) : scan, connexion, test page, auto-reconnexion |
+| **Paramètres** | Nom de l'établissement (affiché dans l'app et sur les tickets), langue (système / fr / en) |
 
 ---
 
@@ -52,14 +52,14 @@ lib/
 │
 └── features/
     ├── products/                    ✅ Complet
-    │   ├── data/models/             Product (immuable, copyWith, toMap/fromMap)
-    │   ├── data/repositories/       ProductsRepository — CRUD SQLite
-    │   ├── providers/               ProductsNotifier — liste réactive Riverpod
-    │   └── presentation/            ProductsScreen + ProductFormDialog
+    │   ├── data/models/             Product + Category (immuables, copyWith, toMap/fromMap)
+    │   ├── data/repositories/       ProductsRepository + CategoriesRepository — CRUD SQLite
+    │   ├── providers/               ProductsNotifier + CategoriesNotifier — listes réactives Riverpod
+    │   └── presentation/            ProductsScreen + ProductFormDialog + CategoryFormDialog + CategoryFilterBar
     │
     ├── cart/                        ✅ Complet
-    │   ├── providers/               CartNotifier — état en mémoire (Map<id, qty>)
-    │   └── presentation/            CartScreen + _Footer (_TotalRow + _ActionRow)
+    │   ├── providers/               CartNotifier — CartState en mémoire (quantities + tenderedAmount)
+    │   └── presentation/            CartScreen + _Footer rétractable (_TotalRow + _TenderedRow + _ActionRow)
     │
     ├── sales/                       ✅ Complet
     │   ├── data/models/             Sale, SaleLine, BusinessDay
@@ -109,11 +109,14 @@ CartNotifier.clear()  →  panier remis à zéro + snackbar ✅
 ## Base de données (SQLite local)
 
 ```sql
-products      (id, name, price, sort_order, active, created_at)
+categories    (id, name, sort_order)
+products      (id, name, price, sort_order, active, created_at, category_id → categories)
 business_days (id, date UNIQUE, total_revenue, sale_count, closed_at)
-sales         (id, date_time, total, business_day_id)
+sales         (id, date_time, total, business_day_id → business_days)
 sale_lines    (id, sale_id, product_id, name_snapshot, price_snapshot, quantity, subtotal)
 ```
+
+> **Schéma v2** : ajout de la table `categories` et de la colonne `category_id` (nullable) dans `products`.
 
 > **Snapshot** : `name_snapshot` et `price_snapshot` sauvegardent le nom et le prix
 > au moment de la vente. Les modifications ultérieures de prix ne touchent pas l'historique.
