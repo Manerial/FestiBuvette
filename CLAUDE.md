@@ -71,6 +71,7 @@ Les couches inférieures ne connaissent jamais les couches supérieures.
 - **Toujours** faire un `flutter gen-l10n` après modification des ARB.
 - **Jamais** de `String` en dur — toujours passer par `l10n`.
 - **Jamais** de SQL sur les écrans `presentation/`, **toujours** passer par le provider.
+- **Jamais** de _ devant un nom de variable. Le `flutter analyze` renverra une erreur.
 
 ---
 
