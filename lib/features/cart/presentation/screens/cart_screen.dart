@@ -148,18 +148,27 @@ class _ProductRow extends ConsumerWidget {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
-class _Footer extends ConsumerWidget {
+class _Footer extends ConsumerStatefulWidget {
   final List<Product> products;
   final CartState cartState;
 
   const _Footer({required this.products, required this.cartState});
 
+  @override
+  ConsumerState<_Footer> createState() => _FooterState();
+}
+
+class _FooterState extends ConsumerState<_Footer> {
+  bool _expanded = false;
+
+  void _toggle() => setState(() => _expanded = !_expanded);
+
   // ── Record sale (shared by print+record and record-only flows) ────────────
 
-  Future<void> _recordSale(BuildContext context, WidgetRef ref) async {
+  Future<void> _recordSale(BuildContext context) async {
     await SaleService().record(
-      products: products,
-      quantities: cartState.quantities,
+      products: widget.products,
+      quantities: widget.cartState.quantities,
     );
     ref.read(cartProvider.notifier).clear();
     if (context.mounted) {
@@ -175,7 +184,7 @@ class _Footer extends ConsumerWidget {
 
   // ── Print + record (main flow) ────────────────────────────────────────────
 
-  Future<void> _printAndRecord(BuildContext context, WidgetRef ref) async {
+  Future<void> _printAndRecord(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final cartNotifier = ref.read(cartProvider.notifier);
     if (cartNotifier.isEmpty) return;
@@ -204,7 +213,7 @@ class _Footer extends ConsumerWidget {
       );
       if (recordOnly == true && context.mounted) {
         try {
-          await _recordSale(context, ref);
+          await _recordSale(context);
         } catch (e) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -224,8 +233,8 @@ class _Footer extends ConsumerWidget {
       final bytes = await TicketService().buildReceiptFromCart(
         businessName: businessName,
         dateTime: DateTime.now(),
-        products: products,
-        quantities: cartState.quantities,
+        products: widget.products,
+        quantities: widget.cartState.quantities,
       );
 
       final printed =
@@ -241,7 +250,7 @@ class _Footer extends ConsumerWidget {
         return;
       }
 
-      if (context.mounted) await _recordSale(context, ref);
+      if (context.mounted) await _recordSale(context);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -254,7 +263,7 @@ class _Footer extends ConsumerWidget {
 
   // ── Clear cart with confirmation ──────────────────────────────────────────
 
-  Future<void> _confirmClear(BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmClear(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -280,41 +289,88 @@ class _Footer extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final total = cartState.calculateTotal(products);
-    final empty = cartState.isEmpty;
+  Widget build(BuildContext context) {
+    final total = widget.cartState.calculateTotal(widget.products);
+    final empty = widget.cartState.isEmpty;
     final isPrinting =
         ref.watch(printerProvider).valueOrNull?.isPrinting ?? false;
-    final isInsufficient = cartState.insufficientTendered(total);
+    final isInsufficient = widget.cartState.insufficientTendered(total);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+    return GestureDetector(
+      onVerticalDragEnd: (details) {
+        final velocity = details.primaryVelocity ?? 0;
+        if (velocity < -300 && !_expanded) setState(() => _expanded = true);
+        if (velocity > 300 && _expanded) setState(() => _expanded = false);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          top: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _TotalRow(total: total),
-              const SizedBox(height: 8),
-              _TenderedRow(total: total, empty: empty),
-              const SizedBox(height: 12),
-              _ActionRow(
-                empty: empty,
-                isPrinting: isPrinting,
-                isInsufficient: isInsufficient,
-                onClear: () => _confirmClear(context, ref),
-                onPrint: () => _printAndRecord(context, ref),
+              // ── Drag handle + always-visible total ───────────────────────
+              GestureDetector(
+                onTap: _toggle,
+                behavior: HitTestBehavior.opaque,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      _TotalRow(total: total),
+                    ],
+                  ),
+                ),
+              ),
+              // ── Expandable section (widget stays in tree → state preserved)
+              ClipRect(
+                child: IgnorePointer(
+                  ignoring: !_expanded,
+                  child: AnimatedAlign(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.topCenter,
+                    heightFactor: _expanded ? 1.0 : 0.0,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _TenderedRow(total: total, empty: empty),
+                          const SizedBox(height: 12),
+                          _ActionRow(
+                            empty: empty,
+                            isPrinting: isPrinting,
+                            isInsufficient: isInsufficient,
+                            onClear: () => _confirmClear(context),
+                            onPrint: () => _printAndRecord(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
