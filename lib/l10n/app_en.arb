@@ -113,5 +113,12 @@
   "noCategory": "Uncategorized",
   "@noCategory": { "description": "Dropdown option meaning no category assigned" },
   "noProductsInCategory": "No products in this category",
-  "@noProductsInCategory": { "description": "Empty state when a category filter returns no products" }
+  "@noProductsInCategory": { "description": "Empty state when a category filter returns no products" },
+
+  "tenderedAmount": "Amount tendered",
+  "@tenderedAmount": { "description": "Label for the cash amount given by the customer" },
+  "changeDue": "Change",
+  "@changeDue": { "description": "Money change to return to the customer" },
+  "insufficientAmount": "Insufficient amount",
+  "@insufficientAmount": { "description": "Error shown when the tendered amount is less than the total" }
 }

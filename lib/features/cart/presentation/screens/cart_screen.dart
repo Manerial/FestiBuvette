@@ -46,7 +46,7 @@ class _CartContentState extends ConsumerState<_CartContent> {
 
   @override
   Widget build(BuildContext context) {
-    final quantities = ref.watch(cartProvider);
+    final cartState = ref.watch(cartProvider);
     final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
 
     // If selected category was deleted, fall back to "All".
@@ -74,13 +74,13 @@ class _CartContentState extends ConsumerState<_CartContent> {
             itemCount: filtered.length,
             itemBuilder: (context, index) => _ProductRow(
               product: filtered[index],
-              quantity: quantities[filtered[index].id] ?? 0,
+              quantity: cartState.quantities[filtered[index].id] ?? 0,
             ),
           ),
         ),
         // Footer always uses all products to compute total correctly,
         // regardless of the active category filter.
-        _Footer(products: widget.products, quantities: quantities),
+        _Footer(products: widget.products, cartState: cartState),
       ],
     );
   }
@@ -150,14 +150,17 @@ class _ProductRow extends ConsumerWidget {
 
 class _Footer extends ConsumerWidget {
   final List<Product> products;
-  final Map<int, int> quantities;
+  final CartState cartState;
 
-  const _Footer({required this.products, required this.quantities});
+  const _Footer({required this.products, required this.cartState});
 
   // ── Record sale (shared by print+record and record-only flows) ────────────
 
   Future<void> _recordSale(BuildContext context, WidgetRef ref) async {
-    await SaleService().record(products: products, quantities: quantities);
+    await SaleService().record(
+      products: products,
+      quantities: cartState.quantities,
+    );
     ref.read(cartProvider.notifier).clear();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -222,7 +225,7 @@ class _Footer extends ConsumerWidget {
         businessName: businessName,
         dateTime: DateTime.now(),
         products: products,
-        quantities: quantities,
+        quantities: cartState.quantities,
       );
 
       final printed =
@@ -278,10 +281,11 @@ class _Footer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final total = ref.read(cartProvider.notifier).calculateTotal(products);
-    final empty = ref.watch(cartProvider).isEmpty;
+    final total = cartState.calculateTotal(products);
+    final empty = cartState.isEmpty;
     final isPrinting =
         ref.watch(printerProvider).valueOrNull?.isPrinting ?? false;
+    final isInsufficient = cartState.insufficientTendered(total);
 
     return Container(
       decoration: BoxDecoration(
@@ -302,10 +306,13 @@ class _Footer extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _TotalRow(total: total),
+              const SizedBox(height: 8),
+              _TenderedRow(total: total, empty: empty),
               const SizedBox(height: 12),
               _ActionRow(
                 empty: empty,
                 isPrinting: isPrinting,
+                isInsufficient: isInsufficient,
                 onClear: () => _confirmClear(context, ref),
                 onPrint: () => _printAndRecord(context, ref),
               ),
@@ -354,17 +361,117 @@ class _TotalRow extends StatelessWidget {
   }
 }
 
+// ─── Tendered amount row ──────────────────────────────────────────────────────
+
+class _TenderedRow extends ConsumerStatefulWidget {
+  final double total;
+  final bool empty;
+
+  const _TenderedRow({required this.total, required this.empty});
+
+  @override
+  ConsumerState<_TenderedRow> createState() => _TenderedRowState();
+}
+
+class _TenderedRowState extends ConsumerState<_TenderedRow> {
+  final _controller = TextEditingController();
+
+  static final _fmt = NumberFormat.currency(
+    locale: 'fr_FR',
+    symbol: '€',
+    decimalDigits: 2,
+  );
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Reset the input field when the cart (and therefore tenderedAmount) is cleared.
+    ref.listen(
+      cartProvider.select((s) => s.tenderedAmount),
+      (_, next) {
+        if (next == null && _controller.text.isNotEmpty) {
+          _controller.clear();
+        }
+      },
+    );
+
+    final cartState = ref.watch(cartProvider);
+    final change = cartState.change(widget.total);
+    final isInsufficient = cartState.insufficientTendered(widget.total);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                enabled: !widget.empty,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                textAlign: TextAlign.end,
+                decoration: InputDecoration(
+                  labelText: l10n.tenderedAmount,
+                  suffixText: '€',
+                  isDense: true,
+                  errorText: isInsufficient ? l10n.insufficientAmount : null,
+                ),
+                onChanged: (value) {
+                  final parsed =
+                      double.tryParse(value.replaceAll(',', '.').trim());
+                  ref.read(cartProvider.notifier).setTenderedAmount(parsed);
+                },
+              ),
+            ),
+          ],
+        ),
+        if (change != null) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                l10n.changeDue,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade700,
+                    ),
+              ),
+              Text(
+                _fmt.format(change),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade700,
+                    ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 // ─── Action row ───────────────────────────────────────────────────────────────
 
 class _ActionRow extends StatelessWidget {
   final bool empty;
   final bool isPrinting;
+  final bool isInsufficient;
   final VoidCallback onClear;
   final VoidCallback onPrint;
 
   const _ActionRow({
     required this.empty,
     required this.isPrinting,
+    required this.isInsufficient,
     required this.onClear,
     required this.onPrint,
   });
@@ -396,7 +503,7 @@ class _ActionRow extends StatelessWidget {
                   )
                 : const Icon(Icons.print_outlined),
             label: Text(l10n.print),
-            onPressed: empty || isPrinting ? null : onPrint,
+            onPressed: empty || isPrinting || isInsufficient ? null : onPrint,
           ),
         ),
       ],

@@ -279,4 +279,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noProductsInCategory => 'No products in this category';
+
+  @override
+  String get tenderedAmount => 'Amount tendered';
+
+  @override
+  String get changeDue => 'Change';
+
+  @override
+  String get insufficientAmount => 'Insufficient amount';
 }

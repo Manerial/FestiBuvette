@@ -95,5 +95,9 @@
   "categoryNameHint": "Ex : Boissons, Nourriture…",
   "categoryLabel": "Catégorie",
   "noCategory": "Non catégorisé",
-  "noProductsInCategory": "Aucun produit dans cette catégorie"
+  "noProductsInCategory": "Aucun produit dans cette catégorie",
+
+  "tenderedAmount": "Montant remis",
+  "changeDue": "Rendu",
+  "insufficientAmount": "Montant insuffisant"
 }

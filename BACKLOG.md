@@ -137,6 +137,17 @@
 
 ---
 
+## EPIC 7 — Change calculator
+
+- [x] **E7-1** `CartState` wrapper — holds `quantities` map + optional `tenderedAmount`
+- [x] **E7-2** `CartNotifier.setTenderedAmount()` — real-time change computation (`tendered − total`)
+- [x] **E7-3** Block sale confirmation if tendered amount is set but less than total
+- [x] **E7-4** `_TenderedRow` widget — numeric input + change display (hidden if tendered < total)
+- [x] **E7-5** i18n strings (EN + FR): `tenderedAmount`, `changeDue`, `insufficientAmount`
+- [x] **E7-6** Tests: `CartNotifier` — change computation + edge cases (exact, overpay, underpay)
+
+---
+
 ## Suggested iteration order
 
 ```
