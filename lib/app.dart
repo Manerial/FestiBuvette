@@ -4,7 +4,7 @@ import 'package:festi_buvette_app/core/constants/app_constants.dart';
 import 'package:festi_buvette_app/core/theme/app_theme.dart';
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
 import 'package:festi_buvette_app/features/cart/presentation/screens/cart_screen.dart';
-import 'package:festi_buvette_app/features/printer/presentation/screens/settings_screen.dart';
+import 'package:festi_buvette_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:festi_buvette_app/features/products/presentation/screens/products_screen.dart';
 import 'package:festi_buvette_app/features/report/presentation/screens/report_screen.dart';
 import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
