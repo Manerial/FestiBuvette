@@ -37,18 +37,33 @@ class MainScaffold extends ConsumerStatefulWidget {
 }
 
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
+  late final PageController _pageController;
   int _currentIndex = 0;
-
-  static const _screens = [
-    CartScreen(),
-    ProductsScreen(),
-    ReportScreen(),
-  ];
 
   static const _reportTabIndex = 2;
 
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _onTabTap(int index) {
-    // Reload report data each time the user opens the Report tab.
+    setState(() => _currentIndex = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _onPageChanged(int index) {
     if (index == _reportTabIndex) {
       ref.invalidate(reportProvider);
     }
@@ -58,12 +73,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final businessName = ref
-            .watch(settingsProvider)
-            .valueOrNull
-            ?.appName ??
-        AppConstants.appName;
-    // Cart tab shows the configured business name; other tabs show their own name.
+    final businessName =
+        ref.watch(settingsProvider).valueOrNull?.appName ?? AppConstants.appName;
     final titles = [businessName, l10n.productsTab, l10n.reportTab];
 
     return Scaffold(
@@ -80,14 +91,40 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        children: const [
+          _KeepAlive(child: CartScreen()),
+          _KeepAlive(child: ProductsScreen()),
+          _KeepAlive(child: ReportScreen()),
+        ],
       ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: _currentIndex,
         onTap: _onTabTap,
       ),
     );
+  }
+}
+
+// Keeps each PageView page alive so local widget state survives tab switches.
+class _KeepAlive extends StatefulWidget {
+  final Widget child;
+  const _KeepAlive({required this.child});
+
+  @override
+  State<_KeepAlive> createState() => _KeepAliveState();
+}
+
+class _KeepAliveState extends State<_KeepAlive>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vibration/vibration.dart';
 import 'package:intl/intl.dart';
 import 'package:festi_buvette_app/core/constants/app_constants.dart';
 import 'package:festi_buvette_app/features/cart/providers/cart_provider.dart';
@@ -15,7 +16,7 @@ import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 void _triggerHaptic(WidgetRef ref) {
   if (ref.read(settingsProvider).valueOrNull?.hapticFeedback ?? true) {
-    _triggerHaptic(ref);
+    Vibration.vibrate(duration: 40);
   }
 }
 
@@ -544,6 +545,10 @@ class _FooterState extends ConsumerState<_Footer>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    _CartSummary(
+                      products: widget.products,
+                      quantities: widget.cartState.quantities,
+                    ),
                     _TenderedRow(total: total, empty: empty),
                     const SizedBox(height: 12),
                     _ActionRow(
@@ -552,10 +557,6 @@ class _FooterState extends ConsumerState<_Footer>
                       isInsufficient: isInsufficient,
                       onClear: () => _confirmClear(context),
                       onPrint: () => _printAndRecord(context),
-                    ),
-                    _CartSummary(
-                      products: widget.products,
-                      quantities: widget.cartState.quantities,
                     ),
                   ],
                 ),
