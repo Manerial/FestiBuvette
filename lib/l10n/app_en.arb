@@ -102,6 +102,9 @@
   "settingsCartGridViewSubtitle": "Display products as tiles in the cart",
 
   "allCategories": "All",
+  "categoriesTabLabel": "Categories",
+  "addCategoryTooltip": "Add a category",
+  "tapPlusToAddCategory": "Tap + to add your first category",
   "manageCategories": "Manage categories",
   "noCategoriesYet": "No categories yet",
   "newCategory": "New category",

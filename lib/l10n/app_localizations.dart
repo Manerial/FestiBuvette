@@ -590,6 +590,24 @@ abstract class AppLocalizations {
   /// **'All'**
   String get allCategories;
 
+  /// No description provided for @categoriesTabLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get categoriesTabLabel;
+
+  /// No description provided for @addCategoryTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a category'**
+  String get addCategoryTooltip;
+
+  /// No description provided for @tapPlusToAddCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap + to add your first category'**
+  String get tapPlusToAddCategory;
+
   /// No description provided for @manageCategories.
   ///
   /// In en, this message translates to:

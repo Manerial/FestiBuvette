@@ -5,29 +5,23 @@ import 'package:ludo_pay_app/l10n/app_localizations.dart';
 /// Horizontal scrollable row of category filter chips.
 ///
 /// Shows an "All" chip first, then one chip per category.
-/// When [showManageButton] is true, a tune icon button is appended
-/// at the end to trigger [onManage].
 class CategoryFilterBar extends StatelessWidget {
   final List<Category> categories;
   final int? selectedCategoryId;
   final ValueChanged<int?> onSelect;
-  final bool showManageButton;
-  final VoidCallback? onManage;
 
   const CategoryFilterBar({
     super.key,
     required this.categories,
     required this.selectedCategoryId,
     required this.onSelect,
-    this.showManageButton = false,
-    this.onManage,
   });
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    if (categories.isEmpty && !showManageButton) return const SizedBox.shrink();
+    if (categories.isEmpty) return const SizedBox.shrink();
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -46,14 +40,6 @@ class CategoryFilterBar extends StatelessWidget {
               onSelected: () => onSelect(c.id),
             ),
           ),
-          if (showManageButton) ...[
-            const SizedBox(width: 4),
-            IconButton(
-              icon: const Icon(Icons.tune, size: 20),
-              tooltip: l10n.manageCategories,
-              onPressed: onManage,
-            ),
-          ],
         ],
       ),
     );
