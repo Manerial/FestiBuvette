@@ -85,7 +85,7 @@ class _ProductsSection extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text(l10n.errorMessage(e))),
       data: (products) {
-        final hasUncategorized = products.any((p) => p.categoryId == null);
+        final hasUncategorized = categories.isNotEmpty;
         final filtered = switch (selectedCategoryId) {
           null => products,
           CategoryFilterBar.uncategorizedId =>
