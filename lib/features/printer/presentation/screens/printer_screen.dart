@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:ludo_pay_app/core/constants/app_constants.dart';
-import 'package:ludo_pay_app/features/printer/data/models/printer_device.dart';
-import 'package:ludo_pay_app/features/printer/data/services/ticket_service.dart';
-import 'package:ludo_pay_app/features/printer/providers/printer_provider.dart';
-import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
-import 'package:ludo_pay_app/l10n/app_localizations.dart';
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/features/printer/data/models/printer_device.dart';
+import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
+import 'package:festi_buvette_app/features/printer/providers/printer_provider.dart';
+import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
+import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 class PrinterScreen extends ConsumerStatefulWidget {
   const PrinterScreen({super.key});

@@ -1,8 +1,8 @@
-import 'package:ludo_pay_app/core/database/database_helper.dart';
-import 'package:ludo_pay_app/features/products/data/models/product.dart';
-import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
-import 'package:ludo_pay_app/features/sales/data/models/sale_line.dart';
-import 'package:ludo_pay_app/features/sales/data/repositories/sales_repository.dart';
+import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/features/products/data/models/product.dart';
+import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
+import 'package:festi_buvette_app/features/sales/data/models/sale_line.dart';
+import 'package:festi_buvette_app/features/sales/data/repositories/sales_repository.dart';
 
 class SaleService {
   final SalesRepository _repo;

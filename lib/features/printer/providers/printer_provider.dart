@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ludo_pay_app/core/constants/app_constants.dart';
-import 'package:ludo_pay_app/core/services/bluetooth_permissions.dart';
-import 'package:ludo_pay_app/features/printer/data/models/printer_device.dart';
-import 'package:ludo_pay_app/features/printer/data/services/printer_service.dart';
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/core/services/bluetooth_permissions.dart';
+import 'package:festi_buvette_app/features/printer/data/models/printer_device.dart';
+import 'package:festi_buvette_app/features/printer/data/services/printer_service.dart';
 
 // ─── Status enum ──────────────────────────────────────────────────────────────
 

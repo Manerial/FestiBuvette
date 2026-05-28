@@ -110,7 +110,7 @@ La langue est détectée automatiquement depuis les paramètres du device. Fallb
 
 **Règles :**
 - Les fichiers `app_localizations*.dart` sont générés : **ne pas les éditer à la main**
-- Import : `import 'package:ludo_pay_app/l10n/app_localizations.dart';`
+- Import : `import 'package:festi_buvette_app/l10n/app_localizations.dart';`
 - Vérifier que les fichiers contiennent les clés dans le même ordre.
 
 ---

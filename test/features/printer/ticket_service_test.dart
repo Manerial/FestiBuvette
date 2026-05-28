@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ludo_pay_app/features/printer/data/services/ticket_service.dart';
-import 'package:ludo_pay_app/features/products/data/models/category.dart';
-import 'package:ludo_pay_app/features/products/data/models/product.dart';
-import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
-import 'package:ludo_pay_app/features/sales/data/models/sale_line.dart';
+import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
+import 'package:festi_buvette_app/features/products/data/models/category.dart';
+import 'package:festi_buvette_app/features/products/data/models/product.dart';
+import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
+import 'package:festi_buvette_app/features/sales/data/models/sale_line.dart';
 
 void main() {
   // CapabilityProfile.load() uses rootBundle — requires the test binding.

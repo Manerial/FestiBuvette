@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ludo_pay_app/core/constants/app_constants.dart';
-import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
 
 void main() {
   // SharedPreferences uses platform channels — requires the test binding.

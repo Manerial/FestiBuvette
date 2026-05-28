@@ -1,9 +1,9 @@
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ludo_pay_app/core/database/database_helper.dart';
-import 'package:ludo_pay_app/features/sales/data/models/business_day.dart';
-import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
-import 'package:ludo_pay_app/features/sales/data/repositories/sales_repository.dart';
+import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/features/sales/data/models/business_day.dart';
+import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
+import 'package:festi_buvette_app/features/sales/data/repositories/sales_repository.dart';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 

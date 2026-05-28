@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ludo_pay_app/features/cart/presentation/screens/cart_screen.dart';
-import 'package:ludo_pay_app/features/printer/presentation/screens/printer_screen.dart';
-import 'package:ludo_pay_app/features/products/presentation/screens/products_screen.dart';
-import 'package:ludo_pay_app/features/report/presentation/screens/report_screen.dart';
+import 'package:festi_buvette_app/features/cart/presentation/screens/cart_screen.dart';
+import 'package:festi_buvette_app/features/printer/presentation/screens/printer_screen.dart';
+import 'package:festi_buvette_app/features/products/presentation/screens/products_screen.dart';
+import 'package:festi_buvette_app/features/report/presentation/screens/report_screen.dart';
 
 class AppRouter {
   static const String cart = '/';
