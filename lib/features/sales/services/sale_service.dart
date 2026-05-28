@@ -75,12 +75,8 @@ class SaleService {
       lines: lines,
     );
 
-    // 6. Update business day aggregates
-    await _repo.updateBusinessDay(
-      businessDay.id!,
-      totalRevenue: businessDay.totalRevenue + total,
-      saleCount: businessDay.saleCount + 1,
-    );
+    // 6. Update business day aggregates (atomic increment — safe on double-tap)
+    await _repo.incrementBusinessDay(businessDay.id!, total);
 
     return createdSale;
   }
