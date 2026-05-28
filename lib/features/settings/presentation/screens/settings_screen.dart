@@ -107,6 +107,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 16),
           _CartGridViewTile(),
           _HapticFeedbackTile(),
+          const SizedBox(height: 16),
+          _AppBarColorPicker(),
 
           const SizedBox(height: 32),
 
@@ -377,6 +379,77 @@ class _DeviceTile extends ConsumerWidget {
                       .connect(device),
               child: Text(l10n.printerConnect),
             ),
+    );
+  }
+}
+
+// ─── AppBar color picker ──────────────────────────────────────────────────────
+
+class _AppBarColorPicker extends ConsumerWidget {
+  static const _palette = [
+    Color(0xFFFFA946), // Orange (default)
+    Color(0xFFE53935), // Red
+    Color(0xFFE91E63), // Pink
+    Color(0xFF9C27B0), // Purple
+    Color(0xFF3F51B5), // Indigo
+    Color(0xFF1E88E5), // Blue
+    Color(0xFF00897B), // Teal
+    Color(0xFF43A047), // Green
+    Color(0xFFF4511E), // Deep Orange
+    Color(0xFF8D6E63), // Brown
+    Color(0xFF546E7A), // Blue Grey
+    Color(0xFF37474F), // Slate
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final current = ref.watch(settingsProvider).valueOrNull?.appBarColor ??
+        AppConstants.defaultAppBarColor;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.settingsAppBarColor,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            for (final color in _palette)
+              GestureDetector(
+                onTap: () =>
+                    ref.read(settingsProvider.notifier).setAppBarColor(color),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: color.toARGB32() == current.toARGB32()
+                          ? Theme.of(context).colorScheme.onSurface
+                          : Colors.transparent,
+                      width: 2.5,
+                    ),
+                  ),
+                  child: color.toARGB32() == current.toARGB32()
+                      ? Icon(
+                          Icons.check,
+                          size: 18,
+                          color: color.computeLuminance() > 0.4
+                              ? Colors.black87
+                              : Colors.white,
+                        )
+                      : null,
+                ),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }

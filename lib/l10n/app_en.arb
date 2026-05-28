@@ -99,6 +99,7 @@
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
 
+  "settingsAppBarColor": "App bar color",
   "settingsCartGridView": "Grid view",
   "settingsCartGridViewSubtitle": "Display products as tiles in the cart",
 

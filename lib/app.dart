@@ -16,10 +16,12 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final localeCode = ref.watch(settingsProvider).valueOrNull?.locale;
+    final settings = ref.watch(settingsProvider).valueOrNull;
+    final localeCode = settings?.locale;
+    final appBarColor = settings?.appBarColor ?? AppConstants.defaultAppBarColor;
     return MaterialApp(
       title: AppConstants.appName,
-      theme: AppTheme.light,
+      theme: AppTheme.buildLight(appBarColor),
       debugShowCheckedModeBanner: false,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

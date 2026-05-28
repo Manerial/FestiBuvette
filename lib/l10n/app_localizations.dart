@@ -578,6 +578,12 @@ abstract class AppLocalizations {
   /// **'English'**
   String get settingsLanguageEn;
 
+  /// No description provided for @settingsAppBarColor.
+  ///
+  /// In en, this message translates to:
+  /// **'App bar color'**
+  String get settingsAppBarColor;
+
   /// No description provided for @settingsCartGridView.
   ///
   /// In en, this message translates to:

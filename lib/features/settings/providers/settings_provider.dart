@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:festi_buvette_app/core/constants/app_constants.dart';
@@ -20,11 +21,14 @@ class SettingsState {
   /// `false` → no vibration
   final bool hapticFeedback;
 
+  final Color appBarColor;
+
   const SettingsState({
     required this.appName,
     this.locale,
     this.cartGridView = true,
     this.hapticFeedback = true,
+    this.appBarColor = AppConstants.defaultAppBarColor,
   });
 }
 
@@ -39,11 +43,15 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
   @override
   Future<SettingsState> build() async {
     final prefs = await SharedPreferences.getInstance();
+    final colorValue = prefs.getInt(AppConstants.keyAppBarColor);
     return SettingsState(
       appName: prefs.getString(AppConstants.keyAppName) ?? AppConstants.appName,
       locale: prefs.getString(AppConstants.keyLocale),
       cartGridView: prefs.getBool(AppConstants.keyCartGridView) ?? true,
       hapticFeedback: prefs.getBool(AppConstants.keyHapticFeedback) ?? true,
+      appBarColor: colorValue != null
+          ? Color(colorValue)
+          : AppConstants.defaultAppBarColor,
     );
   }
 
@@ -58,6 +66,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       locale: current?.locale,
       cartGridView: current?.cartGridView ?? true,
       hapticFeedback: current?.hapticFeedback ?? true,
+      appBarColor: current?.appBarColor ?? AppConstants.defaultAppBarColor,
     ));
   }
 
@@ -74,6 +83,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       locale: locale,
       cartGridView: current?.cartGridView ?? true,
       hapticFeedback: current?.hapticFeedback ?? true,
+      appBarColor: current?.appBarColor ?? AppConstants.defaultAppBarColor,
     ));
   }
 
@@ -86,6 +96,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       locale: current?.locale,
       cartGridView: value,
       hapticFeedback: current?.hapticFeedback ?? true,
+      appBarColor: current?.appBarColor ?? AppConstants.defaultAppBarColor,
     ));
   }
 
@@ -98,6 +109,20 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       locale: current?.locale,
       cartGridView: current?.cartGridView ?? true,
       hapticFeedback: value,
+      appBarColor: current?.appBarColor ?? AppConstants.defaultAppBarColor,
+    ));
+  }
+
+  Future<void> setAppBarColor(Color color) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(AppConstants.keyAppBarColor, color.toARGB32());
+    final current = state.valueOrNull;
+    state = AsyncData(SettingsState(
+      appName: current?.appName ?? AppConstants.appName,
+      locale: current?.locale,
+      cartGridView: current?.cartGridView ?? true,
+      hapticFeedback: current?.hapticFeedback ?? true,
+      appBarColor: color,
     ));
   }
 }
