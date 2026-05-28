@@ -298,6 +298,7 @@ class _Footer extends ConsumerStatefulWidget {
 class _FooterState extends ConsumerState<_Footer>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  final _contentKey = GlobalKey();
   double _dragStartDy = 0;
   double _dragStartValue = 0;
 
@@ -332,8 +333,11 @@ class _FooterState extends ConsumerState<_Footer>
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
+    final renderBox =
+        _contentKey.currentContext?.findRenderObject() as RenderBox?;
+    final height = renderBox?.size.height ?? 200.0;
     final delta = _dragStartDy - details.globalPosition.dy;
-    _controller.value = (_dragStartValue + delta / 200).clamp(0.0, 1.0);
+    _controller.value = (_dragStartValue + delta / height).clamp(0.0, 1.0);
   }
 
   void _onDragEnd(DragEndDetails details) {
@@ -541,6 +545,7 @@ class _FooterState extends ConsumerState<_Footer>
                 ),
               ),
               child: Padding(
+                key: _contentKey,
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -860,23 +865,33 @@ class _CartSummary extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         const Divider(height: 20),
-        for (final item in items)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 160),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(item.name),
-                Text(
-                  '× ${item.qty}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
+                for (final item in items)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(item.name),
+                        Text(
+                          '× ${item.qty}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),
+        ),
       ],
     );
   }
