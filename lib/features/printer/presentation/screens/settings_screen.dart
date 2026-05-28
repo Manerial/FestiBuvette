@@ -11,14 +11,14 @@ import 'package:festi_buvette_app/features/products/services/catalogue_transfer_
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
-class PrinterScreen extends ConsumerStatefulWidget {
-  const PrinterScreen({super.key});
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({super.key});
 
   @override
-  ConsumerState<PrinterScreen> createState() => _PrinterScreenState();
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _PrinterScreenState extends ConsumerState<PrinterScreen> {
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late final TextEditingController _nameController;
 
   @override
@@ -59,7 +59,7 @@ class _PrinterScreenState extends ConsumerState<PrinterScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.printerScreenTitle)),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -113,7 +113,7 @@ class _PrinterScreenState extends ConsumerState<PrinterScreen> {
           const SizedBox(height: 32),
 
           // ── Bluetooth printer ────────────────────────────────────────────
-          _SectionHeader(label: l10n.settings),
+          _SectionHeader(label: l10n.printerScreenTitle),
           const SizedBox(height: 12),
           _BluetoothSection(),
         ],
