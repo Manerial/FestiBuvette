@@ -223,6 +223,15 @@ void main() {
     expect(ok, isFalse);
   });
 
+  test('printBytes with empty list returns true', () async {
+    final mock = MockPrinterService()..writeBytesResult = true;
+    final container = makeContainer(mock);
+    await container.read(printerProvider.future);
+
+    final ok = await container.read(printerProvider.notifier).printBytes([]);
+    expect(ok, isTrue);
+  });
+
   test('isPrinting is false after printBytes completes', () async {
     final mock = MockPrinterService()..writeBytesResult = true;
     final container = makeContainer(mock);

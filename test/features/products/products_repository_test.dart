@@ -151,4 +151,13 @@ void main() {
     await repo.insert(buildProduct(order: 1));
     expect(await repo.nextOrder(), 2);
   });
+
+  test('nextOrder decreases after softDelete with no sale_lines reference', () async {
+    final id1 = await repo.insert(buildProduct(name: 'A', order: 0));
+    await repo.insert(buildProduct(name: 'B', order: 1));
+    expect(await repo.nextOrder(), 2);
+
+    await repo.softDelete(id1); // no sale_lines reference → hard delete
+    expect(await repo.nextOrder(), 1);
+  });
 }

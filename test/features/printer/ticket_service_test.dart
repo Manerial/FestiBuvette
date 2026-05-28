@@ -126,6 +126,32 @@ void main() {
     expect(decode(bytes), contains(thankYou));
   });
 
+  test('buildReceiptFromCart encodes quantity above 9 correctly', () async {
+    final bytes = await service.buildReceiptFromCart(
+      businessName: 'Test',
+      dateTime: DateTime(2025, 1, 15, 10, 30),
+      products: products,
+      quantities: {1: 10, 2: 99},
+      otherCategoryLabel: other,
+      thankYouLabel: thankYou,
+    );
+    final content = decode(bytes);
+    expect(content, contains('X10'));
+    expect(content, contains('X99'));
+  });
+
+  test('buildReceiptFromCart with empty businessName does not throw', () async {
+    final bytes = await service.buildReceiptFromCart(
+      businessName: '',
+      dateTime: DateTime(2025, 1, 15, 10, 30),
+      products: products,
+      quantities: {1: 1},
+      otherCategoryLabel: other,
+      thankYouLabel: thankYou,
+    );
+    expect(bytes, isNotEmpty);
+  });
+
   // ─── buildReceiptFromCart — category grouping ────────────────────────────
 
   const drinks = Category(id: 1, name: 'Boissons', order: 0);

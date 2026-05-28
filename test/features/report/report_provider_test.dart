@@ -242,6 +242,59 @@ void main() {
     expect(state.currentDayIndex, 0);
   });
 
+  test('goToNextDay on the most recent day is a no-op', () async {
+    final helper = await createTestDatabaseHelper();
+    final db = await helper.database;
+    await db.insert('business_days', {
+      'date': '2026-01-01',
+      'total_revenue': 10.0,
+      'sale_count': 1,
+      'closed_at': null,
+    });
+    await db.insert('business_days', {
+      'date': '2026-01-02',
+      'total_revenue': 20.0,
+      'sale_count': 2,
+      'closed_at': null,
+    });
+    final repo = SalesRepository(helper);
+    final container = makeContainer(repo);
+    await awaitData(container); // starts on index 0 = most recent (Jan 2)
+
+    await container.read(reportProvider.notifier).goToNextDay(); // already at index 0
+    final state = await container.read(reportProvider.future);
+
+    expect(state.day!.date, '2026-01-02');
+    expect(state.currentDayIndex, 0);
+  });
+
+  test('goToPreviousDay on the oldest day is a no-op', () async {
+    final helper = await createTestDatabaseHelper();
+    final db = await helper.database;
+    await db.insert('business_days', {
+      'date': '2026-01-01',
+      'total_revenue': 10.0,
+      'sale_count': 1,
+      'closed_at': null,
+    });
+    await db.insert('business_days', {
+      'date': '2026-01-02',
+      'total_revenue': 20.0,
+      'sale_count': 2,
+      'closed_at': null,
+    });
+    final repo = SalesRepository(helper);
+    final container = makeContainer(repo);
+    await awaitData(container);
+
+    // Navigate to oldest (Jan 1), then try to go further back.
+    await container.read(reportProvider.notifier).goToPreviousDay();
+    await container.read(reportProvider.notifier).goToPreviousDay(); // no-op
+    final state = await container.read(reportProvider.future);
+
+    expect(state.day!.date, '2026-01-01');
+  });
+
   test('closeDay is a no-op when day is already closed', () async {
     final helper = await createTestDatabaseHelper();
     final repo = SalesRepository(helper);
