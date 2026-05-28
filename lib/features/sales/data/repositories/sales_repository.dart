@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/sales/data/models/business_day.dart';
 import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
@@ -14,9 +15,16 @@ class SalesRepository {
   // ─── Business Days ──────────────────────────────────────────────────────────
 
   /// Returns today's business day, creating it if it doesn't exist.
+  /// Safe under concurrent calls: INSERT OR IGNORE prevents UNIQUE violations.
   Future<BusinessDay> getOrCreateToday() async {
     final db = await _dbHelper.database;
     final today = _dateFmt.format(DateTime.now());
+
+    await db.insert(
+      'business_days',
+      {'date': today, 'total_revenue': 0.0, 'sale_count': 0, 'closed_at': null},
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
 
     final rows = await db.query(
       'business_days',
@@ -24,17 +32,7 @@ class SalesRepository {
       whereArgs: [today],
       limit: 1,
     );
-
-    if (rows.isNotEmpty) return BusinessDay.fromMap(rows.first);
-
-    final id = await db.insert('business_days', {
-      'date': today,
-      'total_revenue': 0.0,
-      'sale_count': 0,
-      'closed_at': null,
-    });
-
-    return BusinessDay(id: id, date: today, totalRevenue: 0, saleCount: 0);
+    return BusinessDay.fromMap(rows.first);
   }
 
   /// Updates totalRevenue and saleCount for a business day.
@@ -49,6 +47,20 @@ class SalesRepository {
       {'total_revenue': totalRevenue, 'sale_count': saleCount},
       where: 'id = ?',
       whereArgs: [businessDayId],
+    );
+  }
+
+  /// Increments total_revenue and sale_count atomically.
+  /// Use this when recording a sale — safe under concurrent calls unlike
+  /// [updateBusinessDay], which writes absolute values.
+  Future<void> incrementBusinessDay(int businessDayId, double amount) async {
+    final db = await _dbHelper.database;
+    await db.rawUpdate(
+      'UPDATE business_days'
+      ' SET total_revenue = total_revenue + ?,'
+      '     sale_count    = sale_count + 1'
+      ' WHERE id = ?',
+      [amount, businessDayId],
     );
   }
 

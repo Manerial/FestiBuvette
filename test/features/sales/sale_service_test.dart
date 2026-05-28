@@ -104,6 +104,30 @@ void main() {
     expect(sale.total, closeTo(5.0, 0.001));
   });
 
+  // ─── Concurrent calls (BUG-1) ───────────────────────────────────────────────
+
+  test('concurrent record calls preserve both sale_count and total_revenue', () async {
+    final products = [product(1, price: 2.0)];
+    final quantities = {1: 1};
+
+    await Future.wait([
+      service.record(products: products, quantities: quantities),
+      service.record(products: products, quantities: quantities),
+    ]);
+
+    final day = await repo.getToday();
+    expect(day!.saleCount, 2);
+    expect(day.totalRevenue, closeTo(4.0, 0.001));
+  });
+
+  test('concurrent getOrCreateToday does not throw on first call of the day', () async {
+    final days = await Future.wait([
+      repo.getOrCreateToday(),
+      repo.getOrCreateToday(),
+    ]);
+    expect(days[0].id, days[1].id);
+  });
+
   // ─── Auto-reopen closed day ─────────────────────────────────────────────────
 
   test('record reopens a closed business day', () async {
