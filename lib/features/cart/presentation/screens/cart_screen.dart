@@ -895,6 +895,7 @@ class _CartSummary extends StatelessWidget {
             ),
           ),
         ),
+        const Divider(height: 20),
       ],
     );
   }
