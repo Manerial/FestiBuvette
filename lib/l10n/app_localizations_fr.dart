@@ -284,6 +284,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get allCategories => 'Tout';
 
   @override
+  String get categoriesTabLabel => 'Catégories';
+
+  @override
+  String get addCategoryTooltip => 'Ajouter une catégorie';
+
+  @override
+  String get tapPlusToAddCategory =>
+      'Appuyez sur + pour ajouter votre première catégorie';
+
+  @override
   String get manageCategories => 'Gérer les catégories';
 
   @override

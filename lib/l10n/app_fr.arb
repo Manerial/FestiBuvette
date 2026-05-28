@@ -95,6 +95,9 @@
   "settingsCartGridViewSubtitle": "Afficher les produits en tuiles dans le panier",
 
   "allCategories": "Tout",
+  "categoriesTabLabel": "Catégories",
+  "addCategoryTooltip": "Ajouter une catégorie",
+  "tapPlusToAddCategory": "Appuyez sur + pour ajouter votre première catégorie",
   "manageCategories": "Gérer les catégories",
   "noCategoriesYet": "Aucune catégorie pour l'instant",
   "newCategory": "Nouvelle catégorie",

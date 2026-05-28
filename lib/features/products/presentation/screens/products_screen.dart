@@ -19,11 +19,11 @@ class ProductsScreen extends ConsumerStatefulWidget {
 
 class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   int? _selectedCategoryId;
+  bool _showCategories = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final productsAsync = ref.watch(productsProvider);
     final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
 
     // If the selected category was deleted, fall back to "All".
@@ -32,30 +32,75 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             ? _selectedCategoryId
             : null;
 
+    return Column(
+      children: [
+        // ── View switcher ──────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: SegmentedButton<bool>(
+            segments: [
+              ButtonSegment(value: false, label: Text(l10n.productsTab)),
+              ButtonSegment(
+                  value: true, label: Text(l10n.categoriesTabLabel)),
+            ],
+            selected: {_showCategories},
+            onSelectionChanged: (v) =>
+                setState(() => _showCategories = v.first),
+          ),
+        ),
+        // ── Active view ────────────────────────────────────────────────────
+        Expanded(
+          child: _showCategories
+              ? const _CategoriesSection()
+              : _ProductsSection(
+                  selectedCategoryId: effectiveCategoryId,
+                  onSelect: (id) => setState(() => _selectedCategoryId = id),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Products section ─────────────────────────────────────────────────────────
+
+class _ProductsSection extends ConsumerWidget {
+  final int? selectedCategoryId;
+  final ValueChanged<int?> onSelect;
+
+  const _ProductsSection({
+    required this.selectedCategoryId,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final productsAsync = ref.watch(productsProvider);
+    final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
+
     return productsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text(l10n.errorMessage(e))),
       data: (products) {
-        final filtered = effectiveCategoryId == null
+        final filtered = selectedCategoryId == null
             ? products
             : products
-                .where((p) => p.categoryId == effectiveCategoryId)
+                .where((p) => p.categoryId == selectedCategoryId)
                 .toList();
 
         return Column(
           children: [
             CategoryFilterBar(
               categories: categories,
-              selectedCategoryId: effectiveCategoryId,
-              onSelect: (id) => setState(() => _selectedCategoryId = id),
-              showManageButton: true,
-              onManage: () => _showManageCategories(context),
+              selectedCategoryId: selectedCategoryId,
+              onSelect: onSelect,
             ),
             Expanded(
               child: Stack(
                 children: [
                   if (products.isEmpty)
-                    _EmptyState(ref: ref)
+                    _EmptyProductsState(ref: ref)
                   else if (filtered.isEmpty)
                     const _EmptyCategoryState()
                   else
@@ -68,7 +113,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       tooltip: l10n.addProductTooltip,
                       onPressed: () => showProductFormDialog(
                         context,
-                        defaultCategoryId: effectiveCategoryId,
+                        defaultCategoryId: selectedCategoryId,
                       ),
                       child: const Icon(Icons.add),
                     ),
@@ -81,80 +126,70 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
       },
     );
   }
-
-  void _showManageCategories(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) => const _CategoryManagementSheet(),
-    );
-  }
 }
 
-// ─── Category management bottom sheet ────────────────────────────────────────
+// ─── Categories section ───────────────────────────────────────────────────────
 
-class _CategoryManagementSheet extends ConsumerWidget {
-  const _CategoryManagementSheet();
+class _CategoriesSection extends ConsumerWidget {
+  const _CategoriesSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 8, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return Stack(
+      children: [
+        if (categories.isEmpty)
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: Text(
-                    l10n.manageCategories,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
+                Icon(Icons.label_outline,
+                    size: 72, color: Colors.grey.shade400),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.noCategoriesYet,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.copyWith(color: Colors.grey.shade600),
                 ),
-                FilledButton.icon(
-                  icon: const Icon(Icons.add, size: 18),
-                  label: Text(l10n.add),
-                  onPressed: () => showCategoryFormDialog(context, ref),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.tapPlusToAddCategory,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: Colors.grey.shade500),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(width: 8),
               ],
             ),
-            const SizedBox(height: 8),
-            if (categories.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Text(
-                    l10n.noCategoriesYet,
-                    style: TextStyle(color: Colors.grey.shade500),
-                  ),
-                ),
-              )
-            else
-              ReorderableListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: categories.length,
-                onReorderItem: (oldIndex, newIndex) => ref
-                    .read(categoriesProvider.notifier)
-                    .reorder(oldIndex, newIndex),
-                itemBuilder: (_, i) => _CategoryTile(
-                  key: ValueKey(categories[i].id),
-                  category: categories[i],
-                  index: i,
-                ),
-              ),
-          ],
+          )
+        else
+          ReorderableListView.builder(
+            padding: const EdgeInsets.only(bottom: 88),
+            itemCount: categories.length,
+            onReorderItem: (o, n) =>
+                ref.read(categoriesProvider.notifier).reorder(o, n),
+            itemBuilder: (_, i) => _CategoryTile(
+              key: ValueKey(categories[i].id),
+              category: categories[i],
+              index: i,
+            ),
+          ),
+        Positioned(
+          bottom: 24,
+          right: 16,
+          child: FloatingActionButton(
+            heroTag: 'fab_categories',
+            tooltip: l10n.addCategoryTooltip,
+            onPressed: () => showCategoryFormDialog(context, ref),
+            child: const Icon(Icons.add),
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -254,7 +289,7 @@ class _ReorderableTile extends StatelessWidget {
   }
 }
 
-// ─── Reorderable list ─────────────────────────────────────────────────────────
+// ─── Reorderable product list ─────────────────────────────────────────────────
 
 class _ProductList extends ConsumerWidget {
   final List<Product> products;
@@ -317,9 +352,9 @@ class _ProductTile extends ConsumerWidget {
 
 // ─── Empty states ─────────────────────────────────────────────────────────────
 
-class _EmptyState extends StatelessWidget {
+class _EmptyProductsState extends StatelessWidget {
   final WidgetRef ref;
-  const _EmptyState({required this.ref});
+  const _EmptyProductsState({required this.ref});
 
   @override
   Widget build(BuildContext context) {
