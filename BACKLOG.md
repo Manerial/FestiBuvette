@@ -162,10 +162,10 @@
 - [x] **E8-9** Haptic feedback — `HapticFeedback.lightImpact()` on `+` / `-` product buttons (list + grid views)
 - [ ] **E8-10** Out-of-stock toggle — long-press on a product to mark it unavailable; grayed + non-clickable in cart; sorted last without altering `sort_order` (ORDER BY `is_out_of_stock ASC, sort_order ASC`); DB migration v2→v3
 - [x] **E8-11** Category grouping on ticket — group order lines by category on the printed ticket; categories ordered by their `sort_order` (same as in-app); uncategorized products printed last under a `** AUTRES **` / `** OTHER **` bold separator (i18n); categories with no items in the cart are skipped; flat layout preserved for reprints (`buildReceiptFromSale`) since category info is not snapshotted
-- [ ] **E8-12** Order summary in expanded footer — when the footer is open, display the cart items (name + qty) as a list below the total and the cash change buttons; hidden when the footer is collapsed
+- [x] **E8-12** Order summary in expanded footer — when the footer is open, display the cart items (name + qty) as a list below the total and the cash change buttons; hidden when the footer is collapsed
 - [ ] **E8-13** Category management as a section inside the Products tab — replace the bottom sheet with a `SegmentedButton` (Produits | Catégories) at the top of the products screen; the Categories view exposes full CRUD (add, rename, delete) replacing the current bottom sheet; the filter chips and `[+]` AppBar button adapt to the active view
 - [ ] **E8-14** Swipe left/right between main tabs — wrap the 3 main screens (Cart / Products / Report) in a `PageView`; page follows the finger in real time; `BottomNavigationBar` stays in sync
-- [ ] **E8-15** Fluid footer drag — footer follows the thumb in real time during drag (via `GestureDetector` + live offset) instead of toggling between two states; release near top → opens, near bottom → closes; replaces the current `AnimatedAlign` toggle
+- [x] **E8-15** Fluid footer drag — footer follows the thumb in real time during drag (via `GestureDetector` + live offset) instead of toggling between two states; release near top → opens, near bottom → closes; replaces the current `AnimatedAlign` toggle
 
 ---
 

@@ -289,10 +289,55 @@ class _Footer extends ConsumerStatefulWidget {
   ConsumerState<_Footer> createState() => _FooterState();
 }
 
-class _FooterState extends ConsumerState<_Footer> {
-  bool _expanded = false;
+class _FooterState extends ConsumerState<_Footer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  double _dragStartDy = 0;
+  double _dragStartValue = 0;
 
-  void _toggle() => setState(() => _expanded = !_expanded);
+  bool get _expanded => _controller.value > 0.5;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    if (_expanded) {
+      _controller.animateTo(0, curve: Curves.easeInOut);
+    } else {
+      _controller.animateTo(1, curve: Curves.easeInOut);
+    }
+  }
+
+  void _onDragStart(DragStartDetails details) {
+    _dragStartDy = details.globalPosition.dy;
+    _dragStartValue = _controller.value;
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    final delta = _dragStartDy - details.globalPosition.dy;
+    _controller.value = (_dragStartValue + delta / 200).clamp(0.0, 1.0);
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    final velocity = details.primaryVelocity ?? 0;
+    if (velocity < -300 || (_controller.value >= 0.5 && velocity <= 300)) {
+      _controller.animateTo(1, curve: Curves.easeOut);
+    } else {
+      _controller.animateTo(0, curve: Curves.easeOut);
+    }
+  }
 
   // ── Record sale (shared by print+record and record-only flows) ────────────
 
@@ -432,84 +477,86 @@ class _FooterState extends ConsumerState<_Footer> {
         ref.watch(printerProvider).valueOrNull?.isPrinting ?? false;
     final isInsufficient = widget.cartState.insufficientTendered(total);
 
-    return GestureDetector(
-      onVerticalDragEnd: (details) {
-        final velocity = details.primaryVelocity ?? 0;
-        if (velocity < -300 && !_expanded) setState(() => _expanded = true);
-        if (velocity > 300 && _expanded) setState(() => _expanded = false);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // ── Drag handle + always-visible total ───────────────────────
-              GestureDetector(
-                onTap: _toggle,
-                behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 40,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade300,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── Drag handle + always-visible total ─────────────────────────
+            GestureDetector(
+              onTap: _toggle,
+              onVerticalDragStart: _onDragStart,
+              onVerticalDragUpdate: _onDragUpdate,
+              onVerticalDragEnd: _onDragEnd,
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      _TotalRow(total: total),
-                    ],
-                  ),
-                ),
-              ),
-              // ── Expandable section (widget stays in tree → state preserved)
-              ClipRect(
-                child: IgnorePointer(
-                  ignoring: !_expanded,
-                  child: AnimatedAlign(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeInOut,
-                    alignment: Alignment.topCenter,
-                    heightFactor: _expanded ? 1.0 : 0.0,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _TenderedRow(total: total, empty: empty),
-                          const SizedBox(height: 12),
-                          _ActionRow(
-                            empty: empty,
-                            isPrinting: isPrinting,
-                            isInsufficient: isInsufficient,
-                            onClear: () => _confirmClear(context),
-                            onPrint: () => _printAndRecord(context),
-                          ),
-                        ],
-                      ),
                     ),
+                    const SizedBox(height: 10),
+                    _TotalRow(total: total),
+                  ],
+                ),
+              ),
+            ),
+            // ── Expandable section (widget stays in tree → state preserved)
+            AnimatedBuilder(
+              animation: _controller,
+              builder: (ctx, child) => ClipRect(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  heightFactor: _controller.value,
+                  child: IgnorePointer(
+                    ignoring: _controller.value < 0.01,
+                    child: child!,
                   ),
                 ),
               ),
-            ],
-          ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _TenderedRow(total: total, empty: empty),
+                    const SizedBox(height: 12),
+                    _ActionRow(
+                      empty: empty,
+                      isPrinting: isPrinting,
+                      isInsufficient: isInsufficient,
+                      onClear: () => _confirmClear(context),
+                      onPrint: () => _printAndRecord(context),
+                    ),
+                    _CartSummary(
+                      products: widget.products,
+                      quantities: widget.cartState.quantities,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -781,6 +828,49 @@ class _ActionRow extends StatelessWidget {
             onPressed: empty || isPrinting || isInsufficient ? null : onPrint,
           ),
         ),
+      ],
+    );
+  }
+}
+
+// ─── Cart summary ─────────────────────────────────────────────────────────────
+
+class _CartSummary extends StatelessWidget {
+  final List<Product> products;
+  final Map<int, int> quantities;
+
+  const _CartSummary({required this.products, required this.quantities});
+
+  @override
+  Widget build(BuildContext context) {
+    final items = products
+        .where((p) => (quantities[p.id] ?? 0) > 0)
+        .map((p) => (name: p.name, qty: quantities[p.id]!))
+        .toList();
+
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Divider(height: 20),
+        for (final item in items)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(item.name),
+                Text(
+                  '× ${item.qty}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }
