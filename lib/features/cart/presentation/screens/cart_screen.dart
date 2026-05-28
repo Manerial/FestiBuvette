@@ -64,9 +64,13 @@ class _CartContentState extends ConsumerState<_CartContent> {
             ? _selectedCategoryId
             : null;
 
+    // Out-of-stock products are not purchasable — exclude from the cart entirely.
+    final available =
+        widget.products.where((p) => !p.isOutOfStock).toList();
+
     final filtered = effectiveCategoryId == null
-        ? widget.products
-        : widget.products
+        ? available
+        : available
             .where((p) => p.categoryId == effectiveCategoryId)
             .toList();
 
@@ -105,9 +109,8 @@ class _CartContentState extends ConsumerState<_CartContent> {
                   ),
                 ),
         ),
-        // Footer always uses all products to compute total correctly,
-        // regardless of the active category filter.
-        _Footer(products: widget.products, cartState: cartState),
+        // Footer uses available products (OOS excluded) to compute total.
+        _Footer(products: available, cartState: cartState),
       ],
     );
   }
@@ -129,67 +132,53 @@ class _ProductRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final notifier = ref.read(cartProvider.notifier);
     final inCart = quantity > 0;
-    final oos = product.isOutOfStock;
 
-    return GestureDetector(
-      onLongPress: () =>
-          ref.read(productsProvider.notifier).toggleOutOfStock(product.id!),
-      child: ListTile(
-        title: Text(
-          product.name,
-          style: TextStyle(
-            fontWeight: inCart && !oos ? FontWeight.bold : FontWeight.normal,
-            color: oos ? Colors.grey : null,
-          ),
+    return ListTile(
+      title: Text(
+        product.name,
+        style: TextStyle(
+          fontWeight: inCart ? FontWeight.bold : FontWeight.normal,
         ),
-        subtitle: oos
-            ? Text(
-                l10n.outOfStock,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              )
-            : Text(_priceFmt.format(product.price)),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.remove_circle_outline),
-              onPressed: inCart
-                  ? () {
-                      _triggerHaptic(ref);
-                      notifier.decrement(product.id!);
-                    }
-                  : null,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            SizedBox(
-              width: 28,
-              child: Text(
-                '$quantity',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: inCart && !oos ? FontWeight.bold : FontWeight.normal,
-                  color: inCart && !oos
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey,
-                ),
+      ),
+      subtitle: Text(_priceFmt.format(product.price)),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.remove_circle_outline),
+            onPressed: inCart
+                ? () {
+                    _triggerHaptic(ref);
+                    notifier.decrement(product.id!);
+                  }
+                : null,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          SizedBox(
+            width: 28,
+            child: Text(
+              '$quantity',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: inCart ? FontWeight.bold : FontWeight.normal,
+                color: inCart
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey,
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              onPressed: oos
-                  ? null
-                  : () {
-                      _triggerHaptic(ref);
-                      notifier.increment(product.id!);
-                    },
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: () {
+              _triggerHaptic(ref);
+              notifier.increment(product.id!);
+            },
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ],
       ),
     );
   }
@@ -211,103 +200,86 @@ class _ProductGridTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
     final notifier = ref.read(cartProvider.notifier);
     final inCart = quantity > 0;
-    final oos = product.isOutOfStock;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      onLongPress: () =>
-          ref.read(productsProvider.notifier).toggleOutOfStock(product.id!),
-      child: Card(
-        elevation: inCart && !oos ? 3 : 1,
-        color: oos
-            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-            : inCart
-                ? colorScheme.primaryContainer
-                : colorScheme.surface,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // ── Name + price/status ──────────────────────────────────
-              Column(
-                children: [
-                  Text(
-                    product.name,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight:
-                          inCart && !oos ? FontWeight.bold : FontWeight.normal,
-                      fontSize: 14,
-                      color: oos
-                          ? Colors.grey
-                          : inCart
-                              ? colorScheme.onPrimaryContainer
-                              : colorScheme.onSurface,
-                    ),
+    return Card(
+      elevation: inCart ? 3 : 1,
+      color: inCart ? colorScheme.primaryContainer : colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // ── Name + price ─────────────────────────────────────────
+            Column(
+              children: [
+                Text(
+                  product.name,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight:
+                        inCart ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 14,
+                    color: inCart
+                        ? colorScheme.onPrimaryContainer
+                        : colorScheme.onSurface,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    oos ? l10n.outOfStock : _priceFmt.format(product.price),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: oos
-                          ? Colors.grey.shade400
-                          : inCart
-                              ? colorScheme.onPrimaryContainer
-                                  .withValues(alpha: 0.8)
-                              : Colors.grey,
-                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _priceFmt.format(product.price),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: inCart
+                        ? colorScheme.onPrimaryContainer.withValues(alpha: 0.8)
+                        : Colors.grey,
                   ),
-                ],
-              ),
-              // ── Controls ─────────────────────────────────────────────
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.remove_circle_outline, size: 28),
-                    onPressed: inCart
-                        ? () {
-                            _triggerHaptic(ref);
-                            notifier.decrement(product.id!);
-                          }
-                        : null,
-                    color: colorScheme.primary,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+            // ── Controls ─────────────────────────────────────────────
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.remove_circle_outline, size: 28),
+                  onPressed: inCart
+                      ? () {
+                          _triggerHaptic(ref);
+                          notifier.decrement(product.id!);
+                        }
+                      : null,
+                  color: colorScheme.primary,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  '$quantity',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: inCart ? colorScheme.primary : Colors.grey,
                   ),
-                  const SizedBox(width: 10),
-                  Text(
-                    '$quantity',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: inCart && !oos ? colorScheme.primary : Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline, size: 28),
-                    onPressed: oos
-                        ? null
-                        : () {
-                            _triggerHaptic(ref);
-                            notifier.increment(product.id!);
-                          },
-                    color: colorScheme.primary,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: const Icon(Icons.add_circle_outline, size: 28),
+                  onPressed: () {
+                    _triggerHaptic(ref);
+                    notifier.increment(product.id!);
+                  },
+                  color: colorScheme.primary,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

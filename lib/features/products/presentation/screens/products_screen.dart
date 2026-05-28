@@ -234,7 +234,7 @@ class _ReorderableTile extends StatelessWidget {
   final String deleteDialogMessage;
   final VoidCallback onEdit;
   final VoidCallback onDeleteConfirmed;
-  final VoidCallback? onLongPress;
+  final Widget? leadingTrailingAction;
 
   const _ReorderableTile({
     required this.index,
@@ -244,13 +244,12 @@ class _ReorderableTile extends StatelessWidget {
     required this.deleteDialogMessage,
     required this.onEdit,
     required this.onDeleteConfirmed,
-    this.onLongPress,
+    this.leadingTrailingAction,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      onLongPress: onLongPress,
       leading: ReorderableDragStartListener(
         index: index,
         child: const Icon(Icons.drag_handle, color: Colors.grey),
@@ -260,6 +259,7 @@ class _ReorderableTile extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          ?leadingTrailingAction,
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             onPressed: onEdit,
@@ -359,8 +359,17 @@ class _ProductTile extends ConsumerWidget {
       onEdit: () => showProductFormDialog(context, product: product),
       onDeleteConfirmed: () =>
           ref.read(productsProvider.notifier).delete(product.id!),
-      onLongPress: () =>
-          ref.read(productsProvider.notifier).toggleOutOfStock(product.id!),
+      leadingTrailingAction: IconButton(
+        icon: product.isOutOfStock
+            ? const Icon(Icons.add_shopping_cart)
+            : const Icon(Icons.remove_shopping_cart),
+        color: product.isOutOfStock ? Colors.orange : Colors.grey,
+        tooltip: product.isOutOfStock
+            ? l10n.markAsInStock
+            : l10n.markAsOutOfStock,
+        onPressed: () =>
+            ref.read(productsProvider.notifier).toggleOutOfStock(product.id!),
+      ),
     );
   }
 }

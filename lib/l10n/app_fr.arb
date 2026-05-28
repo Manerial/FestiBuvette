@@ -118,6 +118,8 @@
   "insufficientAmount": "Montant insuffisant",
 
   "outOfStock": "Rupture de stock",
+  "markAsOutOfStock": "Marquer en rupture de stock",
+  "markAsInStock": "Marquer comme disponible",
 
   "ticketOtherCategory": "AUTRES",
   "ticketThankYou": "Merci !",

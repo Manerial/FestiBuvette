@@ -710,6 +710,18 @@ abstract class AppLocalizations {
   /// **'Out of stock'**
   String get outOfStock;
 
+  /// No description provided for @markAsOutOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as out of stock'**
+  String get markAsOutOfStock;
+
+  /// No description provided for @markAsInStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as available'**
+  String get markAsInStock;
+
   /// No description provided for @ticketOtherCategory.
   ///
   /// In en, this message translates to:
