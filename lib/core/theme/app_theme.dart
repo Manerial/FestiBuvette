@@ -4,25 +4,32 @@ import 'package:flutter/services.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get light {
+  static ThemeData buildLight(Color appBarColor) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF2563EB), // bleu principal
+      seedColor: const Color(0xFF2563EB),
       brightness: Brightness.light,
     );
+    final luminance = appBarColor.computeLuminance();
+    final foreground = luminance > 0.4 ? Colors.black87 : Colors.white;
+    final statusIconBrightness =
+        luminance > 0.4 ? Brightness.dark : Brightness.light;
+    final statusBarBrightness =
+        luminance > 0.4 ? Brightness.light : Brightness.dark;
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: Color(0xFFFFA946),
-        foregroundColor: Colors.white,
+        backgroundColor: appBarColor,
+        foregroundColor: foreground,
         surfaceTintColor: Colors.transparent,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.light, // Android
-          statusBarBrightness: Brightness.dark,      // iOS
+          statusBarIconBrightness: statusIconBrightness,
+          statusBarBrightness: statusBarBrightness,
         ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(

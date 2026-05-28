@@ -277,6 +277,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settingsLanguageEn => 'English';
 
   @override
+  String get settingsAppBarColor => 'Couleur du bandeau';
+
+  @override
   String get settingsCartGridView => 'Vue en grille';
 
   @override

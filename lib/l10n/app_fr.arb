@@ -92,6 +92,7 @@
   "settingsLanguageFr": "Français",
   "settingsLanguageEn": "English",
 
+  "settingsAppBarColor": "Couleur du bandeau",
   "settingsCartGridView": "Vue en grille",
   "settingsCartGridViewSubtitle": "Afficher les produits en tuiles dans le panier",
 

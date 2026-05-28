@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart';
+
 class AppConstants {
   AppConstants._();
 
   static const String appName = 'FestiBuvette';
+  static const Color defaultAppBarColor = Color(0xFFFFA946);
 
   // SharedPreferences keys
   static const String keyAppName = 'app_name';
@@ -10,6 +13,7 @@ class AppConstants {
   static const String keyPrinterName = 'printer_name';
   static const String keyCartGridView = 'cart_grid_view';
   static const String keyHapticFeedback = 'haptic_feedback';
+  static const String keyAppBarColor = 'app_bar_color';
 
   // Database — nom volontairement indépendant du nom de l'app
   static const String dbName = 'caisse.db';

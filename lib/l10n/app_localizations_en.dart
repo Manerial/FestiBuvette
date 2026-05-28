@@ -273,6 +273,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsLanguageEn => 'English';
 
   @override
+  String get settingsAppBarColor => 'App bar color';
+
+  @override
   String get settingsCartGridView => 'Grid view';
 
   @override
