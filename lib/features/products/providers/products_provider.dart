@@ -9,11 +9,10 @@ final productsProvider =
 );
 
 class ProductsNotifier extends AsyncNotifier<List<Product>> {
-  late final ProductsRepository _repo;
+  final _repo = ProductsRepository(DatabaseHelper.instance);
 
   @override
   Future<List<Product>> build() async {
-    _repo = ProductsRepository(DatabaseHelper.instance);
     return _repo.getAllActive();
   }
 
