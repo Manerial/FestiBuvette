@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:festi_buvette_app/features/cart/presentation/screens/cart_screen.dart';
-import 'package:festi_buvette_app/features/printer/presentation/screens/printer_screen.dart';
+import 'package:festi_buvette_app/features/printer/presentation/screens/settings_screen.dart';
 import 'package:festi_buvette_app/features/products/presentation/screens/products_screen.dart';
 import 'package:festi_buvette_app/features/report/presentation/screens/report_screen.dart';
 
@@ -19,7 +19,7 @@ class AppRouter {
       case report:
         return MaterialPageRoute(builder: (_) => const ReportScreen());
       case printer:
-        return MaterialPageRoute(builder: (_) => const PrinterScreen());
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
       default:
         return MaterialPageRoute(builder: (_) => const CartScreen());
     }
