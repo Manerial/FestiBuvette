@@ -3,6 +3,9 @@
 Application mobile de caisse simplifiée avec impression thermique Bluetooth.
 Fonctionne entièrement hors ligne (sauf connexion Bluetooth à l'imprimante).
 
+Application 100% codée par IA dans le cadre d'une montée en compétence sur le sujet,
+mais avec un véritable besoin derrière.
+
 **Stack :** Flutter 3.44 · Dart 3.12 · Riverpod 2.6 · SQLite · ESC/POS
 
 ---
