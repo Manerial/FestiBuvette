@@ -4,6 +4,7 @@
   "errorMessage": "Erreur : {message}",
 
   "cancel": "Annuler",
+  "close": "Fermer",
   "delete": "Supprimer",
   "save": "Enregistrer",
   "add": "Ajouter",
