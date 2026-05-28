@@ -59,8 +59,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.settings)),
-      body: ListView(
+      appBar: AppBar(
+        title: Text(l10n.settings),
+        automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.keyboard_arrow_up),
+            tooltip: l10n.close,
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        top: false,
+        child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // ── App settings ────────────────────────────────────────────────
@@ -117,6 +129,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 12),
           _BluetoothSection(),
         ],
+      ),
       ),
     );
   }

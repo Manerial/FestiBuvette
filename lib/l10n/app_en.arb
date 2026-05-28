@@ -5,6 +5,7 @@
   "@errorMessage": { "placeholders": { "message": { "type": "Object" } } },
 
   "cancel": "Cancel",
+  "close": "Close",
   "delete": "Delete",
   "save": "Save",
   "add": "Add",

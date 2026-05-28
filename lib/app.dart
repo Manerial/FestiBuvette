@@ -86,7 +86,21 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
             tooltip: l10n.settings,
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              PageRouteBuilder(
+                pageBuilder: (_, _, _) => const SettingsScreen(),
+                transitionDuration: const Duration(milliseconds: 300),
+                reverseTransitionDuration: const Duration(milliseconds: 250),
+                transitionsBuilder: (_, animation, _, child) => SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, -1),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInOut,
+                  )),
+                  child: child,
+                ),
+              ),
             ),
           ),
         ],
