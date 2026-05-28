@@ -27,8 +27,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
 
     // If the selected category was deleted, fall back to "All".
+    // The uncategorized sentinel (-1) is always valid.
     final effectiveCategoryId =
-        categories.any((c) => c.id == _selectedCategoryId)
+        _selectedCategoryId == CategoryFilterBar.uncategorizedId ||
+                categories.any((c) => c.id == _selectedCategoryId)
             ? _selectedCategoryId
             : null;
 
@@ -83,11 +85,13 @@ class _ProductsSection extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text(l10n.errorMessage(e))),
       data: (products) {
-        final filtered = selectedCategoryId == null
-            ? products
-            : products
-                .where((p) => p.categoryId == selectedCategoryId)
-                .toList();
+        final hasUncategorized = products.any((p) => p.categoryId == null);
+        final filtered = switch (selectedCategoryId) {
+          null => products,
+          CategoryFilterBar.uncategorizedId =>
+            products.where((p) => p.categoryId == null).toList(),
+          _ => products.where((p) => p.categoryId == selectedCategoryId).toList(),
+        };
 
         return Column(
           children: [
@@ -95,6 +99,7 @@ class _ProductsSection extends ConsumerWidget {
               categories: categories,
               selectedCategoryId: selectedCategoryId,
               onSelect: onSelect,
+              hasUncategorized: hasUncategorized,
             ),
             Expanded(
               child: Stack(
@@ -113,7 +118,10 @@ class _ProductsSection extends ConsumerWidget {
                       tooltip: l10n.addProductTooltip,
                       onPressed: () => showProductFormDialog(
                         context,
-                        defaultCategoryId: selectedCategoryId,
+                        defaultCategoryId:
+                            selectedCategoryId == CategoryFilterBar.uncategorizedId
+                                ? null
+                                : selectedCategoryId,
                       ),
                       child: const Icon(Icons.add),
                     ),
