@@ -211,6 +211,32 @@ notifiers (transitions d'état), services (logique métier).
 
 ---
 
+## Notes de build Android
+
+### Workaround — `file_picker` + Flutter 3.44
+
+Flutter 3.44 expose `flutter.compileSdkVersion = 36`. Le plugin `flutter_plugin_android_lifecycle`
+l'utilise pour compiler à SDK 36 → son AAR déclare `minCompileSdk = 36`.
+
+`file_picker 8.0.7` hardcode `compileSdk 34` dans son propre `build.gradle` (pas de version
+corrigée disponible à ce jour). Résultat : le check AGP `checkReleaseAarMetadata` échoue.
+
+**Workaround appliqué** : édition manuelle du `build.gradle` de `file_picker` dans le pub cache :
+
+```
+%LOCALAPPDATA%\Pub\Cache\hosted\pub.dev\file_picker-8.0.7\android\build.gradle
+```
+
+Ligne modifiée : `compileSdk 34` → `compileSdk 36`
+
+> ⚠ Cette modification est dans le pub cache partagé. Elle sera perdue si :
+> - `flutter pub cache repair` est exécuté
+> - `file_picker` est mis à jour vers une nouvelle version
+>
+> Dans ces cas, réappliquer la modification manuellement ou vérifier si la nouvelle version corrige le problème.
+
+---
+
 ## Backlog
 
 Voir [BACKLOG.md](BACKLOG.md) pour le suivi des tâches et l'état d'avancement.
