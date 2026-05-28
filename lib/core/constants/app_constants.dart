@@ -9,6 +9,7 @@ class AppConstants {
   static const String keyPrinterAddress = 'printer_address';
   static const String keyPrinterName = 'printer_name';
   static const String keyCartGridView = 'cart_grid_view';
+  static const String keyHapticFeedback = 'haptic_feedback';
 
   // Database — nom volontairement indépendant du nom de l'app
   static const String dbName = 'caisse.db';

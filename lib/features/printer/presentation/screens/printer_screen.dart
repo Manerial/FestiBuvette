@@ -91,6 +91,7 @@ class _PrinterScreenState extends ConsumerState<PrinterScreen> {
 
           const SizedBox(height: 16),
           _CartGridViewTile(),
+          _HapticFeedbackTile(),
 
           const SizedBox(height: 32),
 
@@ -373,6 +374,26 @@ class _CartGridViewTile extends ConsumerWidget {
       value: gridView,
       onChanged: (value) =>
           ref.read(settingsProvider.notifier).setCartGridView(value),
+    );
+  }
+}
+
+// ─── Haptic feedback toggle ───────────────────────────────────────────────────
+
+class _HapticFeedbackTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final haptic =
+        ref.watch(settingsProvider).valueOrNull?.hapticFeedback ?? true;
+
+    return SwitchListTile(
+      contentPadding: EdgeInsets.zero,
+      title: Text(l10n.settingsHapticFeedback),
+      subtitle: Text(l10n.settingsHapticFeedbackSubtitle),
+      value: haptic,
+      onChanged: (value) =>
+          ref.read(settingsProvider.notifier).setHapticFeedback(value),
     );
   }
 }

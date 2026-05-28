@@ -196,4 +196,55 @@ void main() {
     expect(state.appName, 'Mon Bar');
     expect(state.locale, 'fr');
   });
+
+  // ─── setHapticFeedback ────────────────────────────────────────────────────
+
+  test('hapticFeedback defaults to true when not persisted', () async {
+    final container = makeContainer();
+    final state = await container.read(settingsProvider.future);
+    expect(state.hapticFeedback, isTrue);
+  });
+
+  test('hapticFeedback returns persisted value on first load', () async {
+    SharedPreferences.setMockInitialValues(
+        {AppConstants.keyHapticFeedback: false});
+    final container = makeContainer();
+    final state = await container.read(settingsProvider.future);
+    expect(state.hapticFeedback, isFalse);
+  });
+
+  test('setHapticFeedback updates state immediately', () async {
+    final container = makeContainer();
+    await container.read(settingsProvider.future);
+
+    await container.read(settingsProvider.notifier).setHapticFeedback(false);
+
+    final state = await container.read(settingsProvider.future);
+    expect(state.hapticFeedback, isFalse);
+  });
+
+  test('setHapticFeedback persists across provider instances', () async {
+    final c1 = makeContainer();
+    await c1.read(settingsProvider.future);
+    await c1.read(settingsProvider.notifier).setHapticFeedback(false);
+
+    final c2 = makeContainer();
+    final state = await c2.read(settingsProvider.future);
+    expect(state.hapticFeedback, isFalse);
+  });
+
+  test('setHapticFeedback preserves existing appName and locale', () async {
+    SharedPreferences.setMockInitialValues({
+      AppConstants.keyAppName: 'Mon Bar',
+      AppConstants.keyLocale: 'fr',
+    });
+    final container = makeContainer();
+    await container.read(settingsProvider.future);
+
+    await container.read(settingsProvider.notifier).setHapticFeedback(false);
+
+    final state = await container.read(settingsProvider.future);
+    expect(state.appName, 'Mon Bar');
+    expect(state.locale, 'fr');
+  });
 }

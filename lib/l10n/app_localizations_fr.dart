@@ -281,6 +281,13 @@ class AppLocalizationsFr extends AppLocalizations {
       'Afficher les produits en tuiles dans le panier';
 
   @override
+  String get settingsHapticFeedback => 'Retour haptique';
+
+  @override
+  String get settingsHapticFeedbackSubtitle =>
+      'Vibrer lors des appuis sur + / -';
+
+  @override
   String get allCategories => 'Tout';
 
   @override

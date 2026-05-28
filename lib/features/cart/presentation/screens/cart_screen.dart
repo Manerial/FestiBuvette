@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ludo_pay_app/core/constants/app_constants.dart';
@@ -13,6 +12,12 @@ import 'package:ludo_pay_app/features/products/providers/products_provider.dart'
 import 'package:ludo_pay_app/features/sales/services/sale_service.dart';
 import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
 import 'package:ludo_pay_app/l10n/app_localizations.dart';
+
+void _triggerHaptic(WidgetRef ref) {
+  if (ref.read(settingsProvider).valueOrNull?.hapticFeedback ?? true) {
+    _triggerHaptic(ref);
+  }
+}
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -141,7 +146,7 @@ class _ProductRow extends ConsumerWidget {
             icon: const Icon(Icons.remove_circle_outline),
             onPressed: inCart
                 ? () {
-                    HapticFeedback.lightImpact();
+                    _triggerHaptic(ref);
                     notifier.decrement(product.id!);
                   }
                 : null,
@@ -164,7 +169,7 @@ class _ProductRow extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.add_circle_outline),
             onPressed: () {
-              HapticFeedback.lightImpact();
+              _triggerHaptic(ref);
               notifier.increment(product.id!);
             },
             color: Theme.of(context).colorScheme.primary,
@@ -240,7 +245,7 @@ class _ProductGridTile extends ConsumerWidget {
                   icon: const Icon(Icons.remove_circle_outline, size: 28),
                   onPressed: inCart
                       ? () {
-                          HapticFeedback.lightImpact();
+                          _triggerHaptic(ref);
                           notifier.decrement(product.id!);
                         }
                       : null,
@@ -261,7 +266,7 @@ class _ProductGridTile extends ConsumerWidget {
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline, size: 28),
                   onPressed: () {
-                    HapticFeedback.lightImpact();
+                    _triggerHaptic(ref);
                     notifier.increment(product.id!);
                   },
                   color: colorScheme.primary,

@@ -16,10 +16,15 @@ class SettingsState {
   /// `false` → list view
   final bool cartGridView;
 
+  /// `true`  → vibrate on + / - button press (default)
+  /// `false` → no vibration
+  final bool hapticFeedback;
+
   const SettingsState({
     required this.appName,
     this.locale,
     this.cartGridView = true,
+    this.hapticFeedback = true,
   });
 }
 
@@ -38,24 +43,24 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       appName: prefs.getString(AppConstants.keyAppName) ?? AppConstants.appName,
       locale: prefs.getString(AppConstants.keyLocale),
       cartGridView: prefs.getBool(AppConstants.keyCartGridView) ?? true,
+      hapticFeedback: prefs.getBool(AppConstants.keyHapticFeedback) ?? true,
     );
   }
 
-  /// Persists [name] and updates the state immediately.
-  /// Falls back to [AppConstants.appName] if the trimmed value is empty.
   Future<void> setAppName(String name) async {
     final trimmed = name.trim();
     final effective = trimmed.isEmpty ? AppConstants.appName : trimmed;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(AppConstants.keyAppName, effective);
+    final current = state.valueOrNull;
     state = AsyncData(SettingsState(
       appName: effective,
-      locale: state.valueOrNull?.locale,
+      locale: current?.locale,
+      cartGridView: current?.cartGridView ?? true,
+      hapticFeedback: current?.hapticFeedback ?? true,
     ));
   }
 
-  /// Persists [locale] (`'fr'`, `'en'`, or `null` for system default)
-  /// and updates the state immediately.
   Future<void> setLocale(String? locale) async {
     final prefs = await SharedPreferences.getInstance();
     if (locale == null) {
@@ -63,21 +68,36 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     } else {
       await prefs.setString(AppConstants.keyLocale, locale);
     }
+    final current = state.valueOrNull;
     state = AsyncData(SettingsState(
-      appName: state.valueOrNull?.appName ?? AppConstants.appName,
+      appName: current?.appName ?? AppConstants.appName,
       locale: locale,
-      cartGridView: state.valueOrNull?.cartGridView ?? true,
+      cartGridView: current?.cartGridView ?? true,
+      hapticFeedback: current?.hapticFeedback ?? true,
     ));
   }
 
-  /// Persists [value] and updates the state immediately.
   Future<void> setCartGridView(bool value) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(AppConstants.keyCartGridView, value);
+    final current = state.valueOrNull;
     state = AsyncData(SettingsState(
-      appName: state.valueOrNull?.appName ?? AppConstants.appName,
-      locale: state.valueOrNull?.locale,
+      appName: current?.appName ?? AppConstants.appName,
+      locale: current?.locale,
       cartGridView: value,
+      hapticFeedback: current?.hapticFeedback ?? true,
+    ));
+  }
+
+  Future<void> setHapticFeedback(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(AppConstants.keyHapticFeedback, value);
+    final current = state.valueOrNull;
+    state = AsyncData(SettingsState(
+      appName: current?.appName ?? AppConstants.appName,
+      locale: current?.locale,
+      cartGridView: current?.cartGridView ?? true,
+      hapticFeedback: value,
     ));
   }
 }

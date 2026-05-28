@@ -584,6 +584,18 @@ abstract class AppLocalizations {
   /// **'Display products as tiles in the cart'**
   String get settingsCartGridViewSubtitle;
 
+  /// No description provided for @settingsHapticFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Haptic feedback'**
+  String get settingsHapticFeedback;
+
+  /// No description provided for @settingsHapticFeedbackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate on + / - button press'**
+  String get settingsHapticFeedbackSubtitle;
+
   /// No description provided for @allCategories.
   ///
   /// In en, this message translates to:
