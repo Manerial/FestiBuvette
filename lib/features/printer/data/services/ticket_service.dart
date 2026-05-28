@@ -47,6 +47,12 @@ class TicketService {
     final gen = Generator(PaperSize.mm58, profile);
     final bytes = <int>[];
 
+    // ESC t 16 — select CP1252 (Windows-1252). The Generator encodes strings
+    // with Latin-1; CP1252 is byte-identical to Latin-1 for 0xA0–0xFF (all
+    // accented Latin characters). Without this, the printer defaults to CP437
+    // which maps those bytes to unrelated glyphs (e.g. 0xE8 → ø instead of è).
+    bytes.addAll(gen.setGlobalCodeTable('CP1252'));
+
     // ── Header ────────────────────────────────────────────────────────────
     bytes.addAll(gen.text(
       businessName,
@@ -100,7 +106,7 @@ class TicketService {
       thankYouLabel,
       styles: const PosStyles(align: PosAlign.center),
     ));
-    bytes.addAll(gen.feed(3));
+    bytes.addAll(gen.feed(2));
     bytes.addAll(gen.cut());
 
     return bytes;
@@ -162,6 +168,7 @@ class TicketService {
     final profile = await CapabilityProfile.load();
     final gen = Generator(PaperSize.mm58, profile);
     final bytes = <int>[];
+    bytes.addAll(gen.setGlobalCodeTable('CP1252'));
     final now = DateTime.now();
 
     bytes.addAll(gen.text(
@@ -182,7 +189,7 @@ class TicketService {
       'Imprimante OK',
       styles: const PosStyles(align: PosAlign.center),
     ));
-    bytes.addAll(gen.feed(3));
+    bytes.addAll(gen.feed(2));
     bytes.addAll(gen.cut());
 
     return bytes;
