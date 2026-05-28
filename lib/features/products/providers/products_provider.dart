@@ -9,7 +9,10 @@ final productsProvider =
 );
 
 class ProductsNotifier extends AsyncNotifier<List<Product>> {
-  final _repo = ProductsRepository(DatabaseHelper.instance);
+  ProductsNotifier([ProductsRepository? repo])
+      : _repo = repo ?? ProductsRepository(DatabaseHelper.instance);
+
+  final ProductsRepository _repo;
 
   @override
   Future<List<Product>> build() async {
@@ -81,6 +84,12 @@ class ProductsNotifier extends AsyncNotifier<List<Product>> {
   /// Deletes (physically or logically) a product.
   Future<void> delete(int id) async {
     await _repo.softDelete(id);
+    state = AsyncData(await _repo.getAllActive());
+  }
+
+  /// Toggles the out-of-stock status of a product.
+  Future<void> toggleOutOfStock(int id) async {
+    await _repo.toggleOutOfStock(id);
     state = AsyncData(await _repo.getAllActive());
   }
 }

@@ -117,6 +117,8 @@
   "changeDue": "Rendu",
   "insufficientAmount": "Montant insuffisant",
 
+  "outOfStock": "Rupture de stock",
+
   "ticketOtherCategory": "AUTRES",
   "ticketThankYou": "Merci !",
 

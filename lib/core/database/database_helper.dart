@@ -42,7 +42,8 @@ class DatabaseHelper {
         sort_order  INTEGER NOT NULL DEFAULT 0,
         active      INTEGER NOT NULL DEFAULT 1,
         created_at  TEXT    NOT NULL,
-        category_id INTEGER REFERENCES categories(id)
+        category_id     INTEGER REFERENCES categories(id),
+        is_out_of_stock INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -92,6 +93,11 @@ class DatabaseHelper {
       ''');
       await db.execute(
         'ALTER TABLE products ADD COLUMN category_id INTEGER REFERENCES categories(id)',
+      );
+    }
+    if (oldVersion < 3) {
+      await db.execute(
+        'ALTER TABLE products ADD COLUMN is_out_of_stock INTEGER NOT NULL DEFAULT 0',
       );
     }
   }

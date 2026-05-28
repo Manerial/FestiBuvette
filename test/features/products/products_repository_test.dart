@@ -152,6 +152,37 @@ void main() {
     expect(await repo.nextOrder(), 2);
   });
 
+  // ─── toggleOutOfStock ────────────────────────────────────────────────────────
+
+  test('toggleOutOfStock marks product as out of stock', () async {
+    final id = await repo.insert(buildProduct());
+    await repo.toggleOutOfStock(id);
+
+    final products = await repo.getAllActive();
+    expect(products.first.isOutOfStock, isTrue);
+  });
+
+  test('toggleOutOfStock marks product back in stock', () async {
+    final id = await repo.insert(buildProduct());
+    await repo.toggleOutOfStock(id); // out
+    await repo.toggleOutOfStock(id); // back in
+
+    final products = await repo.getAllActive();
+    expect(products.first.isOutOfStock, isFalse);
+  });
+
+  test('getAllActive returns out-of-stock products last', () async {
+    final id1 = await repo.insert(buildProduct(name: 'Alpha', order: 0));
+    await repo.insert(buildProduct(name: 'Beta', order: 1));
+
+    await repo.toggleOutOfStock(id1); // Alpha is now OOS
+
+    final products = await repo.getAllActive();
+    expect(products.first.name, 'Beta');
+    expect(products.last.name, 'Alpha');
+    expect(products.last.isOutOfStock, isTrue);
+  });
+
   test('nextOrder decreases after softDelete with no sale_lines reference', () async {
     final id1 = await repo.insert(buildProduct(name: 'A', order: 0));
     await repo.insert(buildProduct(name: 'B', order: 1));

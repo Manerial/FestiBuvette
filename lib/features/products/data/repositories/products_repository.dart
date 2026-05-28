@@ -7,14 +7,14 @@ class ProductsRepository {
 
   ProductsRepository(this._dbHelper);
 
-  /// Returns all active products sorted by ascending order.
+  /// Returns all active products: in-stock first (sort_order ASC), out-of-stock last.
   Future<List<Product>> getAllActive() async {
     final db = await _dbHelper.database;
     final maps = await db.query(
       'products',
       where: 'active = ?',
       whereArgs: [1],
-      orderBy: 'sort_order ASC',
+      orderBy: 'is_out_of_stock ASC, sort_order ASC',
     );
     return maps.map(Product.fromMap).toList();
   }
@@ -71,6 +71,24 @@ class ProductsRepository {
     } else {
       await db.delete('products', where: 'id = ?', whereArgs: [id]);
     }
+  }
+
+  /// Toggles the out-of-stock status of a product.
+  Future<void> toggleOutOfStock(int id) async {
+    final db = await _dbHelper.database;
+    final current = Sqflite.firstIntValue(
+          await db.rawQuery(
+            'SELECT is_out_of_stock FROM products WHERE id = ?',
+            [id],
+          ),
+        ) ??
+        0;
+    await db.update(
+      'products',
+      {'is_out_of_stock': current == 0 ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   /// Returns the next order number (= current number of active products).
