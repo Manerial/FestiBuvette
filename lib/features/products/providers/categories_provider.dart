@@ -9,11 +9,10 @@ final categoriesProvider =
 );
 
 class CategoriesNotifier extends AsyncNotifier<List<Category>> {
-  late final CategoriesRepository _repo;
+  final _repo = CategoriesRepository(DatabaseHelper.instance);
 
   @override
   Future<List<Category>> build() async {
-    _repo = CategoriesRepository(DatabaseHelper.instance);
     return _repo.getAll();
   }
 

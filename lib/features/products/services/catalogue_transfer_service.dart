@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
@@ -34,6 +35,9 @@ class CatalogueTransferService {
         _categoriesRepo = CategoriesRepository(DatabaseHelper.instance),
         _productsRepo = ProductsRepository(DatabaseHelper.instance);
 
+  static const _channel =
+      MethodChannel('com.jcbpartner.festi_buvette_app/file_saver');
+
   Future<void> exportCatalogue() async {
     final categories = await _categoriesRepo.getAll();
     final products = await _productsRepo.getAllActive();
@@ -58,10 +62,19 @@ class CatalogueTransferService {
     };
 
     final json = const JsonEncoder.withIndent('  ').convert(payload);
+
+    if (Platform.isAndroid) {
+      await _channel.invokeMethod<bool>('saveJsonFile', {
+        'fileName': 'catalogue_festibuvette.json',
+        'content': json,
+      });
+      return;
+    }
+
+    // iOS: share sheet native avec option "Enregistrer dans Fichiers"
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/catalogue_festibuvette.json');
     await file.writeAsString(json);
-
     await Share.shareXFiles(
       [XFile(file.path, mimeType: 'application/json')],
       subject: 'FestiBuvette — Catalogue',
