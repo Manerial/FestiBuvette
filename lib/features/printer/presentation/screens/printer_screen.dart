@@ -5,6 +5,9 @@ import 'package:festi_buvette_app/core/constants/app_constants.dart';
 import 'package:festi_buvette_app/features/printer/data/models/printer_device.dart';
 import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
 import 'package:festi_buvette_app/features/printer/providers/printer_provider.dart';
+import 'package:festi_buvette_app/features/products/providers/categories_provider.dart';
+import 'package:festi_buvette_app/features/products/providers/products_provider.dart';
+import 'package:festi_buvette_app/features/products/services/catalogue_transfer_service.dart';
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
@@ -92,6 +95,13 @@ class _PrinterScreenState extends ConsumerState<PrinterScreen> {
           const SizedBox(height: 16),
           _CartGridViewTile(),
           _HapticFeedbackTile(),
+
+          const SizedBox(height: 32),
+
+          // ── Catalogue ─────────────────────────────────────────────────────
+          _SectionHeader(label: l10n.catalogueSection),
+          const SizedBox(height: 4),
+          _CatalogueSection(),
 
           const SizedBox(height: 32),
 
@@ -416,6 +426,110 @@ class _LanguageSelector extends ConsumerWidget {
       onSelectionChanged: (selected) =>
           ref.read(settingsProvider.notifier).setLocale(selected.first),
     );
+  }
+}
+
+// ─── Catalogue export / import ───────────────────────────────────────────────
+
+class _CatalogueSection extends ConsumerWidget {
+  final _service = CatalogueTransferService();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      children: [
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.upload_outlined),
+          title: Text(l10n.catalogueExport),
+          subtitle: Text(l10n.catalogueExportSubtitle),
+          onTap: () => _export(context),
+        ),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.download_outlined),
+          title: Text(l10n.catalogueImport),
+          subtitle: Text(l10n.catalogueImportSubtitle),
+          onTap: () => _import(context, ref),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _export(BuildContext context) async {
+    try {
+      await _service.exportCatalogue();
+    } catch (_) {
+      // share_plus throws if the user dismisses the sheet on some platforms;
+      // treat as a silent cancel.
+    }
+  }
+
+  Future<void> _import(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final data = await _service.pickAndParseCatalogue();
+      if (data == null || !context.mounted) return;
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.catalogueImportConfirmTitle),
+          content: Text(l10n.catalogueImportConfirmMessage(
+            data.productsCount,
+            data.categoriesCount,
+          )),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.catalogueImportAction),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !context.mounted) return;
+
+      await _service.applyCatalogue(data);
+
+      ref.invalidate(productsProvider);
+      ref.invalidate(categoriesProvider);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.catalogueImported(
+              data.productsCount,
+              data.categoriesCount,
+            )),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } on FormatException {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.catalogueImportError),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.catalogueImportError),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 

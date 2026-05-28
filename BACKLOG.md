@@ -169,11 +169,13 @@
 
 ---
 
-## EPIC 9 — Export
+## EPIC 9 — Export & import
 
 - [ ] **E9-1** Export daily report as CSV (revenue, sale count, breakdown by product)
 - [ ] **E9-2** Export daily report as PDF (formatted, printable)
 - [ ] **E9-3** Share sheet integration — native share dialog (email, AirDrop, cloud…)
+- [x] **E9-4** Catalogue export — serialise active products + categories to `catalogue_festibuvette.json` (JSON v1); share via native share sheet (`share_plus`)
+- [x] **E9-5** Catalogue import — pick a JSON file (`file_picker`); confirmation dialog with counts; atomic SQLite transaction (products with sales → deactivated, others → deleted; categories replaced; IDs remapped via name); invalidates `productsProvider` + `categoriesProvider`
 
 ---
 

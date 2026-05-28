@@ -40,6 +40,11 @@ dependencies:
   # Direct vibration (bypasses Android HAPTIC_FEEDBACK_ENABLED system setting)
   vibration: ^3.1.2
 
+  # Catalogue export/import
+  share_plus: ^9.0.0
+  file_picker: ^8.0.0
+  path_provider: ^2.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

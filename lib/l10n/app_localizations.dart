@@ -715,6 +715,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Thank you!'**
   String get ticketThankYou;
+
+  /// No description provided for @catalogueSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalogue'**
+  String get catalogueSection;
+
+  /// No description provided for @catalogueExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export catalogue'**
+  String get catalogueExport;
+
+  /// No description provided for @catalogueExportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share as a JSON file to configure another phone'**
+  String get catalogueExportSubtitle;
+
+  /// No description provided for @catalogueImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import catalogue'**
+  String get catalogueImport;
+
+  /// No description provided for @catalogueImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace products and categories from a JSON file'**
+  String get catalogueImportSubtitle;
+
+  /// No description provided for @catalogueImportConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Import catalogue?'**
+  String get catalogueImportConfirmTitle;
+
+  /// No description provided for @catalogueImportConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will replace {productsCount} products and {categoriesCount} categories.\n\nSales history will be preserved.'**
+  String catalogueImportConfirmMessage(int productsCount, int categoriesCount);
+
+  /// No description provided for @catalogueImportAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get catalogueImportAction;
+
+  /// No description provided for @catalogueImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{productsCount} products and {categoriesCount} categories imported'**
+  String catalogueImported(int productsCount, int categoriesCount);
+
+  /// No description provided for @catalogueImportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Import failed: invalid or incompatible file'**
+  String get catalogueImportError;
 }
 
 class _AppLocalizationsDelegate
