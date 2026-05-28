@@ -5,13 +5,13 @@ import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:ludo_pay_app/core/constants/app_constants.dart';
-import 'package:ludo_pay_app/features/printer/data/services/ticket_service.dart';
-import 'package:ludo_pay_app/features/printer/providers/printer_provider.dart';
-import 'package:ludo_pay_app/features/report/providers/report_provider.dart';
-import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
-import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
-import 'package:ludo_pay_app/l10n/app_localizations.dart';
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
+import 'package:festi_buvette_app/features/printer/providers/printer_provider.dart';
+import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
+import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
+import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
+import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 class ReportScreen extends ConsumerWidget {
   const ReportScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:ludo_pay_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
 
 class DatabaseHelper {
   DatabaseHelper._();

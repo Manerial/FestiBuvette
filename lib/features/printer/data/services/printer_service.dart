@@ -1,5 +1,5 @@
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
-import 'package:ludo_pay_app/features/printer/data/models/printer_device.dart';
+import 'package:festi_buvette_app/features/printer/data/models/printer_device.dart';
 
 // ─── Abstract interface ────────────────────────────────────────────────────────
 // Allows mocking in unit tests without hardware.

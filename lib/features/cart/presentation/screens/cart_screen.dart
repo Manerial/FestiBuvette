@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:ludo_pay_app/core/constants/app_constants.dart';
-import 'package:ludo_pay_app/features/cart/providers/cart_provider.dart';
-import 'package:ludo_pay_app/features/printer/data/services/ticket_service.dart';
-import 'package:ludo_pay_app/features/printer/providers/printer_provider.dart';
-import 'package:ludo_pay_app/features/products/data/models/product.dart';
-import 'package:ludo_pay_app/features/products/presentation/widgets/category_filter_bar.dart';
-import 'package:ludo_pay_app/features/products/providers/categories_provider.dart';
-import 'package:ludo_pay_app/features/products/providers/products_provider.dart';
-import 'package:ludo_pay_app/features/sales/services/sale_service.dart';
-import 'package:ludo_pay_app/features/settings/providers/settings_provider.dart';
-import 'package:ludo_pay_app/l10n/app_localizations.dart';
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/features/cart/providers/cart_provider.dart';
+import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
+import 'package:festi_buvette_app/features/printer/providers/printer_provider.dart';
+import 'package:festi_buvette_app/features/products/data/models/product.dart';
+import 'package:festi_buvette_app/features/products/presentation/widgets/category_filter_bar.dart';
+import 'package:festi_buvette_app/features/products/providers/categories_provider.dart';
+import 'package:festi_buvette_app/features/products/providers/products_provider.dart';
+import 'package:festi_buvette_app/features/sales/services/sale_service.dart';
+import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
+import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 void _triggerHaptic(WidgetRef ref) {
   if (ref.read(settingsProvider).valueOrNull?.hapticFeedback ?? true) {

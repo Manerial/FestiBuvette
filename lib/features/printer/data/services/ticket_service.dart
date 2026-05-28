@@ -1,8 +1,8 @@
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:intl/intl.dart';
-import 'package:ludo_pay_app/features/products/data/models/category.dart';
-import 'package:ludo_pay_app/features/products/data/models/product.dart';
-import 'package:ludo_pay_app/features/sales/data/models/sale.dart';
+import 'package:festi_buvette_app/features/products/data/models/category.dart';
+import 'package:festi_buvette_app/features/products/data/models/product.dart';
+import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
 
 /// Builds ESC/POS byte sequences for the 58mm NETUM NT-1809DD thermal printer.
 class TicketService {

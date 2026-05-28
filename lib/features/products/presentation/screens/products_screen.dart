@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:ludo_pay_app/features/products/data/models/category.dart';
-import 'package:ludo_pay_app/features/products/data/models/product.dart';
-import 'package:ludo_pay_app/features/products/presentation/widgets/category_filter_bar.dart';
-import 'package:ludo_pay_app/features/products/presentation/widgets/category_form_dialog.dart';
-import 'package:ludo_pay_app/features/products/presentation/widgets/product_form_dialog.dart';
-import 'package:ludo_pay_app/features/products/providers/categories_provider.dart';
-import 'package:ludo_pay_app/features/products/providers/products_provider.dart';
-import 'package:ludo_pay_app/l10n/app_localizations.dart';
+import 'package:festi_buvette_app/features/products/data/models/category.dart';
+import 'package:festi_buvette_app/features/products/data/models/product.dart';
+import 'package:festi_buvette_app/features/products/presentation/widgets/category_filter_bar.dart';
+import 'package:festi_buvette_app/features/products/presentation/widgets/category_form_dialog.dart';
+import 'package:festi_buvette_app/features/products/presentation/widgets/product_form_dialog.dart';
+import 'package:festi_buvette_app/features/products/providers/categories_provider.dart';
+import 'package:festi_buvette_app/features/products/providers/products_provider.dart';
+import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 class ProductsScreen extends ConsumerStatefulWidget {
   const ProductsScreen({super.key});

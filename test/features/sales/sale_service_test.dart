@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ludo_pay_app/core/database/database_helper.dart';
-import 'package:ludo_pay_app/features/products/data/models/product.dart';
-import 'package:ludo_pay_app/features/sales/data/repositories/sales_repository.dart';
-import 'package:ludo_pay_app/features/sales/services/sale_service.dart';
+import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/features/products/data/models/product.dart';
+import 'package:festi_buvette_app/features/sales/data/repositories/sales_repository.dart';
+import 'package:festi_buvette_app/features/sales/services/sale_service.dart';
 
 import '../../helpers/database_test_helper.dart';
 

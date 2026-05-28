@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ludo_pay_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 

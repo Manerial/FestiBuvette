@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ludo_pay_app/features/products/data/models/product.dart';
+import 'package:festi_buvette_app/features/products/data/models/product.dart';
 
 final cartProvider = NotifierProvider<CartNotifier, CartState>(CartNotifier.new);
 

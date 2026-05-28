@@ -1,6 +1,6 @@
 import 'package:sqflite/sqflite.dart';
-import 'package:ludo_pay_app/core/database/database_helper.dart';
-import 'package:ludo_pay_app/features/products/data/models/category.dart';
+import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/features/products/data/models/category.dart';
 
 class CategoriesRepository {
   final DatabaseHelper _dbHelper;

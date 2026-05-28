@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ludo_pay_app/l10n/app_localizations.dart';
+import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
