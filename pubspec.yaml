@@ -37,6 +37,9 @@ dependencies:
   # Runtime permissions (Bluetooth scan/connect on Android 12+, Bluetooth on iOS)
   permission_handler: ^11.3.0
 
+  # Direct vibration (bypasses Android HAPTIC_FEEDBACK_ENABLED system setting)
+  vibration: ^3.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
