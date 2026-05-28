@@ -124,6 +124,8 @@
   "changeDue": "Change",
   "insufficientAmount": "Insufficient amount",
 
+  "outOfStock": "Out of stock",
+
   "ticketOtherCategory": "OTHER",
   "ticketThankYou": "Thank you!",
 

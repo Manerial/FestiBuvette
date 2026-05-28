@@ -344,6 +344,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get insufficientAmount => 'Montant insuffisant';
 
   @override
+  String get outOfStock => 'Rupture de stock';
+
+  @override
   String get ticketOtherCategory => 'AUTRES';
 
   @override

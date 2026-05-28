@@ -704,6 +704,12 @@ abstract class AppLocalizations {
   /// **'Insufficient amount'**
   String get insufficientAmount;
 
+  /// No description provided for @outOfStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of stock'**
+  String get outOfStock;
+
   /// No description provided for @ticketOtherCategory.
   ///
   /// In en, this message translates to:
