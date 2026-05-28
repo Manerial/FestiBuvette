@@ -341,6 +341,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get outOfStock => 'Out of stock';
 
   @override
+  String get markAsOutOfStock => 'Mark as out of stock';
+
+  @override
+  String get markAsInStock => 'Mark as available';
+
+  @override
   String get ticketOtherCategory => 'OTHER';
 
   @override

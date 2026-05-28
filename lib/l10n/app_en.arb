@@ -125,6 +125,8 @@
   "insufficientAmount": "Insufficient amount",
 
   "outOfStock": "Out of stock",
+  "markAsOutOfStock": "Mark as out of stock",
+  "markAsInStock": "Mark as available",
 
   "ticketOtherCategory": "OTHER",
   "ticketThankYou": "Thank you!",

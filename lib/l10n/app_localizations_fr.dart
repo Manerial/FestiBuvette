@@ -347,6 +347,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get outOfStock => 'Rupture de stock';
 
   @override
+  String get markAsOutOfStock => 'Marquer en rupture de stock';
+
+  @override
+  String get markAsInStock => 'Marquer comme disponible';
+
+  @override
   String get ticketOtherCategory => 'AUTRES';
 
   @override
