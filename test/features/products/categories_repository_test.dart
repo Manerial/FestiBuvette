@@ -102,6 +102,37 @@ void main() {
     expect(rows.first['category_id'], isNull);
   });
 
+  test('delete uncategorizes all products when multiple belong to the category', () async {
+    final categoryId = await repo.insert(buildCategory());
+    final productsRepo = ProductsRepository(helper);
+
+    final id1 = await productsRepo.insert(Product(
+      name: 'Beer',
+      price: 3.0,
+      order: 0,
+      createdAt: '2026-01-01T00:00:00.000',
+      categoryId: categoryId,
+    ));
+    final id2 = await productsRepo.insert(Product(
+      name: 'Wine',
+      price: 4.5,
+      order: 1,
+      createdAt: '2026-01-01T00:00:00.000',
+      categoryId: categoryId,
+    ));
+
+    await repo.delete(categoryId);
+
+    final db = await helper.database;
+    final rows = await db.query(
+      'products',
+      where: 'id IN (?, ?)',
+      whereArgs: [id1, id2],
+    );
+    expect(rows.length, 2);
+    expect(rows.every((r) => r['category_id'] == null), isTrue);
+  });
+
   // ─── nextOrder ──────────────────────────────────────────────────────────────
 
   test('nextOrder returns 0 when no categories exist', () async {

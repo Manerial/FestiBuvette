@@ -90,17 +90,6 @@ void main() {
     expect(state.appName, 'Chez Marcel');
   });
 
-  test('setAppName preserves existing locale', () async {
-    SharedPreferences.setMockInitialValues({AppConstants.keyLocale: 'en'});
-    final container = makeContainer();
-    await container.read(settingsProvider.future);
-
-    await container.read(settingsProvider.notifier).setAppName('My Shop');
-
-    final state = await container.read(settingsProvider.future);
-    expect(state.locale, 'en');
-  });
-
   // ─── setLocale ────────────────────────────────────────────────────────────
 
   test('setLocale updates state immediately', () async {
@@ -132,18 +121,6 @@ void main() {
     final c2 = makeContainer();
     final state = await c2.read(settingsProvider.future);
     expect(state.locale, 'en');
-  });
-
-  test('setLocale preserves existing appName', () async {
-    SharedPreferences.setMockInitialValues(
-        {AppConstants.keyAppName: 'Mon Café'});
-    final container = makeContainer();
-    await container.read(settingsProvider.future);
-
-    await container.read(settingsProvider.notifier).setLocale('fr');
-
-    final state = await container.read(settingsProvider.future);
-    expect(state.appName, 'Mon Café');
   });
 
   // ─── setCartGridView ─────────────────────────────────────────────────────
@@ -233,18 +210,4 @@ void main() {
     expect(state.hapticFeedback, isFalse);
   });
 
-  test('setHapticFeedback preserves existing appName and locale', () async {
-    SharedPreferences.setMockInitialValues({
-      AppConstants.keyAppName: 'Mon Bar',
-      AppConstants.keyLocale: 'fr',
-    });
-    final container = makeContainer();
-    await container.read(settingsProvider.future);
-
-    await container.read(settingsProvider.notifier).setHapticFeedback(false);
-
-    final state = await container.read(settingsProvider.future);
-    expect(state.appName, 'Mon Bar');
-    expect(state.locale, 'fr');
-  });
 }

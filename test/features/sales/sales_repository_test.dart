@@ -311,6 +311,28 @@ void main() {
 
   // ─── getTotalsByProduct ─────────────────────────────────────────────────────
 
+  test('getTotalsByProduct returns empty after all sales are deleted', () async {
+    final day = await repo.getOrCreateToday();
+
+    final sale = await repo.insertSaleWithLines(
+      sale: buildSale(businessDayId: day.id!),
+      lines: [
+        SaleLine(
+          saleId: 0,
+          productId: 1,
+          nameSnapshot: 'Coffee',
+          priceSnapshot: 2.5,
+          quantity: 2,
+          subtotal: 5.0,
+        ),
+      ],
+    );
+
+    await repo.deleteSale(sale);
+
+    expect(await repo.getTotalsByProduct(day.id!), isEmpty);
+  });
+
   test('getTotalsByProduct returns aggregated data per product', () async {
     final day = await repo.getOrCreateToday();
 

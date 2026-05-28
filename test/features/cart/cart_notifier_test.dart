@@ -162,6 +162,24 @@ void main() {
     );
   });
 
+  test('calculateTotal returns 0 when cart product id is absent from product list', () {
+    final container = makeContainer();
+    container.read(cartProvider.notifier).increment(99); // id 99 not in catalogue
+    final products = [product(1, 2.5), product(2, 1.0)];
+    expect(container.read(cartProvider.notifier).calculateTotal(products), 0.0);
+  });
+
+  test('calculateTotal handles price 0.0 (free product) correctly', () {
+    final container = makeContainer();
+    container.read(cartProvider.notifier).increment(1);
+    container.read(cartProvider.notifier).increment(2);
+    final products = [product(1, 0.0), product(2, 1.0)];
+    expect(
+      container.read(cartProvider.notifier).calculateTotal(products),
+      closeTo(1.0, 0.001),
+    );
+  });
+
   // ─── setTenderedAmount ─────────────────────────────────────────────────────
 
   test('setTenderedAmount updates tenderedAmount', () {
