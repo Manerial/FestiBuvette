@@ -94,6 +94,9 @@
   "settingsCartGridView": "Vue en grille",
   "settingsCartGridViewSubtitle": "Afficher les produits en tuiles dans le panier",
 
+  "settingsHapticFeedback": "Retour haptique",
+  "settingsHapticFeedbackSubtitle": "Vibrer lors des appuis sur + / -",
+
   "allCategories": "Tout",
   "categoriesTabLabel": "Catégories",
   "addCategoryTooltip": "Ajouter une catégorie",

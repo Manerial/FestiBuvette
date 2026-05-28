@@ -277,6 +277,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Display products as tiles in the cart';
 
   @override
+  String get settingsHapticFeedback => 'Haptic feedback';
+
+  @override
+  String get settingsHapticFeedbackSubtitle => 'Vibrate on + / - button press';
+
+  @override
   String get allCategories => 'All';
 
   @override

@@ -101,6 +101,9 @@
   "settingsCartGridView": "Grid view",
   "settingsCartGridViewSubtitle": "Display products as tiles in the cart",
 
+  "settingsHapticFeedback": "Haptic feedback",
+  "settingsHapticFeedbackSubtitle": "Vibrate on + / - button press",
+
   "allCategories": "All",
   "categoriesTabLabel": "Categories",
   "addCategoryTooltip": "Add a category",
