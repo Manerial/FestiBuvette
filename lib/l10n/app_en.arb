@@ -125,5 +125,28 @@
   "insufficientAmount": "Insufficient amount",
 
   "ticketOtherCategory": "OTHER",
-  "ticketThankYou": "Thank you!"
+  "ticketThankYou": "Thank you!",
+
+  "catalogueSection": "Catalogue",
+  "catalogueExport": "Export catalogue",
+  "catalogueExportSubtitle": "Share as a JSON file to configure another phone",
+  "catalogueImport": "Import catalogue",
+  "catalogueImportSubtitle": "Replace products and categories from a JSON file",
+  "catalogueImportConfirmTitle": "Import catalogue?",
+  "catalogueImportConfirmMessage": "This will replace {productsCount} products and {categoriesCount} categories.\n\nSales history will be preserved.",
+  "@catalogueImportConfirmMessage": {
+    "placeholders": {
+      "productsCount": { "type": "int" },
+      "categoriesCount": { "type": "int" }
+    }
+  },
+  "catalogueImportAction": "Import",
+  "catalogueImported": "{productsCount} products and {categoriesCount} categories imported",
+  "@catalogueImported": {
+    "placeholders": {
+      "productsCount": { "type": "int" },
+      "categoriesCount": { "type": "int" }
+    }
+  },
+  "catalogueImportError": "Import failed: invalid or incompatible file"
 }

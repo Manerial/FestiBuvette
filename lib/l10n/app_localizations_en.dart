@@ -342,4 +342,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ticketThankYou => 'Thank you!';
+
+  @override
+  String get catalogueSection => 'Catalogue';
+
+  @override
+  String get catalogueExport => 'Export catalogue';
+
+  @override
+  String get catalogueExportSubtitle =>
+      'Share as a JSON file to configure another phone';
+
+  @override
+  String get catalogueImport => 'Import catalogue';
+
+  @override
+  String get catalogueImportSubtitle =>
+      'Replace products and categories from a JSON file';
+
+  @override
+  String get catalogueImportConfirmTitle => 'Import catalogue?';
+
+  @override
+  String catalogueImportConfirmMessage(int productsCount, int categoriesCount) {
+    return 'This will replace $productsCount products and $categoriesCount categories.\n\nSales history will be preserved.';
+  }
+
+  @override
+  String get catalogueImportAction => 'Import';
+
+  @override
+  String catalogueImported(int productsCount, int categoriesCount) {
+    return '$productsCount products and $categoriesCount categories imported';
+  }
+
+  @override
+  String get catalogueImportError =>
+      'Import failed: invalid or incompatible file';
 }

@@ -120,7 +120,13 @@ La langue est détectée automatiquement depuis les paramètres du device. Fallb
 **Ce qu'il faut couvrir par couche :**
 - Repository : toutes les opérations CRUD + cas limites (soft delete, contraintes…) avec une BDD en mémoire via `sqflite_common_ffi`
 - Notifier : toutes les transitions d'état (valeur initiale, chaque méthode publique)
-- Service : logique métier (cas nominal + cas d'erreur)|
+- Service : logique métier (cas nominal + cas d'erreur)
+
+**Quoi tester :**
+- Le cas nominal documenté
+- Les cas limites pertinents
+- Les cas d'erreur attendus
+- Le test doit échouer si on enlève la logique principale de la fonction.
 
 ---
 

@@ -118,5 +118,16 @@
   "insufficientAmount": "Montant insuffisant",
 
   "ticketOtherCategory": "AUTRES",
-  "ticketThankYou": "Merci !"
+  "ticketThankYou": "Merci !",
+
+  "catalogueSection": "Catalogue",
+  "catalogueExport": "Exporter le catalogue",
+  "catalogueExportSubtitle": "Partager en JSON pour configurer un autre téléphone",
+  "catalogueImport": "Importer un catalogue",
+  "catalogueImportSubtitle": "Remplacer les produits et catégories depuis un fichier JSON",
+  "catalogueImportConfirmTitle": "Importer le catalogue ?",
+  "catalogueImportConfirmMessage": "Cela remplacera {productsCount} produits et {categoriesCount} catégories.\n\nL'historique des ventes sera conservé.",
+  "catalogueImportAction": "Importer",
+  "catalogueImported": "{productsCount} produits et {categoriesCount} catégories importés",
+  "catalogueImportError": "Importation échouée : fichier invalide ou incompatible"
 }
