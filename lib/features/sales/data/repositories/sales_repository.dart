@@ -86,6 +86,19 @@ class SalesRepository {
     );
   }
 
+  /// Closes all past business days that were left open.
+  /// Sets closed_at to the end of that day (23:59:00.000).
+  /// [today] must be an ISO date string (yyyy-MM-dd). Called once on app launch.
+  Future<void> autoCloseUnclosedPastDays(String today) async {
+    final db = await _dbHelper.database;
+    await db.rawUpdate(
+      "UPDATE business_days"
+      " SET closed_at = date || 'T23:59:00.000'"
+      " WHERE date < ? AND closed_at IS NULL",
+      [today],
+    );
+  }
+
   // ─── Sales ─────────────────────────────────────────────────────────────────
 
   /// Inserts a sale AND its lines in an atomic transaction.

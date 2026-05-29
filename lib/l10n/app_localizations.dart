@@ -488,6 +488,42 @@ abstract class AppLocalizations {
   /// **'Closed at {time}'**
   String reportDayClosed(String time);
 
+  /// No description provided for @startDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Start day'**
+  String get startDay;
+
+  /// No description provided for @startDayConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the service? The catalog will be locked.'**
+  String get startDayConfirm;
+
+  /// No description provided for @dayNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Day not started'**
+  String get dayNotStarted;
+
+  /// No description provided for @catalogLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Service in progress — catalog locked'**
+  String get catalogLocked;
+
+  /// No description provided for @reopenDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-open day'**
+  String get reopenDay;
+
+  /// No description provided for @reopenDayConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-open the day? Sales will be possible again.'**
+  String get reopenDayConfirm;
+
   /// No description provided for @reportCloseDayTitle.
   ///
   /// In en, this message translates to:
@@ -497,7 +533,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportCloseDayMessage.
   ///
   /// In en, this message translates to:
-  /// **'A closed day can be reopen if an other sale is done the same day.'**
+  /// **'A closed day can be reopened from the report screen.'**
   String get reportCloseDayMessage;
 
   /// No description provided for @reportDeleteSaleTitle.

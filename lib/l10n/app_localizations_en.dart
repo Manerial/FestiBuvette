@@ -225,11 +225,31 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get startDay => 'Start day';
+
+  @override
+  String get startDayConfirm =>
+      'Start the service? The catalog will be locked.';
+
+  @override
+  String get dayNotStarted => 'Day not started';
+
+  @override
+  String get catalogLocked => 'Service in progress — catalog locked';
+
+  @override
+  String get reopenDay => 'Re-open day';
+
+  @override
+  String get reopenDayConfirm =>
+      'Re-open the day? Sales will be possible again.';
+
+  @override
   String get reportCloseDayTitle => 'Close today\'s session?';
 
   @override
   String get reportCloseDayMessage =>
-      'A closed day can be reopen if an other sale is done the same day.';
+      'A closed day can be reopened from the report screen.';
 
   @override
   String get reportDeleteSaleTitle => 'Delete sale?';

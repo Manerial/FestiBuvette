@@ -385,4 +385,88 @@ void main() {
     expect(water['total_quantity'], 3);
     expect((water['product_total'] as num).toDouble(), closeTo(3.0, 0.001));
   });
+
+  // ─── autoCloseUnclosedPastDays ────────────────────────────────────────────────
+
+  test('autoCloseUnclosedPastDays closes a past unclosed day at 23:59',
+      () async {
+    final db = await helper.database;
+    await db.insert('business_days', {
+      'date': '2026-01-01',
+      'total_revenue': 0.0,
+      'sale_count': 0,
+      'closed_at': null,
+    });
+
+    await repo.autoCloseUnclosedPastDays('2026-01-02');
+
+    final rows = await db.query('business_days',
+        where: "date = '2026-01-01'");
+    expect(rows.first['closed_at'], '2026-01-01T23:59:00.000');
+  });
+
+  test('autoCloseUnclosedPastDays closes multiple past unclosed days',
+      () async {
+    final db = await helper.database;
+    for (final date in ['2026-01-01', '2026-01-02', '2026-01-03']) {
+      await db.insert('business_days', {
+        'date': date,
+        'total_revenue': 0.0,
+        'sale_count': 0,
+        'closed_at': null,
+      });
+    }
+
+    await repo.autoCloseUnclosedPastDays('2026-01-04');
+
+    final rows =
+        await db.query('business_days', orderBy: 'date ASC');
+    for (final row in rows) {
+      expect(row['closed_at'], isNotNull);
+      expect(row['closed_at'] as String, endsWith('T23:59:00.000'));
+    }
+  });
+
+  test('autoCloseUnclosedPastDays does not touch today', () async {
+    final db = await helper.database;
+    const today = '2026-01-04';
+    await db.insert('business_days', {
+      'date': today,
+      'total_revenue': 0.0,
+      'sale_count': 0,
+      'closed_at': null,
+    });
+
+    await repo.autoCloseUnclosedPastDays(today);
+
+    final rows =
+        await db.query('business_days', where: "date = '$today'");
+    expect(rows.first['closed_at'], isNull);
+  });
+
+  test('autoCloseUnclosedPastDays does not affect already closed days',
+      () async {
+    final db = await helper.database;
+    const closedAt = '2026-01-01T14:30:00.000';
+    await db.insert('business_days', {
+      'date': '2026-01-01',
+      'total_revenue': 0.0,
+      'sale_count': 0,
+      'closed_at': closedAt,
+    });
+
+    await repo.autoCloseUnclosedPastDays('2026-01-02');
+
+    final rows =
+        await db.query('business_days', where: "date = '2026-01-01'");
+    expect(rows.first['closed_at'], closedAt);
+  });
+
+  test('autoCloseUnclosedPastDays is a no-op when no past days exist',
+      () async {
+    await repo.autoCloseUnclosedPastDays('2026-01-02');
+
+    final rows = await (await helper.database).query('business_days');
+    expect(rows, isEmpty);
+  });
 }
