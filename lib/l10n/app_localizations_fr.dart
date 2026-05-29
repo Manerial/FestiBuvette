@@ -229,11 +229,31 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get startDay => 'Démarrer la journée';
+
+  @override
+  String get startDayConfirm =>
+      'Démarrer le service ? Le catalogue sera verrouillé.';
+
+  @override
+  String get dayNotStarted => 'Journée non démarrée';
+
+  @override
+  String get catalogLocked => 'Service en cours — catalogue verrouillé';
+
+  @override
+  String get reopenDay => 'Ré-ouvrir la journée';
+
+  @override
+  String get reopenDayConfirm =>
+      'Ré-ouvrir la journée ? Les ventes seront à nouveau possibles.';
+
+  @override
   String get reportCloseDayTitle => 'Clôturer la session ?';
 
   @override
   String get reportCloseDayMessage =>
-      'Une journée cloturée pourra être rouverte si une nouvelle vente est faite le même jour.';
+      'Une journée clôturée peut être ré-ouverte depuis l\'écran rapport.';
 
   @override
   String get reportDeleteSaleTitle => 'Supprimer la vente ?';

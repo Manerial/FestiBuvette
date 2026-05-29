@@ -8,6 +8,7 @@ import 'package:festi_buvette_app/features/products/presentation/widgets/categor
 import 'package:festi_buvette_app/features/products/presentation/widgets/product_form_dialog.dart';
 import 'package:festi_buvette_app/features/products/providers/categories_provider.dart';
 import 'package:festi_buvette_app/features/products/providers/products_provider.dart';
+import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 class ProductsScreen extends ConsumerStatefulWidget {
@@ -25,6 +26,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final categories = ref.watch(categoriesProvider).valueOrNull ?? [];
+    final locked = ref.watch(isCatalogLockedProvider);
 
     // If the selected category was deleted, fall back to "All".
     // The uncategorized sentinel (-1) is always valid.
@@ -36,6 +38,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
     return Column(
       children: [
+        // ── Catalog locked banner ──────────────────────────────────────────
+        if (locked) _CatalogLockedBanner(),
+
         // ── View switcher ──────────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -53,13 +58,43 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         // ── Active view ────────────────────────────────────────────────────
         Expanded(
           child: _showCategories
-              ? const _CategoriesSection()
+              ? _CategoriesSection(locked: locked)
               : _ProductsSection(
                   selectedCategoryId: effectiveCategoryId,
                   onSelect: (id) => setState(() => _selectedCategoryId = id),
+                  locked: locked,
                 ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Catalog locked banner ────────────────────────────────────────────────────
+
+class _CatalogLockedBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final cs = Theme.of(context).colorScheme;
+    return ColoredBox(
+      color: cs.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Row(
+          children: [
+            Icon(Icons.lock_outline, size: 16, color: cs.onPrimaryContainer),
+            const SizedBox(width: 8),
+            Text(
+              l10n.catalogLocked,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: cs.onPrimaryContainer,
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -69,10 +104,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 class _ProductsSection extends ConsumerWidget {
   final int? selectedCategoryId;
   final ValueChanged<int?> onSelect;
+  final bool locked;
 
   const _ProductsSection({
     required this.selectedCategoryId,
     required this.onSelect,
+    required this.locked,
   });
 
   @override
@@ -105,27 +142,28 @@ class _ProductsSection extends ConsumerWidget {
               child: Stack(
                 children: [
                   if (products.isEmpty)
-                    _EmptyProductsState(ref: ref)
+                    _EmptyProductsState(locked: locked)
                   else if (filtered.isEmpty)
                     const _EmptyCategoryState()
                   else
-                    _ProductList(products: filtered),
-                  Positioned(
-                    bottom: 24,
-                    right: 16,
-                    child: FloatingActionButton(
-                      heroTag: 'fab_products',
-                      tooltip: l10n.addProductTooltip,
-                      onPressed: () => showProductFormDialog(
-                        context,
-                        defaultCategoryId:
-                            selectedCategoryId == CategoryFilterBar.uncategorizedId
-                                ? null
-                                : selectedCategoryId,
+                    _ProductList(products: filtered, locked: locked),
+                  if (!locked)
+                    Positioned(
+                      bottom: 24,
+                      right: 16,
+                      child: FloatingActionButton(
+                        heroTag: 'fab_products',
+                        tooltip: l10n.addProductTooltip,
+                        onPressed: () => showProductFormDialog(
+                          context,
+                          defaultCategoryId:
+                              selectedCategoryId == CategoryFilterBar.uncategorizedId
+                                  ? null
+                                  : selectedCategoryId,
+                        ),
+                        child: const Icon(Icons.add),
                       ),
-                      child: const Icon(Icons.add),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -139,7 +177,8 @@ class _ProductsSection extends ConsumerWidget {
 // ─── Categories section ───────────────────────────────────────────────────────
 
 class _CategoriesSection extends ConsumerWidget {
-  const _CategoriesSection();
+  final bool locked;
+  const _CategoriesSection({required this.locked});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -164,14 +203,15 @@ class _CategoriesSection extends ConsumerWidget {
                       ?.copyWith(color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.tapPlusToAddCategory,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodySmall
-                      ?.copyWith(color: Colors.grey.shade500),
-                  textAlign: TextAlign.center,
-                ),
+                if (!locked)
+                  Text(
+                    l10n.tapPlusToAddCategory,
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: Colors.grey.shade500),
+                    textAlign: TextAlign.center,
+                  ),
               ],
             ),
           )
@@ -185,18 +225,20 @@ class _CategoriesSection extends ConsumerWidget {
               key: ValueKey(categories[i].id),
               category: categories[i],
               index: i,
+              locked: locked,
             ),
           ),
-        Positioned(
-          bottom: 24,
-          right: 16,
-          child: FloatingActionButton(
-            heroTag: 'fab_categories',
-            tooltip: l10n.addCategoryTooltip,
-            onPressed: () => showCategoryFormDialog(context, ref),
-            child: const Icon(Icons.add),
+        if (!locked)
+          Positioned(
+            bottom: 24,
+            right: 16,
+            child: FloatingActionButton(
+              heroTag: 'fab_categories',
+              tooltip: l10n.addCategoryTooltip,
+              onPressed: () => showCategoryFormDialog(context, ref),
+              child: const Icon(Icons.add),
+            ),
           ),
-        ),
       ],
     );
   }
@@ -207,7 +249,13 @@ class _CategoriesSection extends ConsumerWidget {
 class _CategoryTile extends ConsumerWidget {
   final Category category;
   final int index;
-  const _CategoryTile({super.key, required this.category, required this.index});
+  final bool locked;
+  const _CategoryTile({
+    super.key,
+    required this.category,
+    required this.index,
+    required this.locked,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -220,6 +268,7 @@ class _CategoryTile extends ConsumerWidget {
       onEdit: () => showCategoryFormDialog(context, ref, category: category),
       onDeleteConfirmed: () =>
           ref.read(categoriesProvider.notifier).delete(category.id!),
+      locked: locked,
     );
   }
 }
@@ -235,6 +284,7 @@ class _ReorderableTile extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDeleteConfirmed;
   final Widget? leadingTrailingAction;
+  final bool locked;
 
   const _ReorderableTile({
     required this.index,
@@ -245,10 +295,30 @@ class _ReorderableTile extends StatelessWidget {
     required this.onEdit,
     required this.onDeleteConfirmed,
     this.leadingTrailingAction,
+    this.locked = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final editDeleteButtons = locked
+        ? const <Widget>[]
+        : [
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: onEdit,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              color: Colors.red,
+              onPressed: () => _handleDelete(context),
+            ),
+          ];
+
+    final trailingWidgets = [
+      ?leadingTrailingAction,
+      ...editDeleteButtons,
+    ];
+
     return ListTile(
       leading: ReorderableDragStartListener(
         index: index,
@@ -256,21 +326,9 @@ class _ReorderableTile extends StatelessWidget {
       ),
       title: Text(title),
       subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ?leadingTrailingAction,
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: onEdit,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete_outline),
-            color: Colors.red,
-            onPressed: () => _handleDelete(context),
-          ),
-        ],
-      ),
+      trailing: trailingWidgets.isEmpty
+          ? null
+          : Row(mainAxisSize: MainAxisSize.min, children: trailingWidgets),
     );
   }
 
@@ -304,8 +362,9 @@ class _ReorderableTile extends StatelessWidget {
 
 class _ProductList extends ConsumerWidget {
   final List<Product> products;
+  final bool locked;
 
-  const _ProductList({required this.products});
+  const _ProductList({required this.products, required this.locked});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -321,6 +380,7 @@ class _ProductList extends ConsumerWidget {
           key: ValueKey(product.id),
           product: product,
           index: index,
+          locked: locked,
         );
       },
     );
@@ -332,11 +392,13 @@ class _ProductList extends ConsumerWidget {
 class _ProductTile extends ConsumerWidget {
   final Product product;
   final int index;
+  final bool locked;
 
   const _ProductTile({
     super.key,
     required this.product,
     required this.index,
+    required this.locked,
   });
 
   static final _priceFmt = NumberFormat.currency(
@@ -370,6 +432,7 @@ class _ProductTile extends ConsumerWidget {
         onPressed: () =>
             ref.read(productsProvider.notifier).toggleOutOfStock(product.id!),
       ),
+      locked: locked,
     );
   }
 }
@@ -377,8 +440,8 @@ class _ProductTile extends ConsumerWidget {
 // ─── Empty states ─────────────────────────────────────────────────────────────
 
 class _EmptyProductsState extends StatelessWidget {
-  final WidgetRef ref;
-  const _EmptyProductsState({required this.ref});
+  final bool locked;
+  const _EmptyProductsState({required this.locked});
 
   @override
   Widget build(BuildContext context) {
@@ -397,15 +460,17 @@ class _EmptyProductsState extends StatelessWidget {
                 .titleMedium
                 ?.copyWith(color: Colors.grey.shade600),
           ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.tapPlusToAddProduct,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: Colors.grey.shade500),
-            textAlign: TextAlign.center,
-          ),
+          if (!locked) ...[
+            const SizedBox(height: 8),
+            Text(
+              l10n.tapPlusToAddProduct,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: Colors.grey.shade500),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ],
       ),
     );

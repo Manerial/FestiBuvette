@@ -24,35 +24,7 @@ class ReportScreen extends ConsumerWidget {
     return reportAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text(l10n.errorMessage(e))),
-      data: (report) => report.allDays.isNotEmpty
-          ? _ReportContent(report: report)
-          : _EmptyState(),
-    );
-  }
-}
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
-
-class _EmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.receipt_long_outlined,
-              size: 72, color: Colors.grey.shade400),
-          const SizedBox(height: 16),
-          Text(
-            l10n.reportNoSalesToday,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Colors.grey.shade600),
-          ),
-        ],
-      ),
+      data: (report) => _ReportContent(report: report),
     );
   }
 }
@@ -94,40 +66,103 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
 
         const SizedBox(height: 16),
 
-        // ── View selector ───────────────────────────────────────────────────
-        SegmentedButton<_ReportView>(
-          showSelectedIcon: false,
-          segments: [
-            ButtonSegment(
-                value: _ReportView.byCart,
-                label: Text(l10n.reportByCart)
+        if (report.isTodayVirtual) ...[
+          // ── Not started state ────────────────────────────────────────────
+          const _NotStartedState(),
+        ] else ...[
+          // ── View selector ────────────────────────────────────────────────
+          SegmentedButton<_ReportView>(
+            showSelectedIcon: false,
+            segments: [
+              ButtonSegment(
+                  value: _ReportView.byCart,
+                  label: Text(l10n.reportByCart)),
+              ButtonSegment(
+                value: _ReportView.byProduct,
+                label: Text(l10n.reportByProduct),
+              ),
+              ButtonSegment(
+                value: _ReportView.byHour,
+                label: Text(l10n.reportByHour),
+              ),
+            ],
+            selected: {_view},
+            onSelectionChanged: (s) => setState(() => _view = s.first),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Breakdown ────────────────────────────────────────────────────
+          if (_view == _ReportView.byProduct)
+            _ProductView(productTotals: report.productTotals)
+          else if (_view == _ReportView.byCart)
+            _CartView(sales: report.sales)
+          else
+            _HourlyView(
+              products: report.hourlyProducts,
+              hourlyData: report.hourlyData,
             ),
-            ButtonSegment(
-              value: _ReportView.byProduct,
-              label: Text(l10n.reportByProduct)
+        ],
+      ],
+    );
+  }
+}
+
+// ─── Not started state ────────────────────────────────────────────────────────
+
+class _NotStartedState extends ConsumerWidget {
+  const _NotStartedState();
+
+  Future<void> _startDay(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.startDay),
+        content: Text(l10n.startDayConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await ref.read(reportProvider.notifier).startDay();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.today_outlined, size: 72, color: Colors.grey.shade400),
+            const SizedBox(height: 16),
+            Text(
+              l10n.dayNotStarted,
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(color: Colors.grey.shade600),
             ),
-            ButtonSegment(
-              value: _ReportView.byHour,
-              label: Text(l10n.reportByHour)
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: () => _startDay(context, ref),
+              child: Text(l10n.startDay),
             ),
           ],
-          selected: {_view},
-          onSelectionChanged: (s) => setState(() => _view = s.first),
         ),
-
-        const SizedBox(height: 16),
-
-        // ── Breakdown ───────────────────────────────────────────────────────
-        if (_view == _ReportView.byProduct)
-          _ProductView(productTotals: report.productTotals)
-        else if (_view == _ReportView.byCart)
-          _CartView(sales: report.sales)
-        else
-          _HourlyView(
-            products: report.hourlyProducts,
-            hourlyData: report.hourlyData,
-          ),
-      ],
+      ),
     );
   }
 }
@@ -141,12 +176,25 @@ class _SummaryCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final day = report.day!;
     final locale = Localizations.localeOf(context).toString();
-    final dateStr = DateFormat.yMMMMEEEEd(locale).format(
-      DateFormat('yyyy-MM-dd').parse(day.date),
-    );
     final notifier = ref.read(reportProvider.notifier);
+
+    final String dateStr;
+    final int saleCount;
+    final double revenue;
+
+    if (report.isTodayVirtual) {
+      dateStr = DateFormat.yMMMMEEEEd(locale).format(DateTime.now());
+      saleCount = 0;
+      revenue = 0.0;
+    } else {
+      final day = report.day!;
+      dateStr = DateFormat.yMMMMEEEEd(locale).format(
+        DateFormat('yyyy-MM-dd').parse(day.date),
+      );
+      saleCount = day.saleCount;
+      revenue = day.totalRevenue;
+    }
 
     return Card(
       child: Padding(
@@ -184,11 +232,11 @@ class _SummaryCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n.reportSaleCount(day.saleCount),
+                  l10n.reportSaleCount(saleCount),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 Text(
-                  _kCurrencyFmt.format(day.totalRevenue),
+                  _kCurrencyFmt.format(revenue),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
@@ -196,19 +244,28 @@ class _SummaryCard extends ConsumerWidget {
                 ),
               ],
             ),
-            // ── Status ──────────────────────────────────────────────────────
-            if (day.isClosed) ...[
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: _ClosedBadge(closedAt: day.closedAt!),
-              ),
-            ] else if (report.isDayToday) ...[
-              const SizedBox(height: 12),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: const _CloseDayButton(),
-              ),
+            // ── Status (real days only) ──────────────────────────────────────
+            if (!report.isTodayVirtual) ...[
+              if (report.day!.isClosed) ...[
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: _ClosedBadge(closedAt: report.day!.closedAt!),
+                ),
+                if (report.isDayToday) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: const _ReopenDayButton(),
+                  ),
+                ],
+              ] else if (report.isDayToday) ...[
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: const _CloseDayButton(),
+                ),
+              ],
             ],
           ],
         ),
@@ -808,6 +865,45 @@ class _HourlyViewState extends State<_HourlyView> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─── Reopen day button ────────────────────────────────────────────────────────
+
+class _ReopenDayButton extends ConsumerWidget {
+  const _ReopenDayButton();
+
+  Future<void> _confirm(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.reopenDay),
+        content: Text(l10n.reopenDayConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await ref.read(reportProvider.notifier).reopenDay();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    return OutlinedButton(
+      onPressed: () => _confirm(context, ref),
+      child: Text(l10n.reopenDay),
     );
   }
 }

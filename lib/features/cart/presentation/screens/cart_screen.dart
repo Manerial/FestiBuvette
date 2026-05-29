@@ -10,6 +10,7 @@ import 'package:festi_buvette_app/features/products/data/models/product.dart';
 import 'package:festi_buvette_app/features/products/presentation/widgets/category_filter_bar.dart';
 import 'package:festi_buvette_app/features/products/providers/categories_provider.dart';
 import 'package:festi_buvette_app/features/products/providers/products_provider.dart';
+import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
 import 'package:festi_buvette_app/features/sales/services/sale_service.dart';
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
@@ -489,6 +490,10 @@ class _FooterState extends ConsumerState<_Footer>
     final isPrinting =
         ref.watch(printerProvider).valueOrNull?.isPrinting ?? false;
     final isInsufficient = widget.cartState.insufficientTendered(total);
+    final todayDay = ref.watch(
+      reportProvider.select((async) => async.valueOrNull?.todayBusinessDay),
+    );
+    final isDayActive = todayDay != null && !todayDay.isClosed;
 
     return Container(
       decoration: BoxDecoration(
@@ -563,6 +568,7 @@ class _FooterState extends ConsumerState<_Footer>
                       empty: empty,
                       isPrinting: isPrinting,
                       isInsufficient: isInsufficient,
+                      isDayActive: isDayActive,
                       onClear: () => _confirmClear(context),
                       onPrint: () => _printAndRecord(context),
                     ),
@@ -801,6 +807,7 @@ class _ActionRow extends StatelessWidget {
   final bool empty;
   final bool isPrinting;
   final bool isInsufficient;
+  final bool isDayActive;
   final VoidCallback onClear;
   final VoidCallback onPrint;
 
@@ -808,6 +815,7 @@ class _ActionRow extends StatelessWidget {
     required this.empty,
     required this.isPrinting,
     required this.isInsufficient,
+    required this.isDayActive,
     required this.onClear,
     required this.onPrint,
   });
@@ -815,6 +823,30 @@ class _ActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final canPrint = !empty && !isPrinting && !isInsufficient && isDayActive;
+
+    Widget printBtn = FilledButton.icon(
+      icon: isPrinting
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
+          : const Icon(Icons.print_outlined),
+      label: Text(l10n.print),
+      onPressed: canPrint ? onPrint : null,
+    );
+
+    if (!isDayActive) {
+      printBtn = Tooltip(
+        message: l10n.dayNotStarted,
+        child: printBtn,
+      );
+    }
+
     return Row(
       children: [
         Expanded(
@@ -825,23 +857,7 @@ class _ActionRow extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Expanded(
-          flex: 2,
-          child: FilledButton.icon(
-            icon: isPrinting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.print_outlined),
-            label: Text(l10n.print),
-            onPressed: empty || isPrinting || isInsufficient ? null : onPrint,
-          ),
-        ),
+        Expanded(flex: 2, child: printBtn),
       ],
     );
   }

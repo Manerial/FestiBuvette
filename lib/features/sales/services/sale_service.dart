@@ -42,12 +42,13 @@ class SaleService {
       (sum, e) => sum + (e.product.price * e.quantity),
     );
 
-    // 3. Get / create today's business day
-    final businessDay = await _repo.getOrCreateToday();
-
-    // 3b. Reopen the day automatically if it was closed
+    // 3. Get today's business day — throw if not started or closed
+    final businessDay = await _repo.getToday();
+    if (businessDay == null) {
+      throw Exception('No active business day. Start the day first.');
+    }
     if (businessDay.isClosed) {
-      await _repo.reopenBusinessDay(businessDay.id!);
+      throw Exception('Business day is closed.');
     }
 
     // 4. Build objects
