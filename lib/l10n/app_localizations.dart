@@ -431,7 +431,7 @@ abstract class AppLocalizations {
   /// No description provided for @reportSaleCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 sale} other{{count} sales}}'**
+  /// **'{count, plural, =0{No sale} =1{1 sale} other{{count} sales}}'**
   String reportSaleCount(num count);
 
   /// No description provided for @reportByProduct.
@@ -841,6 +841,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import failed: invalid or incompatible file'**
   String get catalogueImportError;
+
+  /// No description provided for @syncRoleSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get syncRoleSection;
+
+  /// No description provided for @syncRoleStandalone.
+  ///
+  /// In en, this message translates to:
+  /// **'Standalone'**
+  String get syncRoleStandalone;
+
+  /// No description provided for @syncRoleControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Control'**
+  String get syncRoleControl;
+
+  /// No description provided for @syncRoleSecond.
+  ///
+  /// In en, this message translates to:
+  /// **'Second'**
+  String get syncRoleSecond;
+
+  /// No description provided for @syncSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronization'**
+  String get syncSectionTitle;
+
+  /// No description provided for @syncPinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection PIN'**
+  String get syncPinLabel;
+
+  /// No description provided for @syncPinRegenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate'**
+  String get syncPinRegenerate;
+
+  /// No description provided for @syncConnectedSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} second(s) connected'**
+  String syncConnectedSeconds(int count);
+
+  /// No description provided for @syncConnectedTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to: {address}'**
+  String syncConnectedTo(String address);
+
+  /// No description provided for @syncDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get syncDisconnected;
+
+  /// No description provided for @syncConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get syncConnecting;
+
+  /// No description provided for @syncConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get syncConnected;
+
+  /// No description provided for @syncConnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to control'**
+  String get syncConnectButton;
+
+  /// No description provided for @syncControlIpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Control IP address'**
+  String get syncControlIpLabel;
+
+  /// No description provided for @syncDownloadCatalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Download catalog'**
+  String get syncDownloadCatalog;
+
+  /// No description provided for @syncSendSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Send sales'**
+  String get syncSendSales;
+
+  /// No description provided for @syncDownloadSales.
+  ///
+  /// In en, this message translates to:
+  /// **'Download sales'**
+  String get syncDownloadSales;
+
+  /// No description provided for @syncSalesSent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sale(s) sent'**
+  String syncSalesSent(int count);
+
+  /// No description provided for @syncServiceNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'FestiBuvette — Service running'**
+  String get syncServiceNotificationTitle;
+
+  /// No description provided for @syncServiceNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} second(s) connected'**
+  String syncServiceNotificationBody(int count);
+
+  /// No description provided for @syncPrintFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Printing failed. Record without printing?'**
+  String get syncPrintFailed;
+
+  /// No description provided for @syncDayNotStartedOnControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Day not started on control'**
+  String get syncDayNotStartedOnControl;
+
+  /// No description provided for @syncDisconnectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get syncDisconnectButton;
+
+  /// No description provided for @syncAuthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid PIN. Ask the control operator.'**
+  String get syncAuthFailed;
+
+  /// No description provided for @syncConnectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed. Check the IP address.'**
+  String get syncConnectionFailed;
+
+  /// No description provided for @syncCatalogDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog updated'**
+  String get syncCatalogDownloaded;
+
+  /// No description provided for @syncSalesDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales updated'**
+  String get syncSalesDownloaded;
+
+  /// No description provided for @syncServerAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Server address'**
+  String get syncServerAddress;
+
+  /// No description provided for @syncIpCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Address copied'**
+  String get syncIpCopied;
+
+  /// No description provided for @syncServerStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start server — port 8080 may be in use'**
+  String get syncServerStartFailed;
 }
 
 class _AppLocalizationsDelegate

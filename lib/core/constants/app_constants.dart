@@ -15,7 +15,14 @@ class AppConstants {
   static const String keyHapticFeedback = 'haptic_feedback';
   static const String keyAppBarColor = 'app_bar_color';
 
+  // Sync
+  static const String keySyncRole = 'sync_role';
+  static const String keySyncPin = 'sync_pin';
+  static const String keySyncControlIp = 'sync_control_ip';
+  static const String keySyncToken = 'sync_token';
+  static const String keyDeviceId = 'device_id';
+
   // Database — nom volontairement indépendant du nom de l'app
   static const String dbName = 'caisse.db';
-  static const int dbVersion = 3;
+  static const int dbVersion = 5;
 }

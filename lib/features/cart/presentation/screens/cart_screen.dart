@@ -13,6 +13,9 @@ import 'package:festi_buvette_app/features/products/providers/products_provider.
 import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
 import 'package:festi_buvette_app/features/sales/services/sale_service.dart';
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
+import 'package:festi_buvette_app/features/sync/data/models/sync_exception.dart';
+import 'package:festi_buvette_app/features/sync/data/models/sync_role.dart';
+import 'package:festi_buvette_app/features/sync/providers/sync_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 void _triggerHaptic(WidgetRef ref) {
@@ -306,6 +309,9 @@ class _FooterState extends ConsumerState<_Footer>
   double _dragStartDy = 0;
   double _dragStartValue = 0;
 
+  // True while the second device is waiting for the control to print.
+  bool _isSending = false;
+
   bool get _expanded => _controller.value > 0.5;
 
   @override
@@ -370,6 +376,85 @@ class _FooterState extends ConsumerState<_Footer>
         ),
       );
     }
+  }
+
+  // ── Second mode: delegate print to control, record locally ───────────────
+
+  Future<void> _printAndRecordSecond(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    if (ref.read(cartProvider.notifier).isEmpty) return;
+
+    final syncClient = ref.read(syncProvider.notifier).client;
+    if (syncClient == null) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.syncConnectionFailed),
+          backgroundColor: Colors.red,
+        ));
+      }
+      return;
+    }
+
+    // Build the items payload from the current cart.
+    final items = widget.products
+        .where((p) => (widget.cartState.quantities[p.id] ?? 0) > 0)
+        .map((p) => {
+              'product_id': p.id,
+              'name': p.name,
+              'price': p.price,
+              'quantity': widget.cartState.quantities[p.id]!,
+            })
+        .toList();
+
+    if (mounted) setState(() => _isSending = true);
+    try {
+      await syncClient.post('/print', {'items': items});
+      // Print succeeded → record locally + clear cart.
+      if (context.mounted) await _recordSale(context);
+    } on SyncServerException {
+      // 503 print_failed → ask operator whether to record anyway.
+      if (mounted) setState(() => _isSending = false);
+      if (!context.mounted) return;
+      final recordOnly = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.printerNotConnectedTitle),
+          content: Text(l10n.syncPrintFailed),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.printerRecordWithoutPrinting),
+            ),
+          ],
+        ),
+      );
+      if (recordOnly == true && context.mounted) await _recordSale(context);
+      return;
+    } on SyncNetworkException {
+      // Network error → cart preserved, do not record.
+      if (mounted) setState(() => _isSending = false);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.syncConnectionFailed),
+          backgroundColor: Colors.red,
+        ));
+      }
+      return;
+    } catch (e) {
+      if (mounted) setState(() => _isSending = false);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.errorMessage(e)),
+          backgroundColor: Colors.red,
+        ));
+      }
+      return;
+    }
+    if (mounted) setState(() => _isSending = false);
   }
 
   // ── Print + record (main flow) ────────────────────────────────────────────
@@ -495,6 +580,17 @@ class _FooterState extends ConsumerState<_Footer>
     );
     final isDayActive = todayDay != null && !todayDay.isClosed;
 
+    final syncRole = ref.watch(
+      settingsProvider.select(
+          (s) => s.valueOrNull?.syncRole ?? SyncRole.standalone),
+    );
+    final isSyncConnected = ref.watch(
+      syncProvider.select(
+          (s) => s.connectionStatus == SyncConnectionStatus.connected),
+    );
+    final isSecondMode = syncRole == SyncRole.second && isSyncConnected;
+    final effectivePrinting = isSecondMode ? _isSending : isPrinting;
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -566,11 +662,13 @@ class _FooterState extends ConsumerState<_Footer>
                     const SizedBox(height: 12),
                     _ActionRow(
                       empty: empty,
-                      isPrinting: isPrinting,
+                      isPrinting: effectivePrinting,
                       isInsufficient: isInsufficient,
                       isDayActive: isDayActive,
                       onClear: () => _confirmClear(context),
-                      onPrint: () => _printAndRecord(context),
+                      onPrint: () => isSecondMode
+                          ? _printAndRecordSecond(context)
+                          : _printAndRecord(context),
                     ),
                   ],
                 ),

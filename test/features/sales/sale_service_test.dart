@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/core/services/device_id_service.dart';
 import 'package:festi_buvette_app/features/products/data/models/product.dart';
 import 'package:festi_buvette_app/features/sales/data/repositories/sales_repository.dart';
 import 'package:festi_buvette_app/features/sales/services/sale_service.dart';
@@ -11,9 +13,14 @@ void main() {
   late SaleService service;
   late SalesRepository repo;
 
-  setUpAll(initTestDatabase);
+  setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    initTestDatabase();
+  });
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    DeviceIdService.resetCache();
     helper = await createTestDatabaseHelper();
     repo = SalesRepository(helper);
     service = SaleService.withRepository(repo);

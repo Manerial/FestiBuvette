@@ -102,26 +102,38 @@ class SalesRepository {
   // ─── Sales ─────────────────────────────────────────────────────────────────
 
   /// Inserts a sale AND its lines in an atomic transaction.
+  /// When [deviceId] is provided, [source_device_token] is set to it and
+  /// [source_local_id] is set to the auto-generated sale id — forming the
+  /// composite key (device_uuid, local_id) that uniquely identifies this sale
+  /// across the whole fleet.
   /// Returns the created sale with its id.
   Future<Sale> insertSaleWithLines({
     required Sale sale,
     required List<SaleLine> lines,
+    String? deviceId,
   }) async {
     final db = await _dbHelper.database;
 
     late int saleId;
     await db.transaction((txn) async {
       saleId = await txn.insert('sales', sale.toMap());
+      if (deviceId != null) {
+        await txn.update(
+          'sales',
+          {'source_device_token': deviceId, 'source_local_id': saleId},
+          where: 'id = ?',
+          whereArgs: [saleId],
+        );
+      }
       for (final line in lines) {
-        final lineWithSaleId = SaleLine(
+        await txn.insert('sale_lines', SaleLine(
           saleId: saleId,
           productId: line.productId,
           nameSnapshot: line.nameSnapshot,
           priceSnapshot: line.priceSnapshot,
           quantity: line.quantity,
           subtotal: line.subtotal,
-        );
-        await txn.insert('sale_lines', lineWithSaleId.toMap());
+        ).toMap());
       }
     });
 
@@ -184,6 +196,59 @@ class SalesRepository {
       limit: 1,
     );
     return rows.isEmpty ? null : BusinessDay.fromMap(rows.first);
+  }
+
+  /// Returns all sales for a day as raw maps including [source_device_token]
+  /// and [source_local_id]. Used by the HTTP server's /sales/pull endpoint so
+  /// the second device can preserve the composite device-key when storing.
+  Future<List<Map<String, dynamic>>> getSalesForPullByDay(
+      int businessDayId) async {
+    final db = await _dbHelper.database;
+    return db.rawQuery(
+      'SELECT id, date_time, total, business_day_id,'
+      ' source_device_token, source_local_id'
+      ' FROM sales WHERE business_day_id = ?'
+      ' ORDER BY date_time DESC',
+      [businessDayId],
+    );
+  }
+
+  /// Returns sales eligible for pushing to the control:
+  /// - Sales tagged with [deviceId] (created on this device with UUID tracking)
+  /// - Legacy sales with source_device_token IS NULL (created before UUID
+  ///   tracking was introduced)
+  ///
+  /// Explicitly excludes sales from other devices (downloaded from control or
+  /// received from another second) so they are never re-pushed as duplicates.
+  Future<List<Sale>> getSalesForSyncByDay(
+    int businessDayId,
+    String deviceId,
+  ) async {
+    final db = await _dbHelper.database;
+    final rows = await db.query(
+      'sales',
+      where: 'business_day_id = ?'
+          ' AND (source_device_token IS NULL OR source_device_token = ?)',
+      whereArgs: [businessDayId, deviceId],
+      orderBy: 'date_time DESC',
+    );
+    final sales = rows.map((r) => Sale.fromMap(r)).toList();
+    if (sales.isEmpty) return [];
+
+    final saleIds = sales.map((s) => s.id!).toList();
+    final placeholders = List.filled(saleIds.length, '?').join(', ');
+    final lineRows = await db.rawQuery(
+      'SELECT * FROM sale_lines WHERE sale_id IN ($placeholders) ORDER BY sale_id, id',
+      saleIds,
+    );
+    final linesBySaleId = <int, List<SaleLine>>{};
+    for (final row in lineRows) {
+      (linesBySaleId[row['sale_id'] as int] ??= []).add(SaleLine.fromMap(row));
+    }
+    return sales
+        .map((s) => Sale.fromMap(s.toMap(),
+            lines: linesBySaleId[s.id!] ?? const []))
+        .toList();
   }
 
   /// Returns all sales for a business day, each with its lines pre-loaded.
@@ -250,6 +315,56 @@ class SalesRepository {
       GROUP BY hour, sl.name_snapshot
       ORDER BY hour ASC, sl.name_snapshot ASC
     ''', [businessDayId]);
+  }
+
+  /// Merges a sale received from a second device into the control's SQLite.
+  /// Returns 1 if the sale was inserted, 0 if it was a duplicate.
+  /// Deduplication is based on [deviceToken] + [localId].
+  Future<int> mergeReceivedSale({
+    required int businessDayId,
+    required String deviceToken,
+    required int localId,
+    required String dateTime,
+    required double total,
+    required List<Map<String, dynamic>> lines,
+  }) async {
+    final db = await _dbHelper.database;
+
+    final existing = await db.rawQuery(
+      'SELECT id FROM sales WHERE source_device_token = ? AND source_local_id = ?',
+      [deviceToken, localId],
+    );
+    if (existing.isNotEmpty) return 0;
+
+    await db.transaction((txn) async {
+      final saleId = await txn.insert('sales', {
+        'date_time': dateTime,
+        'total': total,
+        'business_day_id': businessDayId,
+        'source_device_token': deviceToken,
+        'source_local_id': localId,
+      });
+      for (final line in lines) {
+        final price = (line['price_snapshot'] as num).toDouble();
+        final qty = line['quantity'] as int;
+        await txn.insert('sale_lines', {
+          'sale_id': saleId,
+          'product_id': null,
+          'name_snapshot': line['name_snapshot'],
+          'price_snapshot': price,
+          'quantity': qty,
+          'subtotal': price * qty,
+        });
+      }
+      await txn.rawUpdate(
+        'UPDATE business_days'
+        ' SET total_revenue = total_revenue + ?,'
+        '     sale_count    = sale_count + 1'
+        ' WHERE id = ?',
+        [total, businessDayId],
+      );
+    });
+    return 1;
   }
 
   /// Returns all business days ordered by date descending (most recent first).

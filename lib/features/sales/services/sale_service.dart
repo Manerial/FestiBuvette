@@ -1,4 +1,5 @@
 import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/core/services/device_id_service.dart';
 import 'package:festi_buvette_app/features/products/data/models/product.dart';
 import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
 import 'package:festi_buvette_app/features/sales/data/models/sale_line.dart';
@@ -70,10 +71,13 @@ class SaleService {
             ))
         .toList();
 
-    // 5. Insert (atomic transaction)
+    // 5. Insert (atomic transaction) — tag with device UUID so the sale can be
+    //    pushed and deduplicated across the fleet via (device_uuid, local_id).
+    final deviceId = await DeviceIdService.get();
     final createdSale = await _repo.insertSaleWithLines(
       sale: sale,
       lines: lines,
+      deviceId: deviceId,
     );
 
     // 6. Update business day aggregates (atomic increment — safe on double-tap)

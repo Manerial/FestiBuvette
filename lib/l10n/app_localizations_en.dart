@@ -191,6 +191,7 @@ class AppLocalizationsEn extends AppLocalizations {
       locale: localeName,
       other: '$count sales',
       one: '1 sale',
+      zero: 'No sale',
     );
     return '$_temp0';
   }
@@ -414,4 +415,103 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get catalogueImportError =>
       'Import failed: invalid or incompatible file';
+
+  @override
+  String get syncRoleSection => 'Role';
+
+  @override
+  String get syncRoleStandalone => 'Standalone';
+
+  @override
+  String get syncRoleControl => 'Control';
+
+  @override
+  String get syncRoleSecond => 'Second';
+
+  @override
+  String get syncSectionTitle => 'Synchronization';
+
+  @override
+  String get syncPinLabel => 'Connection PIN';
+
+  @override
+  String get syncPinRegenerate => 'Regenerate';
+
+  @override
+  String syncConnectedSeconds(int count) {
+    return '$count second(s) connected';
+  }
+
+  @override
+  String syncConnectedTo(String address) {
+    return 'Connected to: $address';
+  }
+
+  @override
+  String get syncDisconnected => 'Not connected';
+
+  @override
+  String get syncConnecting => 'Connecting…';
+
+  @override
+  String get syncConnected => 'Connected';
+
+  @override
+  String get syncConnectButton => 'Connect to control';
+
+  @override
+  String get syncControlIpLabel => 'Control IP address';
+
+  @override
+  String get syncDownloadCatalog => 'Download catalog';
+
+  @override
+  String get syncSendSales => 'Send sales';
+
+  @override
+  String get syncDownloadSales => 'Download sales';
+
+  @override
+  String syncSalesSent(int count) {
+    return '$count sale(s) sent';
+  }
+
+  @override
+  String get syncServiceNotificationTitle => 'FestiBuvette — Service running';
+
+  @override
+  String syncServiceNotificationBody(int count) {
+    return '$count second(s) connected';
+  }
+
+  @override
+  String get syncPrintFailed => 'Printing failed. Record without printing?';
+
+  @override
+  String get syncDayNotStartedOnControl => 'Day not started on control';
+
+  @override
+  String get syncDisconnectButton => 'Disconnect';
+
+  @override
+  String get syncAuthFailed => 'Invalid PIN. Ask the control operator.';
+
+  @override
+  String get syncConnectionFailed => 'Connection failed. Check the IP address.';
+
+  @override
+  String get syncCatalogDownloaded => 'Catalog updated';
+
+  @override
+  String get syncSalesDownloaded => 'Sales updated';
+
+  @override
+  String get syncServerAddress => 'Server address';
+
+  @override
+  String get syncIpCopied => 'Address copied';
+
+  @override
+  String get syncServerStartFailed =>
+      'Could not start server — port 8080 may be in use';
 }

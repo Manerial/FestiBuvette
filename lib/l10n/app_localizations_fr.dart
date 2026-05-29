@@ -195,6 +195,7 @@ class AppLocalizationsFr extends AppLocalizations {
       locale: localeName,
       other: '$count ventes',
       one: '1 vente',
+      zero: 'Aucune vente',
     );
     return '$_temp0';
   }
@@ -420,4 +421,106 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get catalogueImportError =>
       'Importation échouée : fichier invalide ou incompatible';
+
+  @override
+  String get syncRoleSection => 'Rôle';
+
+  @override
+  String get syncRoleStandalone => 'Autonome';
+
+  @override
+  String get syncRoleControl => 'Contrôle';
+
+  @override
+  String get syncRoleSecond => 'Second';
+
+  @override
+  String get syncSectionTitle => 'Synchronisation';
+
+  @override
+  String get syncPinLabel => 'Code PIN de connexion';
+
+  @override
+  String get syncPinRegenerate => 'Régénérer';
+
+  @override
+  String syncConnectedSeconds(int count) {
+    return '$count second(s) connecté(s)';
+  }
+
+  @override
+  String syncConnectedTo(String address) {
+    return 'Connecté à : $address';
+  }
+
+  @override
+  String get syncDisconnected => 'Non connecté';
+
+  @override
+  String get syncConnecting => 'Connexion…';
+
+  @override
+  String get syncConnected => 'Connecté';
+
+  @override
+  String get syncConnectButton => 'Se connecter au contrôle';
+
+  @override
+  String get syncControlIpLabel => 'Adresse IP du contrôle';
+
+  @override
+  String get syncDownloadCatalog => 'Récupérer le catalogue';
+
+  @override
+  String get syncSendSales => 'Envoyer les ventes';
+
+  @override
+  String get syncDownloadSales => 'Récupérer les ventes';
+
+  @override
+  String syncSalesSent(int count) {
+    return '$count vente(s) envoyée(s)';
+  }
+
+  @override
+  String get syncServiceNotificationTitle => 'FestiBuvette — Service actif';
+
+  @override
+  String syncServiceNotificationBody(int count) {
+    return '$count second(s) connecté(s)';
+  }
+
+  @override
+  String get syncPrintFailed =>
+      'Impression échouée. Enregistrer sans imprimer ?';
+
+  @override
+  String get syncDayNotStartedOnControl =>
+      'Journée non démarrée sur le contrôle';
+
+  @override
+  String get syncDisconnectButton => 'Déconnecter';
+
+  @override
+  String get syncAuthFailed => 'PIN invalide. Demandez au contrôle.';
+
+  @override
+  String get syncConnectionFailed =>
+      'Connexion échouée. Vérifiez l\'adresse IP.';
+
+  @override
+  String get syncCatalogDownloaded => 'Catalogue mis à jour';
+
+  @override
+  String get syncSalesDownloaded => 'Ventes mises à jour';
+
+  @override
+  String get syncServerAddress => 'Adresse du serveur';
+
+  @override
+  String get syncIpCopied => 'Adresse copiée';
+
+  @override
+  String get syncServerStartFailed =>
+      'Impossible de démarrer le serveur — le port 8080 est peut-être occupé';
 }

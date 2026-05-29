@@ -45,6 +45,13 @@ dependencies:
   file_picker: ^8.0.0
   path_provider: ^2.1.0
 
+  # Multi-device sync — Phase 2
+  shelf: ^1.4.0
+  shelf_router: ^1.1.0
+  multicast_dns: ^0.3.2
+  flutter_foreground_task: ^8.0.0
+  http: ^1.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

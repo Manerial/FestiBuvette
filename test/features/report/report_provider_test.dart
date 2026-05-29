@@ -493,6 +493,44 @@ void main() {
     expect(state.day!.date, '2026-01-01');
   });
 
+  // ─── deleteSale ──────────────────────────────────────────────────────────────
+
+  test('deleteSale reduces saleCount to 0 and removes the sale', () async {
+    final helper = await createTestDatabaseHelper();
+    final repo = SalesRepository(helper);
+    final day = await repo.getOrCreateToday();
+
+    final sale = await repo.insertSaleWithLines(
+      sale: Sale(
+        dateTime: '2026-01-01T10:00:00.000',
+        total: 5.0,
+        businessDayId: day.id!,
+      ),
+      lines: [
+        SaleLine(
+          saleId: 0,
+          nameSnapshot: 'Bière',
+          priceSnapshot: 2.5,
+          quantity: 2,
+          subtotal: 5.0,
+        ),
+      ],
+    );
+    await repo.incrementBusinessDay(day.id!, 5.0);
+
+    final container = makeContainer(repo);
+    final before = await awaitData(container);
+    expect(before.day!.saleCount, 1);
+    expect(before.sales.length, 1);
+
+    await container.read(reportProvider.notifier).deleteSale(sale);
+    final after = await container.read(reportProvider.future);
+
+    expect(after.day!.saleCount, 0);
+    expect(after.sales, isEmpty);
+    expect(after.hasData, isFalse);
+  });
+
   test('canGoNext is false with real todayDate and no virtual slot', () async {
     final helper = await createTestDatabaseHelper();
     final db = await helper.database;

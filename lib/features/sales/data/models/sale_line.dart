@@ -1,7 +1,8 @@
 class SaleLine {
   final int? id;
   final int saleId;
-  final int productId;
+  /// Null for sales received from a second device (no product ID mapping guaranteed).
+  final int? productId;
   final String nameSnapshot;   // product name at time of sale
   final double priceSnapshot;  // product price at time of sale
   final int quantity;
@@ -10,7 +11,7 @@ class SaleLine {
   const SaleLine({
     this.id,
     required this.saleId,
-    required this.productId,
+    this.productId,
     required this.nameSnapshot,
     required this.priceSnapshot,
     required this.quantity,
@@ -30,7 +31,7 @@ class SaleLine {
   factory SaleLine.fromMap(Map<String, dynamic> map) => SaleLine(
         id: map['id'] as int?,
         saleId: map['sale_id'] as int,
-        productId: map['product_id'] as int,
+        productId: map['product_id'] as int?,
         nameSnapshot: map['name_snapshot'] as String,
         priceSnapshot: (map['price_snapshot'] as num).toDouble(),
         quantity: map['quantity'] as int,
