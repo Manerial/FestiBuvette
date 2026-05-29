@@ -36,12 +36,12 @@ class DatabaseHelper {
 
     await db.execute('''
       CREATE TABLE products (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        name        TEXT    NOT NULL,
-        price       REAL    NOT NULL,
-        sort_order  INTEGER NOT NULL DEFAULT 0,
-        active      INTEGER NOT NULL DEFAULT 1,
-        created_at  TEXT    NOT NULL,
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        name            TEXT    NOT NULL,
+        price           REAL    NOT NULL,
+        sort_order      INTEGER NOT NULL DEFAULT 0,
+        active          INTEGER NOT NULL DEFAULT 1,
+        created_at      TEXT    NOT NULL,
         category_id     INTEGER REFERENCES categories(id),
         is_out_of_stock INTEGER NOT NULL DEFAULT 0
       )
@@ -59,19 +59,30 @@ class DatabaseHelper {
 
     await db.execute('''
       CREATE TABLE sales (
-        id               INTEGER PRIMARY KEY AUTOINCREMENT,
-        date_time        TEXT    NOT NULL,
-        total            REAL    NOT NULL,
-        business_day_id  INTEGER NOT NULL,
+        id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+        date_time            TEXT    NOT NULL,
+        total                REAL    NOT NULL,
+        business_day_id      INTEGER NOT NULL,
+        source_device_token  TEXT,
+        source_local_id      INTEGER,
         FOREIGN KEY (business_day_id) REFERENCES business_days(id)
       )
+    ''');
+
+    // Partial unique index: enforces (device_uuid, local_id) uniqueness at DB
+    // level for all device-tracked sales. Rows where either column is NULL are
+    // excluded (old standalone sales before UUID tracking).
+    await db.execute('''
+      CREATE UNIQUE INDEX uq_sales_device
+      ON sales(source_device_token, source_local_id)
+      WHERE source_device_token IS NOT NULL AND source_local_id IS NOT NULL
     ''');
 
     await db.execute('''
       CREATE TABLE sale_lines (
         id              INTEGER PRIMARY KEY AUTOINCREMENT,
         sale_id         INTEGER NOT NULL,
-        product_id      INTEGER NOT NULL,
+        product_id      INTEGER,
         name_snapshot   TEXT    NOT NULL,
         price_snapshot  REAL    NOT NULL,
         quantity        INTEGER NOT NULL,
@@ -99,6 +110,43 @@ class DatabaseHelper {
       await db.execute(
         'ALTER TABLE products ADD COLUMN is_out_of_stock INTEGER NOT NULL DEFAULT 0',
       );
+    }
+    if (oldVersion < 4) {
+      await db.execute(
+        'ALTER TABLE sales ADD COLUMN source_device_token TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE sales ADD COLUMN source_local_id INTEGER',
+      );
+      // Recreate sale_lines to make product_id nullable.
+      await db.execute('''
+        CREATE TABLE sale_lines_v4 (
+          id              INTEGER PRIMARY KEY AUTOINCREMENT,
+          sale_id         INTEGER NOT NULL,
+          product_id      INTEGER,
+          name_snapshot   TEXT    NOT NULL,
+          price_snapshot  REAL    NOT NULL,
+          quantity        INTEGER NOT NULL,
+          subtotal        REAL    NOT NULL,
+          FOREIGN KEY (sale_id)    REFERENCES sales(id),
+          FOREIGN KEY (product_id) REFERENCES products(id)
+        )
+      ''');
+      await db.execute(
+        'INSERT INTO sale_lines_v4 SELECT * FROM sale_lines',
+      );
+      await db.execute('DROP TABLE sale_lines');
+      await db.execute('ALTER TABLE sale_lines_v4 RENAME TO sale_lines');
+    }
+    if (oldVersion < 5) {
+      // Add partial unique index: (device_uuid, local_id) must be unique for
+      // device-tracked sales. Rows with NULL in either column are exempt
+      // (pre-UUID legacy sales).
+      await db.execute('''
+        CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_device
+        ON sales(source_device_token, source_local_id)
+        WHERE source_device_token IS NOT NULL AND source_local_id IS NOT NULL
+      ''');
     }
   }
 

@@ -8,6 +8,7 @@ import 'package:festi_buvette_app/features/settings/presentation/screens/setting
 import 'package:festi_buvette_app/features/products/presentation/screens/products_screen.dart';
 import 'package:festi_buvette_app/features/report/presentation/screens/report_screen.dart';
 import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
+import 'package:festi_buvette_app/features/sync/presentation/widgets/connection_status_icon.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
 import 'package:festi_buvette_app/shared/widgets/app_bottom_nav.dart';
 
@@ -83,6 +84,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
       appBar: AppBar(
         title: Text(titles[_currentIndex]),
         actions: [
+          const ConnectionStatusIcon(),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: l10n.settings,

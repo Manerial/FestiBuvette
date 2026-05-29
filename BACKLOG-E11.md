@@ -406,7 +406,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-1 — Role & sync settings section `[ ]`
+### E11-P2-1 — Role & sync settings section `[x]`
 
 **What to build:**
 - Add a role selector in the settings screen: `Standalone` / `Control` / `Second`
@@ -434,7 +434,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-2 — HTTP server (control) `[ ]`
+### E11-P2-2 — HTTP server (control) `[x]`
 
 **What to build:**
 - `SyncServer` class: starts a `shelf` HTTP server on port `8080` when app launches in Control mode
@@ -455,7 +455,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-3 — HTTP client + mDNS discovery (second) `[ ]`
+### E11-P2-3 — HTTP client + mDNS discovery (second) `[x]`
 
 **What to build:**
 - `SyncClient` class: thin wrapper around the `http` package
@@ -476,7 +476,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-4 — Download catalog `[ ]`
+### E11-P2-4 — Download catalog `[x]`
 
 **What to build:**
 - "Download catalog" button in sync settings section (second only)
@@ -491,7 +491,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-5 — Print delegation `[ ]`
+### E11-P2-5 — Print delegation `[x]`
 
 **What to build:**
 - In Second mode, the "Print" button in the cart calls `SyncClient.print(items)` instead of `PrinterNotifier`
@@ -515,7 +515,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-6 — Send sales (second → control) `[ ]`
+### E11-P2-6 — Send sales (second → control) `[x]`
 
 **What to build:**
 - "Send sales" button in sync settings section (second only)
@@ -531,7 +531,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-7 — Download sales (second ← control) `[ ]`
+### E11-P2-7 — Download sales (second ← control) `[x]`
 
 **What to build:**
 - "Download sales" button in sync settings section (second only)
@@ -546,7 +546,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-8 — UI indicators (Phase 2) `[ ]`
+### E11-P2-8 — UI indicators (Phase 2) `[x]`
 
 **What to build:**
 - `ConnectionStatusIcon` widget added to the AppBar (hidden in Standalone mode):
@@ -557,7 +557,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-9 — i18n (Phase 2) `[ ]`
+### E11-P2-9 — i18n (Phase 2) `[x]`
 
 | Key | EN | FR |
 |---|---|---|
@@ -584,7 +584,7 @@ Add to `app_en.arb` and `app_fr.arb`. Run `flutter gen-l10n` after.
 
 ---
 
-### E11-P2-10 — Tests (Phase 2) `[ ]`
+### E11-P2-10 — Tests (Phase 2) `[x]`
 
 | Test file | What to cover |
 |---|---|

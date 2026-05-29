@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:festi_buvette_app/core/constants/app_constants.dart';
@@ -8,7 +10,14 @@ import 'package:festi_buvette_app/features/printer/providers/printer_provider.da
 import 'package:festi_buvette_app/features/products/providers/categories_provider.dart';
 import 'package:festi_buvette_app/features/products/providers/products_provider.dart';
 import 'package:festi_buvette_app/features/products/services/catalogue_transfer_service.dart';
+import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
+import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/features/sync/data/models/sync_exception.dart';
+import 'package:festi_buvette_app/features/sync/data/models/sync_role.dart';
+import 'package:festi_buvette_app/features/sync/data/services/sync_action_service.dart';
+import 'package:festi_buvette_app/features/sync/data/services/sync_server.dart';
+import 'package:festi_buvette_app/features/sync/providers/sync_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -119,6 +128,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           const SizedBox(height: 32),
 
+          // ── Sync role ─────────────────────────────────────────────────────
+          _SyncSection(),
+
+          const SizedBox(height: 32),
+
           // ── Language ─────────────────────────────────────────────────────
           _SectionHeader(label: l10n.settingsLanguageSection),
           const SizedBox(height: 8),
@@ -133,6 +147,541 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
       ),
+    );
+  }
+}
+
+// ─── Local IP provider ────────────────────────────────────────────────────────
+
+/// Lists all non-loopback IPv4 addresses on the device.
+/// Used by the control to display its address to the operator.
+final _localIpsProvider = FutureProvider.autoDispose<List<String>>((ref) async {
+  final interfaces = await NetworkInterface.list(
+    type: InternetAddressType.IPv4,
+    includeLinkLocal: false,
+  );
+  return [
+    for (final iface in interfaces)
+      for (final addr in iface.addresses)
+        if (!addr.isLoopback) addr.address,
+  ];
+});
+
+// ─── Sync section ─────────────────────────────────────────────────────────────
+
+class _SyncSection extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final role = ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.syncRole ?? SyncRole.standalone),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(label: l10n.syncRoleSection),
+        const SizedBox(height: 8),
+        _RoleSelector(),
+        if (role == SyncRole.control) ...[
+          const SizedBox(height: 24),
+          _SectionHeader(label: l10n.syncSectionTitle),
+          const SizedBox(height: 12),
+          _ControlSyncSection(),
+        ] else if (role == SyncRole.second) ...[
+          const SizedBox(height: 24),
+          _SectionHeader(label: l10n.syncSectionTitle),
+          const SizedBox(height: 12),
+          _SecondSyncSection(),
+        ],
+      ],
+    );
+  }
+}
+
+// ─── Role selector ────────────────────────────────────────────────────────────
+
+class _RoleSelector extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final role = ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.syncRole ?? SyncRole.standalone),
+    );
+
+    return SegmentedButton<SyncRole>(
+      segments: [
+        ButtonSegment(
+          value: SyncRole.standalone,
+          label: Text(l10n.syncRoleStandalone),
+        ),
+        ButtonSegment(
+          value: SyncRole.control,
+          label: Text(l10n.syncRoleControl),
+        ),
+        ButtonSegment(
+          value: SyncRole.second,
+          label: Text(l10n.syncRoleSecond),
+        ),
+      ],
+      selected: {role},
+      onSelectionChanged: (selected) =>
+          ref.read(settingsProvider.notifier).setSyncRole(selected.first),
+    );
+  }
+}
+
+// ─── Control sync section ─────────────────────────────────────────────────────
+
+class _ControlSyncSection extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final pin = ref.watch(
+      settingsProvider.select((s) => s.valueOrNull?.syncPin ?? '------'),
+    );
+    final connectedSeconds = ref.watch(
+      syncProvider.select((s) => s.connectedSeconds),
+    );
+    final serverError = ref.watch(syncProvider.select((s) => s.serverError));
+    final ipsAsync = ref.watch(_localIpsProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Server error banner ───────────────────────────────────────────
+        if (serverError) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.red.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red.shade700, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    l10n.syncServerStartFailed,
+                    style: TextStyle(color: Colors.red.shade700),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // ── PIN + Regenerate ──────────────────────────────────────────────
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.syncPinLabel,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    pin,
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 8,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            OutlinedButton.icon(
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.syncPinRegenerate),
+              onPressed: () =>
+                  ref.read(settingsProvider.notifier).regeneratePin(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // ── Server IP(s) ──────────────────────────────────────────────────
+        ...ipsAsync.whenData((ips) => ips).valueOrNull?.map(
+              (ip) => _IpRow(
+                label: l10n.syncServerAddress,
+                address: '$ip:${SyncServer.port}',
+                onCopy: () {
+                  Clipboard.setData(ClipboardData(text: '$ip:${SyncServer.port}'));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(l10n.syncIpCopied),
+                    duration: const Duration(seconds: 2),
+                  ));
+                },
+              ),
+            ) ??
+            [],
+
+        const SizedBox(height: 8),
+
+        // ── Connected seconds ─────────────────────────────────────────────
+        Text(
+          l10n.syncConnectedSeconds(connectedSeconds),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      ],
+    );
+  }
+}
+
+class _IpRow extends StatelessWidget {
+  final String label;
+  final String address;
+  final VoidCallback onCopy;
+
+  const _IpRow({
+    required this.label,
+    required this.address,
+    required this.onCopy,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi, size: 16, color: Colors.green),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color:
+                            Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                Text(
+                  address,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                      ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.copy_outlined, size: 18),
+            onPressed: onCopy,
+            tooltip: label,
+            visualDensity: VisualDensity.compact,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Second sync section ──────────────────────────────────────────────────────
+
+class _SecondSyncSection extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_SecondSyncSection> createState() => _SecondSyncSectionState();
+}
+
+class _SecondSyncSectionState extends ConsumerState<_SecondSyncSection> {
+  late final TextEditingController _ipController;
+  final TextEditingController _pinController = TextEditingController();
+
+  // Tracks which action button is currently loading (null = idle).
+  String? _activeAction;
+
+  @override
+  void initState() {
+    super.initState();
+    final ip =
+        ref.read(settingsProvider).valueOrNull?.syncControlIp ?? '192.168.43.1';
+    _ipController = TextEditingController(text: ip);
+  }
+
+  @override
+  void dispose() {
+    _ipController.dispose();
+    _pinController.dispose();
+    super.dispose();
+  }
+
+  // ─── Sync action helpers ──────────────────────────────────────────────────
+
+  Future<void> _runAction(
+    String key,
+    Future<void> Function(SyncActionService svc, AppLocalizations l10n) fn,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final client = ref.read(syncProvider.notifier).client;
+    if (client == null) return;
+    setState(() => _activeAction = key);
+    try {
+      await fn(SyncActionService(DatabaseHelper.instance), l10n);
+    } on SyncAuthException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.syncAuthFailed),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.syncConnectionFailed),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } finally {
+      if (mounted) setState(() => _activeAction = null);
+    }
+  }
+
+  Future<void> _downloadCatalog() => _runAction('catalog', (svc, l10n) async {
+        final client = ref.read(syncProvider.notifier).client!;
+        await svc.downloadCatalog(client);
+        ref.invalidate(productsProvider);
+        ref.invalidate(categoriesProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.syncCatalogDownloaded),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ));
+        }
+      });
+
+  Future<void> _sendSales() => _runAction('send', (svc, l10n) async {
+        final client = ref.read(syncProvider.notifier).client!;
+        final merged = await svc.sendSales(client);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.syncSalesSent(merged)),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ));
+        }
+      });
+
+  Future<void> _downloadSales() => _runAction('download', (svc, l10n) async {
+        final client = ref.read(syncProvider.notifier).client!;
+        await svc.downloadSales(client);
+        ref.invalidate(reportProvider);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(l10n.syncSalesDownloaded),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ));
+        }
+      });
+
+  void _saveIp() =>
+      ref.read(settingsProvider.notifier).setSyncControlIp(_ipController.text);
+
+  Future<void> _connect() async {
+    _saveIp();
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      await ref
+          .read(syncProvider.notifier)
+          .connect(_ipController.text.trim(), _pinController.text.trim());
+      if (mounted) {
+        _pinController.clear();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.syncConnected),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ));
+      }
+    } on SyncAuthException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.syncAuthFailed),
+          backgroundColor: Colors.red,
+        ));
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(l10n.syncConnectionFailed),
+          backgroundColor: Colors.red,
+        ));
+      }
+    }
+  }
+
+  Future<void> _disconnect() async {
+    await ref.read(syncProvider.notifier).disconnect();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final syncState = ref.watch(syncProvider);
+    final isConnected =
+        syncState.connectionStatus == SyncConnectionStatus.connected;
+    final isConnecting =
+        syncState.connectionStatus == SyncConnectionStatus.connecting;
+    final todayDay = ref.watch(
+      reportProvider.select((a) => a.valueOrNull?.todayBusinessDay),
+    );
+    final isDayInProgress = todayDay != null && !todayDay.isClosed;
+    final isDayClosed = todayDay != null && todayDay.isClosed;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ── Status ──────────────────────────────────────────────────────
+        Row(
+          children: [
+            Icon(
+              isConnected
+                  ? Icons.wifi
+                  : (isConnecting ? Icons.wifi_find : Icons.wifi_off),
+              size: 18,
+              color: isConnected
+                  ? Colors.green
+                  : (isConnecting ? Colors.orange : Colors.grey),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isConnected
+                  ? l10n.syncConnectedTo(
+                      syncState.connectedToAddress ?? _ipController.text,
+                    )
+                  : (isConnecting ? l10n.syncConnecting : l10n.syncDisconnected),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: isConnected
+                        ? Colors.green
+                        : (isConnecting ? Colors.orange : Colors.grey),
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        // ── IP field ─────────────────────────────────────────────────────
+        TextField(
+          controller: _ipController,
+          decoration: InputDecoration(
+            labelText: l10n.syncControlIpLabel,
+            border: const OutlineInputBorder(),
+          ),
+          keyboardType: TextInputType.text,
+          enabled: !isConnected,
+          onSubmitted: (_) => _saveIp(),
+        ),
+        const SizedBox(height: 8),
+
+        // ── PIN input ─────────────────────────────────────────────────────
+        TextField(
+          controller: _pinController,
+          decoration: InputDecoration(
+            labelText: l10n.syncPinLabel,
+            border: const OutlineInputBorder(),
+            counterText: '',
+          ),
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+          enabled: !isConnected,
+          obscureText: false,
+        ),
+        const SizedBox(height: 12),
+
+        // ── Connect / Disconnect button ───────────────────────────────────
+        if (!isConnected)
+          FilledButton(
+            onPressed: isConnecting ? null : _connect,
+            child: isConnecting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.white),
+                  )
+                : Text(l10n.syncConnectButton),
+          )
+        else
+          OutlinedButton(
+            onPressed: _disconnect,
+            child: Text(l10n.syncDisconnectButton),
+          ),
+        const SizedBox(height: 20),
+        const Divider(),
+        const SizedBox(height: 12),
+
+        // ── Action buttons ────────────────────────────────────────────────
+        _SyncActionButton(
+          label: l10n.syncDownloadCatalog,
+          icon: Icons.download_outlined,
+          enabled: isConnected && !isDayInProgress && _activeAction == null,
+          isLoading: _activeAction == 'catalog',
+          onPressed: _downloadCatalog,
+        ),
+        const SizedBox(height: 8),
+        _SyncActionButton(
+          label: l10n.syncSendSales,
+          icon: Icons.upload_outlined,
+          enabled: isConnected && isDayClosed && _activeAction == null,
+          isLoading: _activeAction == 'send',
+          onPressed: _sendSales,
+        ),
+        const SizedBox(height: 8),
+        _SyncActionButton(
+          label: l10n.syncDownloadSales,
+          icon: Icons.download_outlined,
+          enabled: isConnected && isDayClosed && _activeAction == null,
+          isLoading: _activeAction == 'download',
+          onPressed: _downloadSales,
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Sync action button ───────────────────────────────────────────────────────
+
+class _SyncActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool enabled;
+  final bool isLoading;
+  final VoidCallback onPressed;
+
+  const _SyncActionButton({
+    required this.label,
+    required this.icon,
+    required this.enabled,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      icon: isLoading
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(icon),
+      label: Text(label),
+      onPressed: enabled ? onPressed : null,
     );
   }
 }
