@@ -14,6 +14,7 @@ void main() {
   // Mirrors the French l10n values used in production.
   const thankYou = 'Merci !';
   const other = 'AUTRES';
+  const total = 'TOTAL';
 
   final products = [
     const Product(id: 1, name: 'Café', price: 1.50, order: 0, createdAt: '2025-01-01'),
@@ -33,6 +34,7 @@ void main() {
       quantities: {1: 2, 2: 1},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     expect(bytes, isNotEmpty);
   });
@@ -45,6 +47,7 @@ void main() {
       quantities: {1: 1, 2: 1},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final bytesSome = await service.buildReceiptFromCart(
       businessName: 'Test',
@@ -53,6 +56,7 @@ void main() {
       quantities: {1: 1, 2: 0},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     expect(bytesSome.length, lessThan(bytesAll.length));
   });
@@ -66,6 +70,7 @@ void main() {
       quantities: {},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     expect(bytes, isNotEmpty);
   });
@@ -78,6 +83,7 @@ void main() {
       quantities: {1: 2, 2: 1},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, contains('Café'));
@@ -92,6 +98,7 @@ void main() {
       quantities: {1: 3, 2: 1},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, contains('X3'));
@@ -100,7 +107,8 @@ void main() {
     expect(content, isNot(contains('1x')));
   });
 
-  test('buildReceiptFromCart does not include prices or TOTAL', () async {
+  test('buildReceiptFromCart prints TOTAL line with amount', () async {
+    // Café 1.50 × 2 + Croissant 1.20 × 1 = 4.20 EUR
     final bytes = await service.buildReceiptFromCart(
       businessName: 'Test',
       dateTime: DateTime(2025, 1, 15, 10, 30),
@@ -108,10 +116,27 @@ void main() {
       quantities: {1: 2, 2: 1},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
-    expect(content, isNot(contains('EUR')));
-    expect(content, isNot(contains('TOTAL')));
+    expect(content, contains('TOTAL'));
+    expect(content, contains('4,20 EUR'));
+  });
+
+  test('buildReceiptFromCart does not include per-line prices', () async {
+    final bytes = await service.buildReceiptFromCart(
+      businessName: 'Test',
+      dateTime: DateTime(2025, 1, 15, 10, 30),
+      products: products,
+      quantities: {1: 2, 2: 1},
+      otherCategoryLabel: other,
+      thankYouLabel: thankYou,
+      totalLabel: total,
+    );
+    final content = decode(bytes);
+    // Unit prices must not appear individually on product lines
+    expect(content, isNot(contains('1,50 EUR')));
+    expect(content, isNot(contains('1,20 EUR')));
   });
 
   test('buildReceiptFromCart includes footer "Merci !"', () async {
@@ -122,6 +147,7 @@ void main() {
       quantities: {1: 1},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     expect(decode(bytes), contains(thankYou));
   });
@@ -134,6 +160,7 @@ void main() {
       quantities: {1: 10, 2: 99},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, contains('X10'));
@@ -148,6 +175,7 @@ void main() {
       quantities: {1: 1},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     expect(bytes, isNotEmpty);
   });
@@ -173,6 +201,7 @@ void main() {
       categories: const [drinks, snacks],
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, contains('** BOISSONS **'));
@@ -189,6 +218,7 @@ void main() {
       categories: const [drinks, snacks],
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content.indexOf('** BOISSONS **'), lessThan(content.indexOf('** SNACKS **')));
@@ -203,6 +233,7 @@ void main() {
       categories: const [drinks, snacks],
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, contains('** BOISSONS **'));
@@ -218,6 +249,7 @@ void main() {
       categories: const [drinks, snacks],
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, contains('** AUTRES **'));
@@ -233,6 +265,7 @@ void main() {
       quantities: {1: 1, 3: 1},
       otherCategoryLabel: other,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, isNot(contains('**')));
@@ -270,6 +303,7 @@ void main() {
       businessName: 'Test',
       sale: sale,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, contains('Bière'));
@@ -281,6 +315,7 @@ void main() {
       businessName: 'Test',
       sale: sale,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
     expect(content, contains('X2'));
@@ -288,15 +323,16 @@ void main() {
     expect(content, isNot(contains('2x')));
   });
 
-  test('buildReceiptFromSale does not include prices or TOTAL', () async {
+  test('buildReceiptFromSale prints TOTAL from sale.total', () async {
     final bytes = await service.buildReceiptFromSale(
       businessName: 'Test',
       sale: sale,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     final content = decode(bytes);
-    expect(content, isNot(contains('EUR')));
-    expect(content, isNot(contains('TOTAL')));
+    expect(content, contains('TOTAL'));
+    expect(content, contains('4,20 EUR'));
   });
 
   test('buildReceiptFromSale includes footer "Merci !"', () async {
@@ -304,6 +340,7 @@ void main() {
       businessName: 'Test',
       sale: sale,
       thankYouLabel: thankYou,
+      totalLabel: total,
     );
     expect(decode(bytes), contains(thankYou));
   });

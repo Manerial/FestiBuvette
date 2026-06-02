@@ -220,11 +220,13 @@ class SyncNotifier extends Notifier<SyncState> {
     final localeCode = settings?.locale ??
         PlatformDispatcher.instance.locale.languageCode;
     final thankYouLabel = localeCode == 'fr' ? 'Merci !' : 'Thank you!';
+    final totalLabel = localeCode == 'fr' ? 'TOTAL' : 'TOTAL';
 
     final bytes = await TicketService().buildReceiptFromSale(
       sale: fakeSale,
       businessName: businessName,
       thankYouLabel: thankYouLabel,
+      totalLabel: totalLabel,
     );
 
     return ref.read(printerProvider.notifier).printBytes(bytes);

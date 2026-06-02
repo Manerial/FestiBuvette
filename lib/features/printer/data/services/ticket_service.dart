@@ -8,8 +8,12 @@ import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
 class TicketService {
   static final _dateFmt = DateFormat('dd/MM/yyyy');
   static final _timeFmt = DateFormat('HH:mm');
+  static final _priceFmt = NumberFormat('0.00', 'fr_FR');
 
   // ─── Private helpers ───────────────────────────────────────────────────────
+
+  static String _formatPrice(double amount) =>
+      '${_priceFmt.format(amount)} EUR';
 
   static List<int> _productLine(Generator gen, String name, int qty) =>
       gen.row([
@@ -42,6 +46,8 @@ class TicketService {
     List<Category> categories = const [],
     required String otherCategoryLabel,
     required String thankYouLabel,
+    required String totalLabel,
+    required double total,
   }) async {
     final profile = await CapabilityProfile.load();
     final gen = Generator(PaperSize.mm58, profile);
@@ -100,6 +106,21 @@ class TicketService {
       }
     }
 
+    // ── Total ─────────────────────────────────────────────────────────────
+    bytes.addAll(gen.hr());
+    bytes.addAll(gen.row([
+      PosColumn(
+        text: totalLabel,
+        width: 6,
+        styles: const PosStyles(bold: true),
+      ),
+      PosColumn(
+        text: _formatPrice(total),
+        width: 6,
+        styles: const PosStyles(align: PosAlign.right, bold: true),
+      ),
+    ]));
+
     // ── Footer ────────────────────────────────────────────────────────────
     bytes.addAll(gen.hr());
     bytes.addAll(gen.text(
@@ -123,22 +144,30 @@ class TicketService {
     List<Category> categories = const [],
     required String otherCategoryLabel,
     required String thankYouLabel,
-  }) =>
-      _buildTicket(
-        businessName: businessName,
-        dateTime: dateTime,
-        lines: products
-            .where((p) => (quantities[p.id] ?? 0) > 0)
-            .map((p) => (
-                  name: p.name,
-                  qty: quantities[p.id]!,
-                  categoryId: p.categoryId,
-                ))
-            .toList(),
-        categories: categories,
-        otherCategoryLabel: otherCategoryLabel,
-        thankYouLabel: thankYouLabel,
-      );
+    required String totalLabel,
+  }) {
+    final cartProducts = products.where((p) => (quantities[p.id] ?? 0) > 0);
+    final total = cartProducts.fold(
+      0.0,
+      (sum, p) => sum + p.price * quantities[p.id]!,
+    );
+    return _buildTicket(
+      businessName: businessName,
+      dateTime: dateTime,
+      lines: cartProducts
+          .map((p) => (
+                name: p.name,
+                qty: quantities[p.id]!,
+                categoryId: p.categoryId,
+              ))
+          .toList(),
+      categories: categories,
+      otherCategoryLabel: otherCategoryLabel,
+      thankYouLabel: thankYouLabel,
+      totalLabel: totalLabel,
+      total: total,
+    );
+  }
 
   /// Builds an order ticket from a previously recorded [Sale] (uses snapshots).
   /// Printed flat — category info is not snapshotted in sale lines.
@@ -146,6 +175,7 @@ class TicketService {
     required String businessName,
     required Sale sale,
     required String thankYouLabel,
+    required String totalLabel,
   }) =>
       _buildTicket(
         businessName: businessName,
@@ -159,6 +189,8 @@ class TicketService {
             .toList(),
         otherCategoryLabel: '',
         thankYouLabel: thankYouLabel,
+        totalLabel: totalLabel,
+        total: sale.total,
       );
 
   // ─── Test page ─────────────────────────────────────────────────────────────

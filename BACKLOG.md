@@ -185,6 +185,70 @@
 
 ---
 
+## EPIC 12 — Volunteer / complimentary sales
+
+Sales offered to volunteers, excluded from revenue (CA).
+
+- [ ] **E12-1** DB migration — add `is_volunteer INTEGER DEFAULT 0` (boolean) to `sales` table
+- [ ] **E12-2** `Sale` model — `isVolunteer` field (default `false`)
+- [ ] **E12-3** `SalesRepository` — exclude volunteer sales from revenue queries; add `getVolunteerCountByDay(dayId)` + `getVolunteerRevenueByDay(dayId)`
+- [ ] **E12-4** `BusinessDay` model + DB migration — add `volunteer_sale_count INTEGER DEFAULT 0` + `volunteer_revenue REAL DEFAULT 0` columns; update aggregate recompute logic
+- [ ] **E12-5** `SaleService.record()` — accept `isVolunteer` flag; add to volunteer aggregates, not to revenue aggregates
+- [ ] **E12-6** Cart UI — "Volunteer sale" button (distinct color, e.g. amber) in the action row; confirmation dialog warns the sale is complimentary and excluded from CA; change calculator hidden for volunteer sales
+- [ ] **E12-7** Report summary card — separate volunteer line: count + total (labeled "excl. CA")
+- [ ] **E12-8** Ticket — "BÉNÉVOLE / VOLUNTEER" header band printed above the order lines
+- [ ] **E12-9** i18n strings (EN + FR): `volunteerSale`, `volunteerSaleConfirmTitle`, `volunteerSaleConfirmBody`, `volunteerCount`, `volunteerRevenue`, `excludedFromRevenue`
+- [ ] **E12-10** Tests: `SalesRepository` (isVolunteer flag, revenue exclusion) + `SaleService` (volunteer aggregates) + `CartNotifier` (volunteer toggle state)
+
+---
+
+## EPIC 13 — Price display on order ticket
+
+Show the unit price per line on the printed ESC/POS order ticket.
+
+- [x] **E13-1** `TicketService` — add TOTAL line (amount in EUR, comma decimal) at the bottom of the ticket, above the footer separator; both `buildReceiptFromCart` (computed from price × qty) and `buildReceiptFromSale` (from `sale.total`) covered
+- [x] **E13-2** Reprint path (`buildReceiptFromSale`) — TOTAL line included (see E13-1, covered in same pass)
+- [x] **E13-3** Tests: `TicketService` — TOTAL line + correct amount asserted for cart and sale receipt; per-line prices absent
+
+---
+
+## EPIC 14 — Payment terminal (SumUp Air)
+
+Multi-payment method support (cash + card) via SumUp Air reader + `sumup_flutter` SDK.
+Hardware: SumUp Air (~30 €, 1.69 % / transaction). Requires mobile network for card authorisation.
+
+- [ ] **E14-1** `PaymentMethod` enum (`cash`, `card`) in `core/constants/`; `sumup_flutter` added to `pubspec.yaml`
+- [ ] **E14-2** DB migration — add `payment_method TEXT NOT NULL DEFAULT 'cash'` to `sales` table
+- [ ] **E14-3** `Sale` model — `paymentMethod` field
+- [ ] **E14-4** `SalesRepository` — `getRevenueByPaymentMethod(dayId)` query (grouped totals: cash + card)
+- [ ] **E14-5** `SaleService.record()` — persist `paymentMethod`
+- [ ] **E14-6** `PaymentTerminalService` — abstraction interface + SumUp adapter: SDK init with API key, login (one-time OAuth), `checkout(amount, currency)`, approved / declined / cancelled responses, disconnect
+- [ ] **E14-7** Settings screen — "Terminal de paiement" section: SumUp login/logout, reader pairing (Bluetooth), connection status badge, test transaction button
+- [ ] **E14-8** Cart UI — payment method selector before confirming (cash / card segmented button); cash → existing flow (change calculator); card → triggers SumUp checkout → on approved: record sale + print + clear cart; on declined/cancelled: stay in cart + error snackbar
+- [ ] **E14-9** `TicketService` — print payment method on ticket footer (`PAIEMENT : CARTE` / `PAIEMENT : ESPECES`)
+- [ ] **E14-10** Report summary card — revenue split by method (cash total + card total)
+- [ ] **E14-11** i18n strings (EN + FR): `paymentMethodCash`, `paymentMethodCard`, `selectPaymentMethod`, `revenueCash`, `revenueCard`, `paymentApproved`, `paymentDeclined`, `paymentCancelled`, `terminalSettings`, `terminalPairReader`, `terminalLogin`
+- [ ] **E14-12** Tests: `SalesRepository` (groupBy payment method) + `SaleService` (payment method persisted) + `PaymentTerminalService` mock (approved / declined / cancelled paths)
+
+---
+
+## EPIC 15 — Stock management
+
+Per-product stock tracking: initial quantity, deduction on sale, low-stock alert.
+
+- [ ] **E15-1** DB migration — add `stock_quantity INTEGER` (nullable — `NULL` = tracking disabled) + `low_stock_threshold INTEGER DEFAULT 0` to `products` table
+- [ ] **E15-2** `Product` model — `stockQuantity` (nullable `int?`) + `lowStockThreshold` fields
+- [ ] **E15-3** `ProductsRepository` — `updateStock(productId, delta)` atomic decrement; `getProductsWithLowStock()` (stock ≤ threshold, tracking enabled)
+- [ ] **E15-4** `SaleService.record()` — decrement stock for each sold product (only if `stockQuantity != null`); no sale blocked by default (unless configured in settings)
+- [ ] **E15-5** Product form dialog — stock quantity field (optional) + low-stock threshold field; product tile in Products screen shows remaining quantity badge
+- [ ] **E15-6** Cart screen — low-stock badge on product tile (colored indicator when stock ≤ threshold); configurable hard-block when stock = 0 (settings toggle)
+- [ ] **E15-7** "Reset stocks" action — accessible from the Settings screen; prompts the user to enter the starting quantity for each tracked product; resets all `stock_quantity` values atomically
+- [ ] **E15-8** Report — stock snapshot per product at day close (quantity remaining at close time, stored alongside sale aggregates or displayed live)
+- [ ] **E15-9** i18n strings (EN + FR): `stockQuantity`, `lowStockThreshold`, `lowStockWarning`, `outOfStock`, `resetStocks`, `stockSnapshot`, `stockTrackingDisabled`, `blockSaleWhenOutOfStock`
+- [ ] **E15-10** Tests: `ProductsRepository` (stock decrement, low-stock query) + `SaleService` (stock decremented on sale, skipped if tracking disabled)
+
+---
+
 ## EPIC 999 — Deferred (requires Mac / low priority)
 
 - [ ] **E999-1** POC BLE iOS — scan, connect to NETUM NT-1809DD, identify GATT UUIDs via nRF Connect _(requires Mac + physical iOS device)_
@@ -200,8 +264,8 @@ Ces features sont **exclues** : ne pas les proposer, ne pas les implémenter.
 
 | Fonctionnalité | Décision |
 |---|---|
-| Multi-modes de paiement (CB, chèque…) | ❌ Hors scope — espèces uniquement |
-| Gestion des stocks | ❌ Hors scope |
+| Multi-modes de paiement (CB, chèque…) | → E14 — espèces + carte, décision architecture préalable requise |
+| Gestion des stocks | → E15 |
 | Mode sombre | ❌ Hors scope |
 | Produit offert / remise | ❌ Hors scope |
 | TVA / comptabilité | ❌ Hors scope |
