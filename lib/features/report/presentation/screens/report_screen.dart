@@ -502,6 +502,7 @@ class _SaleTile extends ConsumerWidget {
       businessName: businessName,
       sale: sale,
       thankYouLabel: l10n.ticketThankYou,
+      totalLabel: l10n.total,
     );
     final success =
         await ref.read(printerProvider.notifier).printBytes(bytes);

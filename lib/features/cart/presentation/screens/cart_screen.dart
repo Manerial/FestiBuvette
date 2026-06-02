@@ -515,6 +515,7 @@ class _FooterState extends ConsumerState<_Footer>
         categories: categories,
         otherCategoryLabel: l10n.ticketOtherCategory,
         thankYouLabel: l10n.ticketThankYou,
+        totalLabel: l10n.total,
       );
 
       final printed =
