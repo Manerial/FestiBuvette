@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:festi_buvette_app/features/products/data/models/category.dart';
 import 'package:festi_buvette_app/features/products/providers/categories_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Opens the add or edit category dialog.
 /// [category] == null → Add mode, otherwise → Edit mode.

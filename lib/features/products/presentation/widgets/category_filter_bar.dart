@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:festi_buvette_app/features/products/data/models/category.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
 
 /// Horizontal scrollable row of category filter chips.
 ///

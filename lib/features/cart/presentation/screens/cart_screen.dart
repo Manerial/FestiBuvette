@@ -1,7 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:vibration/vibration.dart';
-import 'package:intl/intl.dart';
 import 'package:festi_buvette_app/core/constants/app_constants.dart';
 import 'package:festi_buvette_app/features/cart/providers/cart_provider.dart';
 import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
@@ -17,6 +13,10 @@ import 'package:festi_buvette_app/features/sync/data/models/sync_exception.dart'
 import 'package:festi_buvette_app/features/sync/data/models/sync_role.dart';
 import 'package:festi_buvette_app/features/sync/providers/sync_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:vibration/vibration.dart';
 
 void _triggerHaptic(WidgetRef ref) {
   if (ref.read(settingsProvider).valueOrNull?.hapticFeedback ?? true) {
@@ -46,6 +46,7 @@ class CartScreen extends ConsumerWidget {
 
 class _CartContent extends ConsumerStatefulWidget {
   final List<Product> products;
+
   const _CartContent({required this.products});
 
   @override
@@ -65,18 +66,15 @@ class _CartContentState extends ConsumerState<_CartContent> {
     // If selected category was deleted, fall back to "All".
     final effectiveCategoryId =
         categories.any((c) => c.id == _selectedCategoryId)
-            ? _selectedCategoryId
-            : null;
+        ? _selectedCategoryId
+        : null;
 
     // Out-of-stock products are not purchasable — exclude from the cart entirely.
-    final available =
-        widget.products.where((p) => !p.isOutOfStock).toList();
+    final available = widget.products.where((p) => !p.isOutOfStock).toList();
 
     final filtered = effectiveCategoryId == null
         ? available
-        : available
-            .where((p) => p.categoryId == effectiveCategoryId)
-            .toList();
+        : available.where((p) => p.categoryId == effectiveCategoryId).toList();
 
     return Column(
       children: [
@@ -92,8 +90,7 @@ class _CartContentState extends ConsumerState<_CartContent> {
           child: gridView
               ? GridView.builder(
                   padding: const EdgeInsets.all(8),
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
@@ -225,8 +222,7 @@ class _ProductGridTile extends ConsumerWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    fontWeight:
-                        inCart ? FontWeight.bold : FontWeight.normal,
+                    fontWeight: inCart ? FontWeight.bold : FontWeight.normal,
                     fontSize: 14,
                     color: inCart
                         ? colorScheme.onPrimaryContainer
@@ -387,10 +383,12 @@ class _FooterState extends ConsumerState<_Footer>
     final syncClient = ref.read(syncProvider.notifier).client;
     if (syncClient == null) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.syncConnectionFailed),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.syncConnectionFailed),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
       return;
     }
@@ -398,12 +396,14 @@ class _FooterState extends ConsumerState<_Footer>
     // Build the items payload from the current cart.
     final items = widget.products
         .where((p) => (widget.cartState.quantities[p.id] ?? 0) > 0)
-        .map((p) => {
-              'product_id': p.id,
-              'name': p.name,
-              'price': p.price,
-              'quantity': widget.cartState.quantities[p.id]!,
-            })
+        .map(
+          (p) => {
+            'product_id': p.id,
+            'name': p.name,
+            'price': p.price,
+            'quantity': widget.cartState.quantities[p.id]!,
+          },
+        )
         .toList();
 
     if (mounted) setState(() => _isSending = true);
@@ -438,19 +438,23 @@ class _FooterState extends ConsumerState<_Footer>
       // Network error → cart preserved, do not record.
       if (mounted) setState(() => _isSending = false);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.syncConnectionFailed),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.syncConnectionFailed),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
       return;
     } catch (e) {
       if (mounted) setState(() => _isSending = false);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.errorMessage(e)),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.errorMessage(e)),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
       return;
     }
@@ -491,10 +495,12 @@ class _FooterState extends ConsumerState<_Footer>
           await _recordSale(context);
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              content: Text(l10n.errorMessage(e)),
-              backgroundColor: Colors.red,
-            ));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.errorMessage(e)),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
         }
       }
@@ -503,10 +509,10 @@ class _FooterState extends ConsumerState<_Footer>
 
     // ── Printer connected → print then record ──────────────────────────────
     try {
-      final businessName = ref.read(settingsProvider).valueOrNull?.appName ??
+      final businessName =
+          ref.read(settingsProvider).valueOrNull?.appName ??
           AppConstants.appName;
-      final categories =
-          ref.read(categoriesProvider).valueOrNull ?? [];
+      final categories = ref.read(categoriesProvider).valueOrNull ?? [];
       final bytes = await TicketService().buildReceiptFromCart(
         businessName: businessName,
         dateTime: DateTime.now(),
@@ -518,15 +524,18 @@ class _FooterState extends ConsumerState<_Footer>
         totalLabel: l10n.total,
       );
 
-      final printed =
-          await ref.read(printerProvider.notifier).printBytes(bytes);
+      final printed = await ref
+          .read(printerProvider.notifier)
+          .printBytes(bytes);
 
       if (!printed) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(l10n.printerPrintError),
-            backgroundColor: Colors.red,
-          ));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.printerPrintError),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
         return;
       }
@@ -534,10 +543,12 @@ class _FooterState extends ConsumerState<_Footer>
       if (context.mounted) await _recordSale(context);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.errorMessage(e)),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.errorMessage(e)),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -583,11 +594,13 @@ class _FooterState extends ConsumerState<_Footer>
 
     final syncRole = ref.watch(
       settingsProvider.select(
-          (s) => s.valueOrNull?.syncRole ?? SyncRole.standalone),
+        (s) => s.valueOrNull?.syncRole ?? SyncRole.standalone,
+      ),
     );
     final isSyncConnected = ref.watch(
       syncProvider.select(
-          (s) => s.connectionStatus == SyncConnectionStatus.connected),
+        (s) => s.connectionStatus == SyncConnectionStatus.connected,
+      ),
     );
     final isSecondMode = syncRole == SyncRole.second && isSyncConnected;
     final effectivePrinting = isSecondMode ? _isSending : isPrinting;
@@ -686,6 +699,7 @@ class _FooterState extends ConsumerState<_Footer>
 
 class _TotalRow extends StatelessWidget {
   final double total;
+
   const _TotalRow({required this.total});
 
   static final _fmt = NumberFormat.currency(
@@ -703,16 +717,16 @@ class _TotalRow extends StatelessWidget {
         Text(
           l10n.total,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+          ),
         ),
         Text(
           _fmt.format(total),
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
         ),
       ],
     );
@@ -737,7 +751,9 @@ class _TenderedRow extends ConsumerWidget {
 
   void _selectBill(WidgetRef ref, int amount) {
     final current = ref.read(cartProvider).tenderedAmount;
-    ref.read(cartProvider.notifier).setTenderedAmount(
+    ref
+        .read(cartProvider.notifier)
+        .setTenderedAmount(
           current == amount.toDouble() ? null : amount.toDouble(),
         );
   }
@@ -797,24 +813,26 @@ class _TenderedRow extends ConsumerWidget {
         Text(
           l10n.tenderedAmount,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 6),
         // ── Bill buttons + custom input ────────────────────────────────────
         Row(
           children: [
-            ..._kBillAmounts.map((amount) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: _BillButton(
-                      label: '$amount €',
-                      isSelected: tendered == amount.toDouble(),
-                      enabled: !empty,
-                      onTap: () => _selectBill(ref, amount),
-                    ),
+            ..._kBillAmounts.map(
+              (amount) => Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: _BillButton(
+                    label: '$amount €',
+                    isSelected: tendered == amount.toDouble(),
+                    enabled: !empty,
+                    onTap: () => _selectBill(ref, amount),
                   ),
-                )),
+                ),
+              ),
+            ),
             IconButton(
               icon: const Icon(Icons.edit_outlined, size: 20),
               onPressed: empty ? null : () => _showCustomInput(context, ref),
@@ -829,8 +847,8 @@ class _TenderedRow extends ConsumerWidget {
           Text(
             l10n.insufficientAmount,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
+              color: Theme.of(context).colorScheme.error,
+            ),
           ),
         ],
         // ── Change ─────────────────────────────────────────────────────────
@@ -842,16 +860,16 @@ class _TenderedRow extends ConsumerWidget {
               Text(
                 l10n.changeDue,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade700,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
               ),
               Text(
                 _fmt.format(change),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade700,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
               ),
             ],
           ),
@@ -940,10 +958,7 @@ class _ActionRow extends StatelessWidget {
     );
 
     if (!isDayActive) {
-      printBtn = Tooltip(
-        message: l10n.dayNotStarted,
-        child: printBtn,
-      );
+      printBtn = Tooltip(message: l10n.dayNotStarted, child: printBtn);
     }
 
     return Row(
@@ -1028,23 +1043,24 @@ class _EmptyCatalog extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.shopping_cart_outlined,
-              size: 72, color: Colors.grey.shade400),
+          Icon(
+            Icons.shopping_cart_outlined,
+            size: 72,
+            color: Colors.grey.shade400,
+          ),
           const SizedBox(height: 16),
           Text(
             l10n.noProductsInCatalogue,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Colors.grey.shade600),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
           ),
           const SizedBox(height: 8),
           Text(
             l10n.addProductsFromTab,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: Colors.grey.shade500),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
           ),
         ],
       ),

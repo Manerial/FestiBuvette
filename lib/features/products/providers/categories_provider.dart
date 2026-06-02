@@ -1,12 +1,12 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/products/data/models/category.dart';
 import 'package:festi_buvette_app/features/products/data/repositories/categories_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final categoriesProvider =
     AsyncNotifierProvider<CategoriesNotifier, List<Category>>(
-  CategoriesNotifier.new,
-);
+      CategoriesNotifier.new,
+    );
 
 class CategoriesNotifier extends AsyncNotifier<List<Category>> {
   final _repo = CategoriesRepository(DatabaseHelper.instance);

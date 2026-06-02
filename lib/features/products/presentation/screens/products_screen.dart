@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:festi_buvette_app/features/products/data/models/category.dart';
 import 'package:festi_buvette_app/features/products/data/models/product.dart';
 import 'package:festi_buvette_app/features/products/presentation/widgets/category_filter_bar.dart';
@@ -10,6 +7,9 @@ import 'package:festi_buvette_app/features/products/providers/categories_provide
 import 'package:festi_buvette_app/features/products/providers/products_provider.dart';
 import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class ProductsScreen extends ConsumerStatefulWidget {
   const ProductsScreen({super.key});
@@ -30,11 +30,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
     // If the selected category was deleted, fall back to "All".
     // The uncategorized sentinel (-1) is always valid.
-    final effectiveCategoryId =
-        _selectedCategoryId == CategoryFilterBar.uncategorizedId ||
-                categories.any((c) => c.id == _selectedCategoryId)
-            ? _selectedCategoryId
-            : null;
+    final isUncategorized =
+        _selectedCategoryId == CategoryFilterBar.uncategorizedId;
+    final isCategorized = categories.any((c) => c.id == _selectedCategoryId);
+    final effectiveCategoryId = (isUncategorized || isCategorized)
+        ? _selectedCategoryId
+        : null;
 
     return Column(
       children: [
@@ -47,8 +48,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           child: SegmentedButton<bool>(
             segments: [
               ButtonSegment(value: false, label: Text(l10n.productsTab)),
-              ButtonSegment(
-                  value: true, label: Text(l10n.categoriesTabLabel)),
+              ButtonSegment(value: true, label: Text(l10n.categoriesTabLabel)),
             ],
             selected: {_showCategories},
             onSelectionChanged: (v) =>
@@ -88,9 +88,9 @@ class _CatalogLockedBanner extends StatelessWidget {
             Text(
               l10n.catalogLocked,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: cs.onPrimaryContainer,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: cs.onPrimaryContainer,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -127,7 +127,8 @@ class _ProductsSection extends ConsumerWidget {
           null => products,
           CategoryFilterBar.uncategorizedId =>
             products.where((p) => p.categoryId == null).toList(),
-          _ => products.where((p) => p.categoryId == selectedCategoryId).toList(),
+          _ =>
+            products.where((p) => p.categoryId == selectedCategoryId).toList(),
         };
 
         return Column(
@@ -157,9 +158,10 @@ class _ProductsSection extends ConsumerWidget {
                         onPressed: () => showProductFormDialog(
                           context,
                           defaultCategoryId:
-                              selectedCategoryId == CategoryFilterBar.uncategorizedId
-                                  ? null
-                                  : selectedCategoryId,
+                              selectedCategoryId ==
+                                  CategoryFilterBar.uncategorizedId
+                              ? null
+                              : selectedCategoryId,
                         ),
                         child: const Icon(Icons.add),
                       ),
@@ -178,6 +180,7 @@ class _ProductsSection extends ConsumerWidget {
 
 class _CategoriesSection extends ConsumerWidget {
   final bool locked;
+
   const _CategoriesSection({required this.locked});
 
   @override
@@ -192,24 +195,25 @@ class _CategoriesSection extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.label_outline,
-                    size: 72, color: Colors.grey.shade400),
+                Icon(
+                  Icons.label_outline,
+                  size: 72,
+                  color: Colors.grey.shade400,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   l10n.noCategoriesYet,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.copyWith(color: Colors.grey.shade600),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 if (!locked)
                   Text(
                     l10n.tapPlusToAddCategory,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.grey.shade500),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade500,
+                    ),
                     textAlign: TextAlign.center,
                   ),
               ],
@@ -250,6 +254,7 @@ class _CategoryTile extends ConsumerWidget {
   final Category category;
   final int index;
   final bool locked;
+
   const _CategoryTile({
     super.key,
     required this.category,
@@ -314,10 +319,7 @@ class _ReorderableTile extends StatelessWidget {
             ),
           ];
 
-    final trailingWidgets = [
-      ?leadingTrailingAction,
-      ...editDeleteButtons,
-    ];
+    final trailingWidgets = [?leadingTrailingAction, ...editDeleteButtons];
 
     return ListTile(
       leading: ReorderableDragStartListener(
@@ -441,6 +443,7 @@ class _ProductTile extends ConsumerWidget {
 
 class _EmptyProductsState extends StatelessWidget {
   final bool locked;
+
   const _EmptyProductsState({required this.locked});
 
   @override
@@ -450,24 +453,25 @@ class _EmptyProductsState extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.inventory_2_outlined,
-              size: 72, color: Colors.grey.shade400),
+          Icon(
+            Icons.inventory_2_outlined,
+            size: 72,
+            color: Colors.grey.shade400,
+          ),
           const SizedBox(height: 16),
           Text(
             l10n.noProducts,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Colors.grey.shade600),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
           ),
           if (!locked) ...[
             const SizedBox(height: 8),
             Text(
               l10n.tapPlusToAddProduct,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Colors.grey.shade500),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -491,10 +495,9 @@ class _EmptyCategoryState extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             l10n.noProductsInCategory,
-            style: Theme.of(context)
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Colors.grey.shade600),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
           ),
         ],
       ),

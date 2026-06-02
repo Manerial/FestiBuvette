@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:festi_buvette_app/features/products/data/models/product.dart';
 import 'package:festi_buvette_app/features/products/providers/categories_provider.dart';
 import 'package:festi_buvette_app/features/products/providers/products_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Opens the add or edit product dialog.
 /// [product] == null → Add mode, otherwise → Edit mode.
@@ -72,7 +72,9 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
     final price = _parsePrice(_priceCtrl.text)!;
     try {
       if (_isEdit) {
-        await ref.read(productsProvider.notifier).edit(
+        await ref
+            .read(productsProvider.notifier)
+            .edit(
               widget.product!.copyWith(
                 name: name,
                 price: price,
@@ -119,8 +121,9 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _priceCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[\d,.]')),
               ],
@@ -151,10 +154,7 @@ class _ProductFormDialogState extends ConsumerState<ProductFormDialog> {
                     ),
                   ),
                   ...categories.map(
-                    (c) => DropdownMenuItem(
-                      value: c.id,
-                      child: Text(c.name),
-                    ),
+                    (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
                   ),
                 ],
                 onChanged: (v) => setState(() => _selectedCategoryId = v),

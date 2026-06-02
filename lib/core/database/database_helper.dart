@@ -1,9 +1,10 @@
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:festi_buvette_app/core/constants/app_constants.dart';
 
 class DatabaseHelper {
   DatabaseHelper._();
+
   static final DatabaseHelper instance = DatabaseHelper._();
 
   Database? _db;
@@ -112,12 +113,8 @@ class DatabaseHelper {
       );
     }
     if (oldVersion < 4) {
-      await db.execute(
-        'ALTER TABLE sales ADD COLUMN source_device_token TEXT',
-      );
-      await db.execute(
-        'ALTER TABLE sales ADD COLUMN source_local_id INTEGER',
-      );
+      await db.execute('ALTER TABLE sales ADD COLUMN source_device_token TEXT');
+      await db.execute('ALTER TABLE sales ADD COLUMN source_local_id INTEGER');
       // Recreate sale_lines to make product_id nullable.
       await db.execute('''
         CREATE TABLE sale_lines_v4 (
@@ -132,9 +129,7 @@ class DatabaseHelper {
           FOREIGN KEY (product_id) REFERENCES products(id)
         )
       ''');
-      await db.execute(
-        'INSERT INTO sale_lines_v4 SELECT * FROM sale_lines',
-      );
+      await db.execute('INSERT INTO sale_lines_v4 SELECT * FROM sale_lines');
       await db.execute('DROP TABLE sale_lines');
       await db.execute('ALTER TABLE sale_lines_v4 RENAME TO sale_lines');
     }

@@ -1,9 +1,9 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:festi_buvette_app/core/constants/app_constants.dart';
 import 'package:festi_buvette_app/core/services/bluetooth_permissions.dart';
 import 'package:festi_buvette_app/features/printer/data/models/printer_device.dart';
 import 'package:festi_buvette_app/features/printer/data/services/printer_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ─── Status enum ──────────────────────────────────────────────────────────────
 
@@ -32,8 +32,11 @@ class PrinterState {
   });
 
   bool get isConnected => status == PrinterConnectionStatus.connected;
+
   bool get isScanning => status == PrinterConnectionStatus.scanning;
+
   bool get isConnecting => status == PrinterConnectionStatus.connecting;
+
   bool get isBusy => isScanning || isConnecting || isPrinting;
 
   static const _absent = Object();
@@ -61,8 +64,9 @@ class PrinterState {
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
-final printerProvider =
-    AsyncNotifierProvider<PrinterNotifier, PrinterState>(PrinterNotifier.new);
+final printerProvider = AsyncNotifierProvider<PrinterNotifier, PrinterState>(
+  PrinterNotifier.new,
+);
 
 // ─── Notifier ─────────────────────────────────────────────────────────────────
 
@@ -70,17 +74,15 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
   final PrinterService? _serviceOverride;
   final BluetoothPermissions? _permissionsOverride;
 
-  PrinterNotifier()
-      : _serviceOverride = null,
-        _permissionsOverride = null;
+  PrinterNotifier() : _serviceOverride = null, _permissionsOverride = null;
 
   /// For unit tests: inject a [PrinterService] mock and optional
   /// [BluetoothPermissions] stub.
   PrinterNotifier.withService(
     PrinterService service, {
     BluetoothPermissions? permissions,
-  })  : _serviceOverride = service,
-        _permissionsOverride = permissions;
+  }) : _serviceOverride = service,
+       _permissionsOverride = permissions;
 
   PrinterService get _service =>
       _serviceOverride ?? const BluetoothPrinterService();
@@ -94,8 +96,7 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
   Future<PrinterState> build() async {
     final prefs = await SharedPreferences.getInstance();
     final savedAddress = prefs.getString(AppConstants.keyPrinterAddress);
-    final savedName =
-        prefs.getString(AppConstants.keyPrinterName) ?? '';
+    final savedName = prefs.getString(AppConstants.keyPrinterName) ?? '';
 
     if (savedAddress == null) {
       return const PrinterState(status: PrinterConnectionStatus.idle);
@@ -150,42 +151,52 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
 
   Future<void> scanDevices() async {
     final current = state.valueOrNull ?? const PrinterState();
-    state = AsyncData(current.copyWith(
-      status: PrinterConnectionStatus.scanning,
-      availableDevices: const [],
-      errorMessage: null,
-    ));
+    state = AsyncData(
+      current.copyWith(
+        status: PrinterConnectionStatus.scanning,
+        availableDevices: const [],
+        errorMessage: null,
+      ),
+    );
 
     // Request permissions before scanning — triggers the OS dialog on first use.
     final granted = await _permissions.requestPermissions();
     if (!granted) {
-      state = AsyncData(current.copyWith(
-        status: PrinterConnectionStatus.error,
-        errorMessage: 'permission_denied',
-      ));
+      state = AsyncData(
+        current.copyWith(
+          status: PrinterConnectionStatus.error,
+          errorMessage: 'permission_denied',
+        ),
+      );
       return;
     }
 
     try {
       final btEnabled = await _service.isBluetoothEnabled();
       if (!btEnabled) {
-        state = AsyncData(current.copyWith(
-          status: PrinterConnectionStatus.error,
-          errorMessage: 'bluetooth_disabled',
-        ));
+        state = AsyncData(
+          current.copyWith(
+            status: PrinterConnectionStatus.error,
+            errorMessage: 'bluetooth_disabled',
+          ),
+        );
         return;
       }
 
       final devices = await _service.getAvailableDevices();
-      state = AsyncData(current.copyWith(
-        status: PrinterConnectionStatus.idle,
-        availableDevices: devices,
-      ));
+      state = AsyncData(
+        current.copyWith(
+          status: PrinterConnectionStatus.idle,
+          availableDevices: devices,
+        ),
+      );
     } catch (e) {
-      state = AsyncData(current.copyWith(
-        status: PrinterConnectionStatus.error,
-        errorMessage: e.toString(),
-      ));
+      state = AsyncData(
+        current.copyWith(
+          status: PrinterConnectionStatus.error,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 
@@ -198,17 +209,21 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
     // guard against edge cases (e.g. user revoked from Settings mid-session).
     final hasPerms = await _permissions.hasPermissions();
     if (!hasPerms) {
-      state = AsyncData(current.copyWith(
-        status: PrinterConnectionStatus.error,
-        errorMessage: 'permission_denied',
-      ));
+      state = AsyncData(
+        current.copyWith(
+          status: PrinterConnectionStatus.error,
+          errorMessage: 'permission_denied',
+        ),
+      );
       return;
     }
 
-    state = AsyncData(current.copyWith(
-      status: PrinterConnectionStatus.connecting,
-      errorMessage: null,
-    ));
+    state = AsyncData(
+      current.copyWith(
+        status: PrinterConnectionStatus.connecting,
+        errorMessage: null,
+      ),
+    );
 
     try {
       final success = await _service
@@ -220,21 +235,27 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
         await prefs.setString(AppConstants.keyPrinterAddress, device.address);
         await prefs.setString(AppConstants.keyPrinterName, device.name);
 
-        state = AsyncData(current.copyWith(
-          status: PrinterConnectionStatus.connected,
-          connectedDevice: device,
-        ));
+        state = AsyncData(
+          current.copyWith(
+            status: PrinterConnectionStatus.connected,
+            connectedDevice: device,
+          ),
+        );
       } else {
-        state = AsyncData(current.copyWith(
-          status: PrinterConnectionStatus.error,
-          errorMessage: 'connection_failed',
-        ));
+        state = AsyncData(
+          current.copyWith(
+            status: PrinterConnectionStatus.error,
+            errorMessage: 'connection_failed',
+          ),
+        );
       }
     } catch (e) {
-      state = AsyncData(current.copyWith(
-        status: PrinterConnectionStatus.error,
-        errorMessage: e.toString(),
-      ));
+      state = AsyncData(
+        current.copyWith(
+          status: PrinterConnectionStatus.error,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 
@@ -246,12 +267,14 @@ class PrinterNotifier extends AsyncNotifier<PrinterState> {
     await prefs.remove(AppConstants.keyPrinterAddress);
     await prefs.remove(AppConstants.keyPrinterName);
 
-    state = AsyncData(state.valueOrNull?.copyWith(
-          status: PrinterConnectionStatus.idle,
-          connectedDevice: null,
-          availableDevices: const [],
-        ) ??
-        const PrinterState(status: PrinterConnectionStatus.idle));
+    state = AsyncData(
+      state.valueOrNull?.copyWith(
+            status: PrinterConnectionStatus.idle,
+            connectedDevice: null,
+            availableDevices: const [],
+          ) ??
+          const PrinterState(status: PrinterConnectionStatus.idle),
+    );
   }
 
   // ── Print bytes ──────────────────────────────────────────────────────────

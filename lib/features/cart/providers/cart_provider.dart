@@ -1,8 +1,10 @@
+import 'package:festi_buvette_app/features/products/data/models/product.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:festi_buvette_app/features/products/data/models/product.dart';
 
-final cartProvider = NotifierProvider<CartNotifier, CartState>(CartNotifier.new);
+final cartProvider = NotifierProvider<CartNotifier, CartState>(
+  CartNotifier.new,
+);
 
 @immutable
 class CartState {
@@ -43,7 +45,10 @@ class CartNotifier extends Notifier<CartState> {
   void increment(int productId) {
     final updated = Map<int, int>.from(state.quantities)
       ..[productId] = (state.quantities[productId] ?? 0) + 1;
-    state = CartState(quantities: updated, tenderedAmount: state.tenderedAmount);
+    state = CartState(
+      quantities: updated,
+      tenderedAmount: state.tenderedAmount,
+    );
   }
 
   void decrement(int productId) {
@@ -55,7 +60,10 @@ class CartNotifier extends Notifier<CartState> {
     } else {
       updated[productId] = current - 1;
     }
-    state = CartState(quantities: updated, tenderedAmount: state.tenderedAmount);
+    state = CartState(
+      quantities: updated,
+      tenderedAmount: state.tenderedAmount,
+    );
   }
 
   /// Clears quantities and tendered amount.
@@ -68,5 +76,6 @@ class CartNotifier extends Notifier<CartState> {
 
   bool get isEmpty => state.isEmpty;
 
-  double calculateTotal(List<Product> products) => state.calculateTotal(products);
+  double calculateTotal(List<Product> products) =>
+      state.calculateTotal(products);
 }

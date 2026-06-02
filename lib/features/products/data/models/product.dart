@@ -31,41 +31,40 @@ class Product {
     bool? isOutOfStock,
     String? createdAt,
     Object? categoryId = _noValue,
-  }) =>
-      Product(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        price: price ?? this.price,
-        order: order ?? this.order,
-        active: active ?? this.active,
-        isOutOfStock: isOutOfStock ?? this.isOutOfStock,
-        createdAt: createdAt ?? this.createdAt,
-        categoryId: identical(categoryId, _noValue)
-            ? this.categoryId
-            : categoryId as int?,
-      );
+  }) => Product(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    price: price ?? this.price,
+    order: order ?? this.order,
+    active: active ?? this.active,
+    isOutOfStock: isOutOfStock ?? this.isOutOfStock,
+    createdAt: createdAt ?? this.createdAt,
+    categoryId: identical(categoryId, _noValue)
+        ? this.categoryId
+        : categoryId as int?,
+  );
 
   Map<String, dynamic> toMap() => {
-        if (id != null) 'id': id,
-        'name': name,
-        'price': price,
-        'sort_order': order,
-        'active': active ? 1 : 0,
-        'is_out_of_stock': isOutOfStock ? 1 : 0,
-        'created_at': createdAt,
-        'category_id': categoryId,
-      };
+    if (id != null) 'id': id,
+    'name': name,
+    'price': price,
+    'sort_order': order,
+    'active': active ? 1 : 0,
+    'is_out_of_stock': isOutOfStock ? 1 : 0,
+    'created_at': createdAt,
+    'category_id': categoryId,
+  };
 
   factory Product.fromMap(Map<String, dynamic> map) => Product(
-        id: map['id'] as int?,
-        name: map['name'] as String,
-        price: (map['price'] as num).toDouble(),
-        order: map['sort_order'] as int,
-        active: (map['active'] as int) == 1,
-        isOutOfStock: (map['is_out_of_stock'] as int? ?? 0) == 1,
-        createdAt: map['created_at'] as String,
-        categoryId: map['category_id'] as int?,
-      );
+    id: map['id'] as int?,
+    name: map['name'] as String,
+    price: (map['price'] as num).toDouble(),
+    order: map['sort_order'] as int,
+    active: (map['active'] as int) == 1,
+    isOutOfStock: (map['is_out_of_stock'] as int? ?? 0) == 1,
+    createdAt: map['created_at'] as String,
+    categoryId: map['category_id'] as int?,
+  );
 
   @override
   String toString() =>

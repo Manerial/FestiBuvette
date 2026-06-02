@@ -1,9 +1,9 @@
-import 'package:intl/intl.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/sales/data/models/business_day.dart';
 import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
 import 'package:festi_buvette_app/features/sales/data/repositories/sales_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -88,8 +88,9 @@ class ReportState {
 
 // ─── Providers ────────────────────────────────────────────────────────────────
 
-final reportProvider =
-    AsyncNotifierProvider<ReportNotifier, ReportState>(ReportNotifier.new);
+final reportProvider = AsyncNotifierProvider<ReportNotifier, ReportState>(
+  ReportNotifier.new,
+);
 
 /// True when today has an active (not closed) BusinessDay.
 /// Used by the cart and products screen to gate writes.

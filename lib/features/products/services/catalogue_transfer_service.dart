@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/features/products/data/repositories/categories_repository.dart';
+import 'package:festi_buvette_app/features/products/data/repositories/products_repository.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
-
-import 'package:festi_buvette_app/core/database/database_helper.dart';
-import 'package:festi_buvette_app/features/products/data/repositories/categories_repository.dart';
-import 'package:festi_buvette_app/features/products/data/repositories/products_repository.dart';
 
 class CatalogueData {
   final int categoriesCount;
@@ -31,12 +30,13 @@ class CatalogueTransferService {
   final ProductsRepository _productsRepo;
 
   CatalogueTransferService()
-      : _dbHelper = DatabaseHelper.instance,
-        _categoriesRepo = CategoriesRepository(DatabaseHelper.instance),
-        _productsRepo = ProductsRepository(DatabaseHelper.instance);
+    : _dbHelper = DatabaseHelper.instance,
+      _categoriesRepo = CategoriesRepository(DatabaseHelper.instance),
+      _productsRepo = ProductsRepository(DatabaseHelper.instance);
 
-  static const _channel =
-      MethodChannel('com.jcbpartner.festi_buvette_app/file_saver');
+  static const _channel = MethodChannel(
+    'com.jcbpartner.festi_buvette_app/file_saver',
+  );
 
   Future<void> exportCatalogue() async {
     final categories = await _categoriesRepo.getAll();
@@ -47,7 +47,7 @@ class CatalogueTransferService {
       'version': 1,
       'exported_at': DateTime.now().toIso8601String(),
       'categories': [
-        for (final c in categories) {'name': c.name, 'sort_order': c.order}
+        for (final c in categories) {'name': c.name, 'sort_order': c.order},
       ],
       'products': [
         for (final p in products)
@@ -55,9 +55,10 @@ class CatalogueTransferService {
             'name': p.name,
             'price': p.price,
             'sort_order': p.order,
-            'category_name':
-                p.categoryId != null ? categoryById[p.categoryId] : null,
-          }
+            'category_name': p.categoryId != null
+                ? categoryById[p.categoryId]
+                : null,
+          },
       ],
     };
 
@@ -75,10 +76,9 @@ class CatalogueTransferService {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/catalogue_festibuvette.json');
     await file.writeAsString(json);
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: 'application/json')],
-      subject: 'FestiBuvette — Catalogue',
-    );
+    await Share.shareXFiles([
+      XFile(file.path, mimeType: 'application/json'),
+    ], subject: 'FestiBuvette — Catalogue');
   }
 
   /// Picks and parses a JSON catalogue file. Returns null if the user cancels.
@@ -124,10 +124,13 @@ class CatalogueTransferService {
       final existingProducts = await txn.query('products');
       for (final p in existingProducts) {
         final id = p['id'] as int;
-        final count = (Sqflite.firstIntValue(await txn.rawQuery(
-              'SELECT COUNT(*) FROM sale_lines WHERE product_id = ?',
-              [id],
-            )) ??
+        final count =
+            (Sqflite.firstIntValue(
+              await txn.rawQuery(
+                'SELECT COUNT(*) FROM sale_lines WHERE product_id = ?',
+                [id],
+              ),
+            ) ??
             0);
         if (count > 0) {
           await txn.update(
@@ -163,8 +166,9 @@ class CatalogueTransferService {
           'sort_order': p['sort_order'] as int? ?? i,
           'active': 1,
           'created_at': now,
-          'category_id':
-              categoryName != null ? categoryIdMap[categoryName] : null,
+          'category_id': categoryName != null
+              ? categoryIdMap[categoryName]
+              : null,
         });
       }
     });

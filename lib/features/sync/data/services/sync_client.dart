@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:http/http.dart' as http;
+
 import 'package:festi_buvette_app/features/sync/data/models/sync_exception.dart';
+import 'package:http/http.dart' as http;
 
 /// Thin HTTP wrapper used by the second device to talk to the control.
 ///
@@ -16,16 +17,13 @@ class SyncClient {
 
   static const Duration _timeout = Duration(seconds: 10);
 
-  SyncClient({
-    required this.baseUrl,
-    this.token,
-    http.Client? client,
-  }) : _httpClient = client ?? http.Client();
+  SyncClient({required this.baseUrl, this.token, http.Client? client})
+    : _httpClient = client ?? http.Client();
 
   Map<String, String> get _authHeaders => {
-        'content-type': 'application/json',
-        if (token != null) 'authorization': 'Bearer $token',
-      };
+    'content-type': 'application/json',
+    if (token != null) 'authorization': 'Bearer $token',
+  };
 
   // ─── Public API ─────────────────────────────────────────────────────────────
 
@@ -33,8 +31,11 @@ class SyncClient {
   /// Throws [SyncAuthException] on wrong PIN.
   /// Throws [SyncNetworkException] on connection failure (no retry).
   Future<String> authenticate(String pin) async {
-    final body = await _rawPost('/auth', {'pin': pin},
-        headers: {'content-type': 'application/json'});
+    final body = await _rawPost(
+      '/auth',
+      {'pin': pin},
+      headers: {'content-type': 'application/json'},
+    );
     return body['token'] as String;
   }
 
@@ -50,8 +51,10 @@ class SyncClient {
 
   // ─── Private ─────────────────────────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> _doGet(String path,
-      {int retriesLeft = 1}) async {
+  Future<Map<String, dynamic>> _doGet(
+    String path, {
+    int retriesLeft = 1,
+  }) async {
     try {
       final resp = await _httpClient
           .get(Uri.parse('$baseUrl$path'), headers: _authHeaders)
@@ -77,8 +80,11 @@ class SyncClient {
   }) async {
     try {
       final resp = await _httpClient
-          .post(Uri.parse('$baseUrl$path'),
-              headers: headers, body: jsonEncode(body))
+          .post(
+            Uri.parse('$baseUrl$path'),
+            headers: headers,
+            body: jsonEncode(body),
+          )
           .timeout(_timeout);
       return _parse(resp);
     } on SocketException catch (e) {
@@ -107,8 +113,11 @@ class SyncClient {
   }) async {
     try {
       final resp = await _httpClient
-          .post(Uri.parse('$baseUrl$path'),
-              headers: headers, body: jsonEncode(body))
+          .post(
+            Uri.parse('$baseUrl$path'),
+            headers: headers,
+            body: jsonEncode(body),
+          )
           .timeout(_timeout);
       return _parse(resp);
     } on SocketException catch (e) {

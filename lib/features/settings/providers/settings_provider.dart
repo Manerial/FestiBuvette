@@ -1,9 +1,10 @@
 import 'dart:math';
+
+import 'package:festi_buvette_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/features/sync/data/models/sync_role.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:festi_buvette_app/core/constants/app_constants.dart';
-import 'package:festi_buvette_app/features/sync/data/models/sync_role.dart';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -47,8 +48,9 @@ class SettingsState {
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
-final settingsProvider =
-    AsyncNotifierProvider<SettingsNotifier, SettingsState>(SettingsNotifier.new);
+final settingsProvider = AsyncNotifierProvider<SettingsNotifier, SettingsState>(
+  SettingsNotifier.new,
+);
 
 // ─── Notifier ─────────────────────────────────────────────────────────────────
 
@@ -135,7 +137,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       syncPin = _generatePin();
       await prefs.setString(AppConstants.keySyncPin, syncPin);
     }
-    state = AsyncData(_build(c, syncRole: role, syncPin: syncPin, overrideSyncPin: true));
+    state = AsyncData(
+      _build(c, syncRole: role, syncPin: syncPin, overrideSyncPin: true),
+    );
   }
 
   Future<void> regeneratePin() async {
@@ -178,7 +182,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       locale: overrideLocale ? locale : (locale ?? c?.locale),
       cartGridView: cartGridView ?? c?.cartGridView ?? true,
       hapticFeedback: hapticFeedback ?? c?.hapticFeedback ?? true,
-      appBarColor: appBarColor ?? c?.appBarColor ?? AppConstants.defaultAppBarColor,
+      appBarColor:
+          appBarColor ?? c?.appBarColor ?? AppConstants.defaultAppBarColor,
       syncRole: syncRole ?? c?.syncRole ?? SyncRole.standalone,
       syncPin: overrideSyncPin ? syncPin : (syncPin ?? c?.syncPin),
       syncControlIp: syncControlIp ?? c?.syncControlIp ?? '192.168.43.1',

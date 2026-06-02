@@ -19,7 +19,8 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider).valueOrNull;
     final localeCode = settings?.locale;
-    final appBarColor = settings?.appBarColor ?? AppConstants.defaultAppBarColor;
+    final appBarColor =
+        settings?.appBarColor ?? AppConstants.defaultAppBarColor;
     return MaterialApp(
       title: AppConstants.appName,
       theme: AppTheme.buildLight(appBarColor),
@@ -77,7 +78,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final businessName =
-        ref.watch(settingsProvider).valueOrNull?.appName ?? AppConstants.appName;
+        ref.watch(settingsProvider).valueOrNull?.appName ??
+        AppConstants.appName;
     final titles = [businessName, l10n.productsTab, l10n.reportTab];
 
     return Scaffold(
@@ -95,13 +97,16 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                 transitionDuration: const Duration(milliseconds: 300),
                 reverseTransitionDuration: const Duration(milliseconds: 250),
                 transitionsBuilder: (_, animation, _, child) => SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, -1),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeInOut,
-                  )),
+                  position:
+                      Tween<Offset>(
+                        begin: const Offset(0, -1),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeInOut,
+                        ),
+                      ),
                   child: child,
                 ),
               ),
@@ -129,6 +134,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
 // Keeps each PageView page alive so local widget state survives tab switches.
 class _KeepAlive extends StatefulWidget {
   final Widget child;
+
   const _KeepAlive({required this.child});
 
   @override

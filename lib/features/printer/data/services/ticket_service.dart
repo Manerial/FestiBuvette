@@ -30,10 +30,10 @@ class TicketService {
       ]);
 
   static List<int> _categoryHeader(Generator gen, String label) => gen.text(
-        '** ${label.toUpperCase()} **',
-        styles: const PosStyles(bold: true),
-        linesAfter: 1,
-      );
+    '** ${label.toUpperCase()} **',
+    styles: const PosStyles(bold: true),
+    linesAfter: 1,
+  );
 
   // ─── Core renderer ─────────────────────────────────────────────────────────
 
@@ -60,24 +60,30 @@ class TicketService {
     bytes.addAll(gen.setGlobalCodeTable('CP1252'));
 
     // ── Header ────────────────────────────────────────────────────────────
-    bytes.addAll(gen.text(
-      businessName,
-      styles: const PosStyles(
-        align: PosAlign.center,
-        bold: true,
-        height: PosTextSize.size2,
-        width: PosTextSize.size2,
+    bytes.addAll(
+      gen.text(
+        businessName,
+        styles: const PosStyles(
+          align: PosAlign.center,
+          bold: true,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+        ),
+        linesAfter: 1,
       ),
-      linesAfter: 1,
-    ));
-    bytes.addAll(gen.text(
-      _dateFmt.format(dateTime),
-      styles: const PosStyles(align: PosAlign.center),
-    ));
-    bytes.addAll(gen.text(
-      _timeFmt.format(dateTime),
-      styles: const PosStyles(align: PosAlign.center),
-    ));
+    );
+    bytes.addAll(
+      gen.text(
+        _dateFmt.format(dateTime),
+        styles: const PosStyles(align: PosAlign.center),
+      ),
+    );
+    bytes.addAll(
+      gen.text(
+        _timeFmt.format(dateTime),
+        styles: const PosStyles(align: PosAlign.center),
+      ),
+    );
     bytes.addAll(gen.hr());
 
     // ── Lines ─────────────────────────────────────────────────────────────
@@ -108,25 +114,26 @@ class TicketService {
 
     // ── Total ─────────────────────────────────────────────────────────────
     bytes.addAll(gen.hr());
-    bytes.addAll(gen.row([
-      PosColumn(
-        text: totalLabel,
-        width: 6,
-        styles: const PosStyles(bold: true),
-      ),
-      PosColumn(
-        text: _formatPrice(total),
-        width: 6,
-        styles: const PosStyles(align: PosAlign.right, bold: true),
-      ),
-    ]));
+    bytes.addAll(
+      gen.row([
+        PosColumn(
+          text: totalLabel,
+          width: 6,
+          styles: const PosStyles(bold: true),
+        ),
+        PosColumn(
+          text: _formatPrice(total),
+          width: 6,
+          styles: const PosStyles(align: PosAlign.right, bold: true),
+        ),
+      ]),
+    );
 
     // ── Footer ────────────────────────────────────────────────────────────
     bytes.addAll(gen.hr());
-    bytes.addAll(gen.text(
-      thankYouLabel,
-      styles: const PosStyles(align: PosAlign.center),
-    ));
+    bytes.addAll(
+      gen.text(thankYouLabel, styles: const PosStyles(align: PosAlign.center)),
+    );
     bytes.addAll(gen.feed(2));
     bytes.addAll(gen.cut());
 
@@ -155,11 +162,13 @@ class TicketService {
       businessName: businessName,
       dateTime: dateTime,
       lines: cartProducts
-          .map((p) => (
-                name: p.name,
-                qty: quantities[p.id]!,
-                categoryId: p.categoryId,
-              ))
+          .map(
+            (p) => (
+              name: p.name,
+              qty: quantities[p.id]!,
+              categoryId: p.categoryId,
+            ),
+          )
           .toList(),
       categories: categories,
       otherCategoryLabel: otherCategoryLabel,
@@ -176,22 +185,20 @@ class TicketService {
     required Sale sale,
     required String thankYouLabel,
     required String totalLabel,
-  }) =>
-      _buildTicket(
-        businessName: businessName,
-        dateTime: DateTime.parse(sale.dateTime),
-        lines: sale.lines
-            .map((l) => (
-                  name: l.nameSnapshot,
-                  qty: l.quantity,
-                  categoryId: null as int?,
-                ))
-            .toList(),
-        otherCategoryLabel: '',
-        thankYouLabel: thankYouLabel,
-        totalLabel: totalLabel,
-        total: sale.total,
-      );
+  }) => _buildTicket(
+    businessName: businessName,
+    dateTime: DateTime.parse(sale.dateTime),
+    lines: sale.lines
+        .map(
+          (l) =>
+              (name: l.nameSnapshot, qty: l.quantity, categoryId: null as int?),
+        )
+        .toList(),
+    otherCategoryLabel: '',
+    thankYouLabel: thankYouLabel,
+    totalLabel: totalLabel,
+    total: sale.total,
+  );
 
   // ─── Test page ─────────────────────────────────────────────────────────────
 
@@ -203,24 +210,29 @@ class TicketService {
     bytes.addAll(gen.setGlobalCodeTable('CP1252'));
     final now = DateTime.now();
 
-    bytes.addAll(gen.text(
-      '=== TEST ===',
-      styles: const PosStyles(align: PosAlign.center, bold: true),
-    ));
+    bytes.addAll(
+      gen.text(
+        '=== TEST ===',
+        styles: const PosStyles(align: PosAlign.center, bold: true),
+      ),
+    );
     bytes.addAll(gen.emptyLines(1));
-    bytes.addAll(gen.text(
-      businessName,
-      styles: const PosStyles(align: PosAlign.center),
-    ));
-    bytes.addAll(gen.text(
-      '${_dateFmt.format(now)} ${_timeFmt.format(now)}',
-      styles: const PosStyles(align: PosAlign.center),
-    ));
+    bytes.addAll(
+      gen.text(businessName, styles: const PosStyles(align: PosAlign.center)),
+    );
+    bytes.addAll(
+      gen.text(
+        '${_dateFmt.format(now)} ${_timeFmt.format(now)}',
+        styles: const PosStyles(align: PosAlign.center),
+      ),
+    );
     bytes.addAll(gen.emptyLines(1));
-    bytes.addAll(gen.text(
-      'Imprimante OK',
-      styles: const PosStyles(align: PosAlign.center),
-    ));
+    bytes.addAll(
+      gen.text(
+        'Imprimante OK',
+        styles: const PosStyles(align: PosAlign.center),
+      ),
+    );
     bytes.addAll(gen.feed(2));
     bytes.addAll(gen.cut());
 

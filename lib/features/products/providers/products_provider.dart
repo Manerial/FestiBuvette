@@ -1,16 +1,15 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/products/data/models/product.dart';
 import 'package:festi_buvette_app/features/products/data/repositories/products_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final productsProvider =
-    AsyncNotifierProvider<ProductsNotifier, List<Product>>(
+final productsProvider = AsyncNotifierProvider<ProductsNotifier, List<Product>>(
   ProductsNotifier.new,
 );
 
 class ProductsNotifier extends AsyncNotifier<List<Product>> {
   ProductsNotifier([ProductsRepository? repo])
-      : _repo = repo ?? ProductsRepository(DatabaseHelper.instance);
+    : _repo = repo ?? ProductsRepository(DatabaseHelper.instance);
 
   final ProductsRepository _repo;
 

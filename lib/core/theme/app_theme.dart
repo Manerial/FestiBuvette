@@ -11,10 +11,12 @@ class AppTheme {
     );
     final luminance = appBarColor.computeLuminance();
     final foreground = luminance > 0.4 ? Colors.black87 : Colors.white;
-    final statusIconBrightness =
-        luminance > 0.4 ? Brightness.dark : Brightness.light;
-    final statusBarBrightness =
-        luminance > 0.4 ? Brightness.light : Brightness.dark;
+    final statusIconBrightness = luminance > 0.4
+        ? Brightness.dark
+        : Brightness.light;
+    final statusBarBrightness = luminance > 0.4
+        ? Brightness.light
+        : Brightness.dark;
 
     return ThemeData(
       useMaterial3: true,

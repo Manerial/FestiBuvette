@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:multicast_dns/multicast_dns.dart';
 
 /// Discovers _festibuvette._tcp services over mDNS.
@@ -17,9 +18,7 @@ class MdnsService {
   Future<void> announce(int port) async {
     final client = MDnsClient();
     try {
-      await client.start(
-        listenAddress: InternetAddress.anyIPv4,
-      );
+      await client.start(listenAddress: InternetAddress.anyIPv4);
       _announceClient = client;
     } catch (_) {
       client.stop();
@@ -33,25 +32,31 @@ class MdnsService {
   }) async {
     final client = MDnsClient();
     try {
-      await client.start(
-        listenAddress: InternetAddress.anyIPv4,
-      );
-      await for (final PtrResourceRecord ptr in client
-          .lookup<PtrResourceRecord>(
-              ResourceRecordQuery.serverPointer(_serviceType))
-          .timeout(timeout, onTimeout: (sink) => sink.close())) {
-        await for (final SrvResourceRecord srv in client
-            .lookup<SrvResourceRecord>(
-                ResourceRecordQuery.service(ptr.domainName))
-            .timeout(
-                const Duration(seconds: 2),
-                onTimeout: (sink) => sink.close())) {
-          await for (final IPAddressResourceRecord addr in client
-              .lookup<IPAddressResourceRecord>(
-                  ResourceRecordQuery.addressIPv4(srv.target))
-              .timeout(
+      await client.start(listenAddress: InternetAddress.anyIPv4);
+      await for (final PtrResourceRecord ptr
+          in client
+              .lookup<PtrResourceRecord>(
+                ResourceRecordQuery.serverPointer(_serviceType),
+              )
+              .timeout(timeout, onTimeout: (sink) => sink.close())) {
+        await for (final SrvResourceRecord srv
+            in client
+                .lookup<SrvResourceRecord>(
+                  ResourceRecordQuery.service(ptr.domainName),
+                )
+                .timeout(
                   const Duration(seconds: 2),
-                  onTimeout: (sink) => sink.close())) {
+                  onTimeout: (sink) => sink.close(),
+                )) {
+          await for (final IPAddressResourceRecord addr
+              in client
+                  .lookup<IPAddressResourceRecord>(
+                    ResourceRecordQuery.addressIPv4(srv.target),
+                  )
+                  .timeout(
+                    const Duration(seconds: 2),
+                    onTimeout: (sink) => sink.close(),
+                  )) {
             client.stop();
             return (ip: addr.address.address, port: srv.port);
           }

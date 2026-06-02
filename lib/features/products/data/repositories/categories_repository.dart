@@ -1,6 +1,6 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/products/data/models/category.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CategoriesRepository {
   final DatabaseHelper _dbHelper;
@@ -63,7 +63,8 @@ class CategoriesRepository {
   /// Returns the next order number (= current number of categories).
   Future<int> nextOrder() async {
     final db = await _dbHelper.database;
-    final count = Sqflite.firstIntValue(
+    final count =
+        Sqflite.firstIntValue(
           await db.rawQuery('SELECT COUNT(*) FROM categories'),
         ) ??
         0;

@@ -1,9 +1,9 @@
-import 'package:intl/intl.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/sales/data/models/business_day.dart';
 import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
 import 'package:festi_buvette_app/features/sales/data/models/sale_line.dart';
+import 'package:intl/intl.dart';
+import 'package:sqflite/sqflite.dart';
 
 class SalesRepository {
   final DatabaseHelper _dbHelper;
@@ -20,11 +20,12 @@ class SalesRepository {
     final db = await _dbHelper.database;
     final today = _dateFmt.format(DateTime.now());
 
-    await db.insert(
-      'business_days',
-      {'date': today, 'total_revenue': 0.0, 'sale_count': 0, 'closed_at': null},
-      conflictAlgorithm: ConflictAlgorithm.ignore,
-    );
+    await db.insert('business_days', {
+      'date': today,
+      'total_revenue': 0.0,
+      'sale_count': 0,
+      'closed_at': null,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
 
     final rows = await db.query(
       'business_days',
@@ -126,21 +127,21 @@ class SalesRepository {
         );
       }
       for (final line in lines) {
-        await txn.insert('sale_lines', SaleLine(
-          saleId: saleId,
-          productId: line.productId,
-          nameSnapshot: line.nameSnapshot,
-          priceSnapshot: line.priceSnapshot,
-          quantity: line.quantity,
-          subtotal: line.subtotal,
-        ).toMap());
+        await txn.insert(
+          'sale_lines',
+          SaleLine(
+            saleId: saleId,
+            productId: line.productId,
+            nameSnapshot: line.nameSnapshot,
+            priceSnapshot: line.priceSnapshot,
+            quantity: line.quantity,
+            subtotal: line.subtotal,
+          ).toMap(),
+        );
       }
     });
 
-    return Sale.fromMap(
-      {...sale.toMap(), 'id': saleId},
-      lines: lines,
-    );
+    return Sale.fromMap({...sale.toMap(), 'id': saleId}, lines: lines);
   }
 
   /// Returns all sales for a business day (without their lines).
@@ -169,9 +170,11 @@ class SalesRepository {
   /// Aggregated totals by product for a given business day.
   /// Returns a list of maps {name_snapshot, total_quantity, product_total}.
   Future<List<Map<String, dynamic>>> getTotalsByProduct(
-      int businessDayId) async {
+    int businessDayId,
+  ) async {
     final db = await _dbHelper.database;
-    return db.rawQuery('''
+    return db.rawQuery(
+      '''
       SELECT
         sl.name_snapshot,
         MIN(sl.price_snapshot) AS price_snapshot,
@@ -182,7 +185,9 @@ class SalesRepository {
       WHERE s.business_day_id = ?
       GROUP BY sl.product_id, sl.name_snapshot
       ORDER BY total_quantity DESC
-    ''', [businessDayId]);
+    ''',
+      [businessDayId],
+    );
   }
 
   /// Returns today's business day if it exists (without creating it).
@@ -202,7 +207,8 @@ class SalesRepository {
   /// and [source_local_id]. Used by the HTTP server's /sales/pull endpoint so
   /// the second device can preserve the composite device-key when storing.
   Future<List<Map<String, dynamic>>> getSalesForPullByDay(
-      int businessDayId) async {
+    int businessDayId,
+  ) async {
     final db = await _dbHelper.database;
     return db.rawQuery(
       'SELECT id, date_time, total, business_day_id,'
@@ -227,7 +233,8 @@ class SalesRepository {
     final db = await _dbHelper.database;
     final rows = await db.query(
       'sales',
-      where: 'business_day_id = ?'
+      where:
+          'business_day_id = ?'
           ' AND (source_device_token IS NULL OR source_device_token = ?)',
       whereArgs: [businessDayId, deviceId],
       orderBy: 'date_time DESC',
@@ -246,8 +253,10 @@ class SalesRepository {
       (linesBySaleId[row['sale_id'] as int] ??= []).add(SaleLine.fromMap(row));
     }
     return sales
-        .map((s) => Sale.fromMap(s.toMap(),
-            lines: linesBySaleId[s.id!] ?? const []))
+        .map(
+          (s) =>
+              Sale.fromMap(s.toMap(), lines: linesBySaleId[s.id!] ?? const []),
+        )
         .toList();
   }
 
@@ -272,10 +281,10 @@ class SalesRepository {
     }
 
     return sales
-        .map((s) => Sale.fromMap(
-              s.toMap(),
-              lines: linesBySaleId[s.id!] ?? const [],
-            ))
+        .map(
+          (s) =>
+              Sale.fromMap(s.toMap(), lines: linesBySaleId[s.id!] ?? const []),
+        )
         .toList();
   }
 
@@ -284,7 +293,11 @@ class SalesRepository {
   Future<void> deleteSale(Sale sale) async {
     final db = await _dbHelper.database;
     await db.transaction((txn) async {
-      await txn.delete('sale_lines', where: 'sale_id = ?', whereArgs: [sale.id]);
+      await txn.delete(
+        'sale_lines',
+        where: 'sale_id = ?',
+        whereArgs: [sale.id],
+      );
       await txn.delete('sales', where: 'id = ?', whereArgs: [sale.id]);
     });
 
@@ -294,16 +307,22 @@ class SalesRepository {
     );
     final rev = (rows.first['rev'] as num).toDouble();
     final cnt = rows.first['cnt'] as int;
-    await updateBusinessDay(sale.businessDayId, totalRevenue: rev, saleCount: cnt);
+    await updateBusinessDay(
+      sale.businessDayId,
+      totalRevenue: rev,
+      saleCount: cnt,
+    );
   }
 
   /// Returns hourly sales per product for a given business day.
   /// Each row: { hour (int 9–18), name_snapshot, total_quantity }.
   /// Hours outside 9–18 are excluded.
   Future<List<Map<String, dynamic>>> getHourlySalesByProduct(
-      int businessDayId) async {
+    int businessDayId,
+  ) async {
     final db = await _dbHelper.database;
-    return db.rawQuery('''
+    return db.rawQuery(
+      '''
       SELECT
         CAST(strftime('%H', s.date_time) AS INTEGER) AS hour,
         sl.name_snapshot,
@@ -314,7 +333,9 @@ class SalesRepository {
         AND CAST(strftime('%H', s.date_time) AS INTEGER) BETWEEN 9 AND 18
       GROUP BY hour, sl.name_snapshot
       ORDER BY hour ASC, sl.name_snapshot ASC
-    ''', [businessDayId]);
+    ''',
+      [businessDayId],
+    );
   }
 
   /// Merges a sale received from a second device into the control's SQLite.
@@ -370,10 +391,7 @@ class SalesRepository {
   /// Returns all business days ordered by date descending (most recent first).
   Future<List<BusinessDay>> getAllBusinessDays() async {
     final db = await _dbHelper.database;
-    final rows = await db.query(
-      'business_days',
-      orderBy: 'date DESC',
-    );
+    final rows = await db.query('business_days', orderBy: 'date DESC');
     return rows.map(BusinessDay.fromMap).toList();
   }
 }

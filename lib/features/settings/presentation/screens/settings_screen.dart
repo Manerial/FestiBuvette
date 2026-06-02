@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:permission_handler/permission_handler.dart';
+
 import 'package:festi_buvette_app/core/constants/app_constants.dart';
+import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/printer/data/models/printer_device.dart';
 import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
 import 'package:festi_buvette_app/features/printer/providers/printer_provider.dart';
@@ -12,13 +10,16 @@ import 'package:festi_buvette_app/features/products/providers/products_provider.
 import 'package:festi_buvette_app/features/products/services/catalogue_transfer_service.dart';
 import 'package:festi_buvette_app/features/report/providers/report_provider.dart';
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
-import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/sync/data/models/sync_exception.dart';
 import 'package:festi_buvette_app/features/sync/data/models/sync_role.dart';
 import 'package:festi_buvette_app/features/sync/data/services/sync_action_service.dart';
 import 'package:festi_buvette_app/features/sync/data/services/sync_server.dart';
 import 'package:festi_buvette_app/features/sync/providers/sync_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -82,70 +83,70 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: SafeArea(
         top: false,
         child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // ── App settings ────────────────────────────────────────────────
-          _SectionHeader(label: l10n.settingsAppSection),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: l10n.settingsAppNameLabel,
-                    hintText: l10n.settingsAppNameHint,
-                    border: const OutlineInputBorder(),
+          padding: const EdgeInsets.all(16),
+          children: [
+            // ── App settings ────────────────────────────────────────────────
+            _SectionHeader(label: l10n.settingsAppSection),
+            const SizedBox(height: 8),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: l10n.settingsAppNameLabel,
+                      hintText: l10n.settingsAppNameHint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    textCapitalization: TextCapitalization.words,
+                    onSubmitted: (_) => _saveName(context),
                   ),
-                  textCapitalization: TextCapitalization.words,
-                  onSubmitted: (_) => _saveName(context),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: FilledButton(
-                  onPressed: () => _saveName(context),
-                  child: Text(l10n.save),
+                const SizedBox(width: 12),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: FilledButton(
+                    onPressed: () => _saveName(context),
+                    child: Text(l10n.save),
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
 
-          const SizedBox(height: 16),
-          _CartGridViewTile(),
-          _HapticFeedbackTile(),
-          const SizedBox(height: 16),
-          _AppBarColorPicker(),
+            const SizedBox(height: 16),
+            _CartGridViewTile(),
+            _HapticFeedbackTile(),
+            const SizedBox(height: 16),
+            _AppBarColorPicker(),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          // ── Catalogue ─────────────────────────────────────────────────────
-          _SectionHeader(label: l10n.catalogueSection),
-          const SizedBox(height: 4),
-          _CatalogueSection(),
+            // ── Catalogue ─────────────────────────────────────────────────────
+            _SectionHeader(label: l10n.catalogueSection),
+            const SizedBox(height: 4),
+            _CatalogueSection(),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          // ── Sync role ─────────────────────────────────────────────────────
-          _SyncSection(),
+            // ── Sync role ─────────────────────────────────────────────────────
+            _SyncSection(),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          // ── Language ─────────────────────────────────────────────────────
-          _SectionHeader(label: l10n.settingsLanguageSection),
-          const SizedBox(height: 8),
-          _LanguageSelector(),
+            // ── Language ─────────────────────────────────────────────────────
+            _SectionHeader(label: l10n.settingsLanguageSection),
+            const SizedBox(height: 8),
+            _LanguageSelector(),
 
-          const SizedBox(height: 32),
+            const SizedBox(height: 32),
 
-          // ── Bluetooth printer ────────────────────────────────────────────
-          _SectionHeader(label: l10n.printerScreenTitle),
-          const SizedBox(height: 12),
-          _BluetoothSection(),
-        ],
-      ),
+            // ── Bluetooth printer ────────────────────────────────────────────
+            _SectionHeader(label: l10n.printerScreenTitle),
+            const SizedBox(height: 12),
+            _BluetoothSection(),
+          ],
+        ),
       ),
     );
   }
@@ -174,7 +175,9 @@ class _SyncSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final role = ref.watch(
-      settingsProvider.select((s) => s.valueOrNull?.syncRole ?? SyncRole.standalone),
+      settingsProvider.select(
+        (s) => s.valueOrNull?.syncRole ?? SyncRole.standalone,
+      ),
     );
 
     return Column(
@@ -206,7 +209,9 @@ class _RoleSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final role = ref.watch(
-      settingsProvider.select((s) => s.valueOrNull?.syncRole ?? SyncRole.standalone),
+      settingsProvider.select(
+        (s) => s.valueOrNull?.syncRole ?? SyncRole.standalone,
+      ),
     );
 
     return SegmentedButton<SyncRole>(
@@ -219,10 +224,7 @@ class _RoleSelector extends ConsumerWidget {
           value: SyncRole.control,
           label: Text(l10n.syncRoleControl),
         ),
-        ButtonSegment(
-          value: SyncRole.second,
-          label: Text(l10n.syncRoleSecond),
-        ),
+        ButtonSegment(value: SyncRole.second, label: Text(l10n.syncRoleSecond)),
       ],
       selected: {role},
       onSelectionChanged: (selected) =>
@@ -285,16 +287,16 @@ class _ControlSyncSection extends ConsumerWidget {
                   Text(
                     l10n.syncPinLabel,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     pin,
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 8,
-                        ),
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 8,
+                    ),
                   ),
                 ],
               ),
@@ -310,19 +312,26 @@ class _ControlSyncSection extends ConsumerWidget {
         const SizedBox(height: 12),
 
         // ── Server IP(s) ──────────────────────────────────────────────────
-        ...ipsAsync.whenData((ips) => ips).valueOrNull?.map(
-              (ip) => _IpRow(
-                label: l10n.syncServerAddress,
-                address: '$ip:${SyncServer.port}',
-                onCopy: () {
-                  Clipboard.setData(ClipboardData(text: '$ip:${SyncServer.port}'));
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(l10n.syncIpCopied),
-                    duration: const Duration(seconds: 2),
-                  ));
-                },
-              ),
-            ) ??
+        ...ipsAsync
+                .whenData((ips) => ips)
+                .valueOrNull
+                ?.map(
+                  (ip) => _IpRow(
+                    label: l10n.syncServerAddress,
+                    address: '$ip:${SyncServer.port}',
+                    onCopy: () {
+                      Clipboard.setData(
+                        ClipboardData(text: '$ip:${SyncServer.port}'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.syncIpCopied),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                  ),
+                ) ??
             [],
 
         const SizedBox(height: 8),
@@ -363,16 +372,15 @@ class _IpRow extends StatelessWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color:
-                            Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 Text(
                   address,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'monospace',
-                      ),
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'monospace',
+                  ),
                 ),
               ],
             ),
@@ -432,17 +440,21 @@ class _SecondSyncSectionState extends ConsumerState<_SecondSyncSection> {
       await fn(SyncActionService(DatabaseHelper.instance), l10n);
     } on SyncAuthException {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.syncAuthFailed),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.syncAuthFailed),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.syncConnectionFailed),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.syncConnectionFailed),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _activeAction = null);
@@ -450,43 +462,49 @@ class _SecondSyncSectionState extends ConsumerState<_SecondSyncSection> {
   }
 
   Future<void> _downloadCatalog() => _runAction('catalog', (svc, l10n) async {
-        final client = ref.read(syncProvider.notifier).client!;
-        await svc.downloadCatalog(client);
-        ref.invalidate(productsProvider);
-        ref.invalidate(categoriesProvider);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(l10n.syncCatalogDownloaded),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ));
-        }
-      });
+    final client = ref.read(syncProvider.notifier).client!;
+    await svc.downloadCatalog(client);
+    ref.invalidate(productsProvider);
+    ref.invalidate(categoriesProvider);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.syncCatalogDownloaded),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  });
 
   Future<void> _sendSales() => _runAction('send', (svc, l10n) async {
-        final client = ref.read(syncProvider.notifier).client!;
-        final merged = await svc.sendSales(client);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(l10n.syncSalesSent(merged)),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ));
-        }
-      });
+    final client = ref.read(syncProvider.notifier).client!;
+    final merged = await svc.sendSales(client);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.syncSalesSent(merged)),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  });
 
   Future<void> _downloadSales() => _runAction('download', (svc, l10n) async {
-        final client = ref.read(syncProvider.notifier).client!;
-        await svc.downloadSales(client);
-        ref.invalidate(reportProvider);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(l10n.syncSalesDownloaded),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ));
-        }
-      });
+    final client = ref.read(syncProvider.notifier).client!;
+    await svc.downloadSales(client);
+    ref.invalidate(reportProvider);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.syncSalesDownloaded),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  });
 
   void _saveIp() =>
       ref.read(settingsProvider.notifier).setSyncControlIp(_ipController.text);
@@ -500,25 +518,31 @@ class _SecondSyncSectionState extends ConsumerState<_SecondSyncSection> {
           .connect(_ipController.text.trim(), _pinController.text.trim());
       if (mounted) {
         _pinController.clear();
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.syncConnected),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 2),
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.syncConnected),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
     } on SyncAuthException {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.syncAuthFailed),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.syncAuthFailed),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     } catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(l10n.syncConnectionFailed),
-          backgroundColor: Colors.red,
-        ));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.syncConnectionFailed),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -562,13 +586,15 @@ class _SecondSyncSectionState extends ConsumerState<_SecondSyncSection> {
                   ? l10n.syncConnectedTo(
                       syncState.connectedToAddress ?? _ipController.text,
                     )
-                  : (isConnecting ? l10n.syncConnecting : l10n.syncDisconnected),
+                  : (isConnecting
+                        ? l10n.syncConnecting
+                        : l10n.syncDisconnected),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isConnected
-                        ? Colors.green
-                        : (isConnecting ? Colors.orange : Colors.grey),
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: isConnected
+                    ? Colors.green
+                    : (isConnecting ? Colors.orange : Colors.grey),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
@@ -611,7 +637,9 @@ class _SecondSyncSectionState extends ConsumerState<_SecondSyncSection> {
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.white),
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : Text(l10n.syncConnectButton),
           )
@@ -725,10 +753,9 @@ class _BluetoothSection extends ConsumerWidget {
             // attempt, or before first scan)
             Text(
               l10n.printerAndroidHint,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Colors.grey.shade500),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
             ),
           ],
         ],
@@ -741,6 +768,7 @@ class _BluetoothSection extends ConsumerWidget {
 
 class _StatusRow extends StatelessWidget {
   final PrinterState printer;
+
   const _StatusRow({required this.printer});
 
   @override
@@ -750,30 +778,30 @@ class _StatusRow extends StatelessWidget {
 
     final (icon, color, label) = switch (printer.status) {
       PrinterConnectionStatus.connected => (
-          Icons.bluetooth_connected,
-          colorScheme.primary,
-          l10n.printerConnectedTo(printer.connectedDevice?.name ?? ''),
-        ),
+        Icons.bluetooth_connected,
+        colorScheme.primary,
+        l10n.printerConnectedTo(printer.connectedDevice?.name ?? ''),
+      ),
       PrinterConnectionStatus.scanning => (
-          Icons.bluetooth_searching,
-          Colors.orange,
-          l10n.printerScanning,
-        ),
+        Icons.bluetooth_searching,
+        Colors.orange,
+        l10n.printerScanning,
+      ),
       PrinterConnectionStatus.connecting => (
-          Icons.bluetooth_searching,
-          Colors.orange,
-          l10n.printerConnecting,
-        ),
+        Icons.bluetooth_searching,
+        Colors.orange,
+        l10n.printerConnecting,
+      ),
       PrinterConnectionStatus.error => (
-          Icons.bluetooth_disabled,
-          colorScheme.error,
-          _errorLabel(l10n, printer.errorMessage),
-        ),
+        Icons.bluetooth_disabled,
+        colorScheme.error,
+        _errorLabel(l10n, printer.errorMessage),
+      ),
       PrinterConnectionStatus.idle => (
-          Icons.bluetooth,
-          Colors.grey,
-          _idleLabel(l10n, printer),
-        ),
+        Icons.bluetooth,
+        Colors.grey,
+        _idleLabel(l10n, printer),
+      ),
     };
 
     return Row(
@@ -809,6 +837,7 @@ class _StatusRow extends StatelessWidget {
 
 class _ActionButtons extends ConsumerWidget {
   final PrinterState printer;
+
   const _ActionButtons({required this.printer});
 
   @override
@@ -853,9 +882,7 @@ class _ActionButtons extends ConsumerWidget {
                   )
                 : const Icon(Icons.print_outlined),
             label: Text(l10n.printerTestPrint),
-            onPressed: printer.isBusy
-                ? null
-                : () => _testPrint(context, ref),
+            onPressed: printer.isBusy ? null : () => _testPrint(context, ref),
           ),
         ],
       ],
@@ -863,8 +890,8 @@ class _ActionButtons extends ConsumerWidget {
   }
 
   Future<void> _testPrint(BuildContext context, WidgetRef ref) async {
-    final businessName = ref.read(settingsProvider).valueOrNull?.appName ??
-        AppConstants.appName;
+    final businessName =
+        ref.read(settingsProvider).valueOrNull?.appName ?? AppConstants.appName;
     final bytes = await TicketService().buildTestPage(businessName);
     final ok = await ref.read(printerProvider.notifier).printBytes(bytes);
 
@@ -913,19 +940,16 @@ class _DeviceTile extends ConsumerWidget {
       ),
       subtitle: Text(
         device.address,
-        style: Theme.of(context)
-            .textTheme
-            .bodySmall
-            ?.copyWith(color: Colors.grey.shade500),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
       ),
       trailing: isActive
           ? null
           : TextButton(
               onPressed: currentPrinter.isBusy
                   ? null
-                  : () => ref
-                      .read(printerProvider.notifier)
-                      .connect(device),
+                  : () => ref.read(printerProvider.notifier).connect(device),
               child: Text(l10n.printerConnect),
             ),
     );
@@ -953,7 +977,8 @@ class _AppBarColorPicker extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final current = ref.watch(settingsProvider).valueOrNull?.appBarColor ??
+    final current =
+        ref.watch(settingsProvider).valueOrNull?.appBarColor ??
         AppConstants.defaultAppBarColor;
 
     return Column(
@@ -1111,10 +1136,12 @@ class _CatalogueSection extends ConsumerWidget {
         context: context,
         builder: (ctx) => AlertDialog(
           title: Text(l10n.catalogueImportConfirmTitle),
-          content: Text(l10n.catalogueImportConfirmMessage(
-            data.productsCount,
-            data.categoriesCount,
-          )),
+          content: Text(
+            l10n.catalogueImportConfirmMessage(
+              data.productsCount,
+              data.categoriesCount,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
@@ -1137,10 +1164,9 @@ class _CatalogueSection extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(l10n.catalogueImported(
-              data.productsCount,
-              data.categoriesCount,
-            )),
+            content: Text(
+              l10n.catalogueImported(data.productsCount, data.categoriesCount),
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
           ),
@@ -1172,6 +1198,7 @@ class _CatalogueSection extends ConsumerWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String label;
+
   const _SectionHeader({required this.label});
 
   @override
@@ -1179,9 +1206,9 @@ class _SectionHeader extends StatelessWidget {
     return Text(
       label.toUpperCase(),
       style: Theme.of(context).textTheme.labelLarge?.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-            letterSpacing: 1,
-          ),
+        color: Theme.of(context).colorScheme.primary,
+        letterSpacing: 1,
+      ),
     );
   }
 }

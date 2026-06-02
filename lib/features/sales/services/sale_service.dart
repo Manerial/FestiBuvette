@@ -25,13 +25,12 @@ class SaleService {
     required Map<int, int> quantities,
   }) async {
     // 1. Filter non-zero lines
-    final lineData = products
-        .where((p) => (quantities[p.id] ?? 0) > 0)
-        .map((p) {
-          final qty = quantities[p.id]!;
-          return (product: p, quantity: qty);
-        })
-        .toList();
+    final lineData = products.where((p) => (quantities[p.id] ?? 0) > 0).map((
+      p,
+    ) {
+      final qty = quantities[p.id]!;
+      return (product: p, quantity: qty);
+    }).toList();
 
     if (lineData.isEmpty) {
       throw Exception('Cart is empty.');
@@ -61,14 +60,17 @@ class SaleService {
     );
 
     final lines = lineData
-        .map((e) => SaleLine(
-              saleId: 0, // replaced by repository
-              productId: e.product.id!,
-              nameSnapshot: e.product.name,
-              priceSnapshot: e.product.price,
-              quantity: e.quantity,
-              subtotal: e.product.price * e.quantity,
-            ))
+        .map(
+          (e) => SaleLine(
+            saleId: 0,
+            // replaced by repository
+            productId: e.product.id!,
+            nameSnapshot: e.product.name,
+            priceSnapshot: e.product.price,
+            quantity: e.quantity,
+            subtotal: e.product.price * e.quantity,
+          ),
+        )
         .toList();
 
     // 5. Insert (atomic transaction) — tag with device UUID so the sale can be

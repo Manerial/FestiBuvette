@@ -1,10 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/foundation.dart' show setEquals;
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:festi_buvette_app/core/constants/app_constants.dart';
 import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
 import 'package:festi_buvette_app/features/printer/providers/printer_provider.dart';
@@ -12,6 +7,11 @@ import 'package:festi_buvette_app/features/report/providers/report_provider.dart
 import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
 import 'package:festi_buvette_app/l10n/app_localizations.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/foundation.dart' show setEquals;
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 class ReportScreen extends ConsumerWidget {
   const ReportScreen({super.key});
@@ -45,6 +45,7 @@ final _kTimeFmt = DateFormat.Hm();
 
 class _ReportContent extends ConsumerStatefulWidget {
   final ReportState report;
+
   const _ReportContent({required this.report});
 
   @override
@@ -75,8 +76,9 @@ class _ReportContentState extends ConsumerState<_ReportContent> {
             showSelectedIcon: false,
             segments: [
               ButtonSegment(
-                  value: _ReportView.byCart,
-                  label: Text(l10n.reportByCart)),
+                value: _ReportView.byCart,
+                label: Text(l10n.reportByCart),
+              ),
               ButtonSegment(
                 value: _ReportView.byProduct,
                 label: Text(l10n.reportByProduct),
@@ -150,10 +152,9 @@ class _NotStartedState extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               l10n.dayNotStarted,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: Colors.grey.shade600),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(color: Colors.grey.shade600),
             ),
             const SizedBox(height: 20),
             FilledButton(
@@ -171,6 +172,7 @@ class _NotStartedState extends ConsumerWidget {
 
 class _SummaryCard extends ConsumerWidget {
   final ReportState report;
+
   const _SummaryCard({required this.report});
 
   @override
@@ -189,9 +191,9 @@ class _SummaryCard extends ConsumerWidget {
       revenue = 0.0;
     } else {
       final day = report.day!;
-      dateStr = DateFormat.yMMMMEEEEd(locale).format(
-        DateFormat('yyyy-MM-dd').parse(day.date),
-      );
+      dateStr = DateFormat.yMMMMEEEEd(
+        locale,
+      ).format(DateFormat('yyyy-MM-dd').parse(day.date));
       saleCount = day.saleCount;
       revenue = day.totalRevenue;
     }
@@ -238,9 +240,9 @@ class _SummaryCard extends ConsumerWidget {
                 Text(
                   _kCurrencyFmt.format(revenue),
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
               ],
             ),
@@ -311,15 +313,15 @@ class _ReportLineRow extends StatelessWidget {
                 Text(
                   name,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: nameSemibold ? FontWeight.w500 : null,
-                      ),
+                    fontWeight: nameSemibold ? FontWeight.w500 : null,
+                  ),
                 ),
                 if (unitPrice != null)
                   Text(
                     unitPrice!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
               ],
             ),
@@ -330,8 +332,8 @@ class _ReportLineRow extends StatelessWidget {
               qty,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
           SizedBox(
@@ -339,10 +341,9 @@ class _ReportLineRow extends StatelessWidget {
             child: Text(
               amount,
               textAlign: TextAlign.right,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -355,6 +356,7 @@ class _ReportLineRow extends StatelessWidget {
 
 class _ProductView extends StatelessWidget {
   final List<Map<String, dynamic>> productTotals;
+
   const _ProductView({required this.productTotals});
 
   @override
@@ -376,8 +378,8 @@ class _ProductView extends StatelessWidget {
                     l10n.reportQtyHeader,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -386,8 +388,8 @@ class _ProductView extends StatelessWidget {
                     '€',
                     textAlign: TextAlign.right,
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
@@ -403,8 +405,7 @@ class _ProductView extends StatelessWidget {
               children: [
                 _ReportLineRow(
                   name: row['name_snapshot'] as String,
-                  unitPrice: _kCurrencyFmt.format(
-                      row['price_snapshot'] as num),
+                  unitPrice: _kCurrencyFmt.format(row['price_snapshot'] as num),
                   qty: '× ${row['total_quantity']}',
                   amount: _kCurrencyFmt.format(row['product_total'] as num),
                   nameSemibold: true,
@@ -423,6 +424,7 @@ class _ProductView extends StatelessWidget {
 
 class _CartView extends ConsumerWidget {
   final List<Sale> sales;
+
   const _CartView({required this.sales});
 
   @override
@@ -448,6 +450,7 @@ class _CartView extends ConsumerWidget {
 
 class _SaleTile extends ConsumerWidget {
   final Sale sale;
+
   const _SaleTile({required this.sale});
 
   Future<void> _deleteSale(BuildContext context, WidgetRef ref) async {
@@ -456,8 +459,9 @@ class _SaleTile extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.reportDeleteSaleTitle),
-        content: Text(l10n.reportDeleteSaleMessage(
-            _kCurrencyFmt.format(sale.total))),
+        content: Text(
+          l10n.reportDeleteSaleMessage(_kCurrencyFmt.format(sale.total)),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -476,9 +480,9 @@ class _SaleTile extends ConsumerWidget {
     if (confirmed == true && context.mounted) {
       await ref.read(reportProvider.notifier).deleteSale(sale);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.reportDeleteSaleSuccess)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.reportDeleteSaleSuccess)));
       }
     }
   }
@@ -489,9 +493,9 @@ class _SaleTile extends ConsumerWidget {
 
     if (printerState == null || !printerState.isConnected) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.printerNotConnected)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.printerNotConnected)));
       }
       return;
     }
@@ -504,8 +508,7 @@ class _SaleTile extends ConsumerWidget {
       thankYouLabel: l10n.ticketThankYou,
       totalLabel: l10n.total,
     );
-    final success =
-        await ref.read(printerProvider.notifier).printBytes(bytes);
+    final success = await ref.read(printerProvider.notifier).printBytes(bytes);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -526,23 +529,27 @@ class _SaleTile extends ConsumerWidget {
         children: [
           // ── Sale header: time + total + actions ───────────────────────
           Padding(
-            padding: const EdgeInsets.only(left: 16, right: 4, top: 4, bottom: 4),
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 4,
+              top: 4,
+              bottom: 4,
+            ),
             child: Row(
               children: [
                 Text(
                   time,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleSmall
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   _kCurrencyFmt.format(sale.total),
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 const Spacer(),
                 IconButton(
@@ -633,11 +640,11 @@ class _HourlyViewState extends State<_HourlyView> {
   Color _colorFor(int index) => _kColors[index % _kColors.length];
 
   double _barWidth(int count) => switch (count) {
-        1 => 16,
-        2 => 12,
-        3 => 9,
-        _ => math.max(4.0, 36.0 / count),
-      };
+    1 => 16,
+    2 => 12,
+    3 => 9,
+    _ => math.max(4.0, 36.0 / count),
+  };
 
   List<BarChartGroupData> _buildGroups(List<String> ordered) {
     return _kHours.asMap().entries.map((e) {
@@ -673,8 +680,10 @@ class _HourlyViewState extends State<_HourlyView> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 8, 0),
                 child: Row(
                   children: [
-                    Text(l10n.reportHourlyFilterTitle,
-                        style: Theme.of(ctx).textTheme.titleMedium),
+                    Text(
+                      l10n.reportHourlyFilterTitle,
+                      style: Theme.of(ctx).textTheme.titleMedium,
+                    ),
                     const Spacer(),
                     TextButton(
                       onPressed: () {
@@ -691,26 +700,28 @@ class _HourlyViewState extends State<_HourlyView> {
                 child: ListView(
                   shrinkWrap: true,
                   children: widget.products
-                      .map((p) => CheckboxListTile(
-                            value: localSelected.contains(p),
-                            title: Text(p),
-                            onChanged: (v) {
-                              setStateSheet(() {
-                                if (v == true) {
-                                  localSelected.add(p);
-                                } else {
-                                  localSelected.remove(p);
-                                }
-                              });
-                              setState(() {
-                                if (v == true) {
-                                  _selected.add(p);
-                                } else {
-                                  _selected.remove(p);
-                                }
-                              });
-                            },
-                          ))
+                      .map(
+                        (p) => CheckboxListTile(
+                          value: localSelected.contains(p),
+                          title: Text(p),
+                          onChanged: (v) {
+                            setStateSheet(() {
+                              if (v == true) {
+                                localSelected.add(p);
+                              } else {
+                                localSelected.remove(p);
+                              }
+                            });
+                            setState(() {
+                              if (v == true) {
+                                _selected.add(p);
+                              } else {
+                                _selected.remove(p);
+                              }
+                            });
+                          },
+                        ),
+                      )
                       .toList(),
                 ),
               ),
@@ -750,12 +761,12 @@ class _HourlyViewState extends State<_HourlyView> {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 40),
-                  child: Text(l10n.reportHourlyNoData,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          )),
+                  child: Text(
+                    l10n.reportHourlyNoData,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
               )
             else ...[
@@ -778,9 +789,9 @@ class _HourlyViewState extends State<_HourlyView> {
                           return BarTooltipItem(
                             '$product\n${hour}h : $qty',
                             TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onInverseSurface,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onInverseSurface,
                               fontSize: 12,
                             ),
                           );
@@ -796,9 +807,9 @@ class _HourlyViewState extends State<_HourlyView> {
                             '${value.toInt() + 9}h',
                             style: TextStyle(
                               fontSize: 10,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -816,18 +827,20 @@ class _HourlyViewState extends State<_HourlyView> {
                               value.toInt().toString(),
                               style: TextStyle(
                                 fontSize: 10,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             );
                           },
                         ),
                       ),
                       topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false)),
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                       rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false)),
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
                     ),
                     borderData: FlBorderData(show: false),
                     gridData: const FlGridData(
@@ -856,8 +869,10 @@ class _HourlyViewState extends State<_HourlyView> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Text(e.value,
-                          style: Theme.of(context).textTheme.bodySmall),
+                      Text(
+                        e.value,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                     ],
                   );
                 }).toList(),
@@ -952,6 +967,7 @@ class _CloseDayButton extends ConsumerWidget {
 
 class _ClosedBadge extends StatelessWidget {
   final String closedAt;
+
   const _ClosedBadge({required this.closedAt});
 
   @override

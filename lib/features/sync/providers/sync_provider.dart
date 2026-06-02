@@ -1,16 +1,14 @@
 import 'dart:ui' show PlatformDispatcher;
-import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:festi_buvette_app/core/constants/app_constants.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
+import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
 import 'package:festi_buvette_app/features/printer/providers/printer_provider.dart';
 import 'package:festi_buvette_app/features/products/data/repositories/categories_repository.dart';
 import 'package:festi_buvette_app/features/products/data/repositories/products_repository.dart';
 import 'package:festi_buvette_app/features/sales/data/models/sale.dart';
 import 'package:festi_buvette_app/features/sales/data/models/sale_line.dart';
 import 'package:festi_buvette_app/features/sales/data/repositories/sales_repository.dart';
-import 'package:festi_buvette_app/features/printer/data/services/ticket_service.dart';
 import 'package:festi_buvette_app/features/settings/providers/settings_provider.dart';
 import 'package:festi_buvette_app/features/sync/data/models/sync_exception.dart';
 import 'package:festi_buvette_app/features/sync/data/models/sync_role.dart';
@@ -18,6 +16,9 @@ import 'package:festi_buvette_app/features/sync/data/services/mdns_service.dart'
 import 'package:festi_buvette_app/features/sync/data/services/sync_client.dart';
 import 'package:festi_buvette_app/features/sync/data/services/sync_server.dart';
 import 'package:festi_buvette_app/features/sync/data/services/sync_task_handler.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ─── Connection status ────────────────────────────────────────────────────────
 
@@ -43,10 +44,8 @@ class SyncState {
 
 /// Factory that creates [SyncClient] instances.
 /// Override in tests to inject a [MockClient]-backed client.
-typedef SyncClientFactory = SyncClient Function({
-  required String baseUrl,
-  String? token,
-});
+typedef SyncClientFactory =
+    SyncClient Function({required String baseUrl, String? token});
 
 final syncClientFactoryProvider = Provider<SyncClientFactory>((ref) {
   return ({required String baseUrl, String? token}) =>
@@ -59,7 +58,9 @@ final mdnsServiceProvider = Provider<MdnsService>((ref) => MdnsService());
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
-final syncProvider = NotifierProvider<SyncNotifier, SyncState>(SyncNotifier.new);
+final syncProvider = NotifierProvider<SyncNotifier, SyncState>(
+  SyncNotifier.new,
+);
 
 // ─── Notifier ─────────────────────────────────────────────────────────────────
 
@@ -142,9 +143,7 @@ class SyncNotifier extends Notifier<SyncState> {
       await _server!.start();
       await _mdns.announce(SyncServer.port);
       await _startForegroundService(0);
-      state = const SyncState(
-        connectionStatus: SyncConnectionStatus.connected,
-      );
+      state = const SyncState(connectionStatus: SyncConnectionStatus.connected);
     } catch (_) {
       await _server?.stop();
       _server = null;
@@ -199,15 +198,17 @@ class SyncNotifier extends Notifier<SyncState> {
     final businessName = settings?.appName ?? AppConstants.appName;
 
     final lines = items
-        .map((item) => SaleLine(
-              saleId: 0,
-              productId: item['product_id'] as int?,
-              nameSnapshot: item['name'] as String,
-              priceSnapshot: (item['price'] as num).toDouble(),
-              quantity: item['quantity'] as int,
-              subtotal:
-                  (item['price'] as num).toDouble() * (item['quantity'] as int),
-            ))
+        .map(
+          (item) => SaleLine(
+            saleId: 0,
+            productId: item['product_id'] as int?,
+            nameSnapshot: item['name'] as String,
+            priceSnapshot: (item['price'] as num).toDouble(),
+            quantity: item['quantity'] as int,
+            subtotal:
+                (item['price'] as num).toDouble() * (item['quantity'] as int),
+          ),
+        )
         .toList();
 
     final fakeSale = Sale(
@@ -217,8 +218,8 @@ class SyncNotifier extends Notifier<SyncState> {
       lines: lines,
     );
 
-    final localeCode = settings?.locale ??
-        PlatformDispatcher.instance.locale.languageCode;
+    final localeCode =
+        settings?.locale ?? PlatformDispatcher.instance.locale.languageCode;
     final thankYouLabel = localeCode == 'fr' ? 'Merci !' : 'Thank you!';
     final totalLabel = localeCode == 'fr' ? 'TOTAL' : 'TOTAL';
 
@@ -242,8 +243,9 @@ class SyncNotifier extends Notifier<SyncState> {
 
     String resolvedIp = ip.trim();
     try {
-      final discovered =
-          await _mdns.discover(timeout: const Duration(seconds: 3));
+      final discovered = await _mdns.discover(
+        timeout: const Duration(seconds: 3),
+      );
       if (discovered != null) resolvedIp = discovered.ip;
     } catch (_) {
       // mDNS failed — use manual IP

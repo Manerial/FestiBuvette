@@ -1,6 +1,6 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:festi_buvette_app/core/database/database_helper.dart';
 import 'package:festi_buvette_app/features/products/data/models/product.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ProductsRepository {
   final DatabaseHelper _dbHelper;
@@ -60,14 +60,21 @@ class ProductsRepository {
   /// - Otherwise → deactivation (active = 0) to preserve history.
   Future<void> softDelete(int id) async {
     final db = await _dbHelper.database;
-    final count = Sqflite.firstIntValue(await db.rawQuery(
-          'SELECT COUNT(*) FROM sale_lines WHERE product_id = ?',
-          [id],
-        )) ??
+    final count =
+        Sqflite.firstIntValue(
+          await db.rawQuery(
+            'SELECT COUNT(*) FROM sale_lines WHERE product_id = ?',
+            [id],
+          ),
+        ) ??
         0;
     if (count > 0) {
-      await db.update('products', {'active': 0},
-          where: 'id = ?', whereArgs: [id]);
+      await db.update(
+        'products',
+        {'active': 0},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
     } else {
       await db.delete('products', where: 'id = ?', whereArgs: [id]);
     }
@@ -76,7 +83,8 @@ class ProductsRepository {
   /// Toggles the out-of-stock status of a product.
   Future<void> toggleOutOfStock(int id) async {
     final db = await _dbHelper.database;
-    final current = Sqflite.firstIntValue(
+    final current =
+        Sqflite.firstIntValue(
           await db.rawQuery(
             'SELECT is_out_of_stock FROM products WHERE id = ?',
             [id],
@@ -94,7 +102,8 @@ class ProductsRepository {
   /// Returns the next order number (= current number of active products).
   Future<int> nextOrder() async {
     final db = await _dbHelper.database;
-    final count = Sqflite.firstIntValue(
+    final count =
+        Sqflite.firstIntValue(
           await db.rawQuery('SELECT COUNT(*) FROM products WHERE active = 1'),
         ) ??
         0;

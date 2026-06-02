@@ -22,7 +22,8 @@ class SyncActionService {
   Future<void> downloadCatalog(SyncClient client) async {
     final data = await client.get('/sync/catalog');
     final products = (data['products'] as List).cast<Map<String, dynamic>>();
-    final categories = (data['categories'] as List).cast<Map<String, dynamic>>();
+    final categories = (data['categories'] as List)
+        .cast<Map<String, dynamic>>();
 
     final db = await _dbHelper.database;
     await db.transaction((txn) async {
@@ -54,8 +55,9 @@ class SyncActionService {
       // Step 5: insert new products with remapped category_ids.
       for (final prod in products) {
         final controlCatId = prod['category_id'] as int?;
-        final localCatId =
-            controlCatId != null ? categoryIdMap[controlCatId] : null;
+        final localCatId = controlCatId != null
+            ? categoryIdMap[controlCatId]
+            : null;
         await txn.insert('products', {
           'name': prod['name'],
           'price': prod['price'],
@@ -89,22 +91,26 @@ class SyncActionService {
     final payload = {
       'device_id': deviceId,
       'sales': sales
-          .map((s) => {
-                // Prefer source_local_id over id: after a downloadSales the sale
-                // gets a new autoincrement id but source_local_id keeps the
-                // original value, which is what the control stored as the
-                // deduplication key on the first push.
-                'local_id': s.sourceLocalId ?? s.id,
-                'date_time': s.dateTime,
-                'total': s.total,
-                'lines': s.lines
-                    .map((l) => {
-                          'name_snapshot': l.nameSnapshot,
-                          'price_snapshot': l.priceSnapshot,
-                          'quantity': l.quantity,
-                        })
-                    .toList(),
-              })
+          .map(
+            (s) => {
+              // Prefer source_local_id over id: after a downloadSales the sale
+              // gets a new autoincrement id but source_local_id keeps the
+              // original value, which is what the control stored as the
+              // deduplication key on the first push.
+              'local_id': s.sourceLocalId ?? s.id,
+              'date_time': s.dateTime,
+              'total': s.total,
+              'lines': s.lines
+                  .map(
+                    (l) => {
+                      'name_snapshot': l.nameSnapshot,
+                      'price_snapshot': l.priceSnapshot,
+                      'quantity': l.quantity,
+                    },
+                  )
+                  .toList(),
+            },
+          )
           .toList(),
     };
 
@@ -123,8 +129,7 @@ class SyncActionService {
 
     final data = await client.get('/sales/pull');
     final salesData = (data['sales'] as List).cast<Map<String, dynamic>>();
-    final linesData =
-        (data['sale_lines'] as List).cast<Map<String, dynamic>>();
+    final linesData = (data['sale_lines'] as List).cast<Map<String, dynamic>>();
 
     final db = await _dbHelper.database;
     await db.transaction((txn) async {
@@ -134,18 +139,20 @@ class SyncActionService {
         columns: ['id'],
         where: 'business_day_id = ?',
         whereArgs: [today.id],
-      ))
-          .map((r) => r['id'] as int)
-          .toList();
+      )).map((r) => r['id'] as int).toList();
 
       if (existingIds.isNotEmpty) {
         final placeholders = List.filled(existingIds.length, '?').join(',');
         await txn.rawDelete(
-            'DELETE FROM sale_lines WHERE sale_id IN ($placeholders)',
-            existingIds);
+          'DELETE FROM sale_lines WHERE sale_id IN ($placeholders)',
+          existingIds,
+        );
       }
-      await txn.delete('sales',
-          where: 'business_day_id = ?', whereArgs: [today.id]);
+      await txn.delete(
+        'sales',
+        where: 'business_day_id = ?',
+        whereArgs: [today.id],
+      );
 
       // Insert received sales, preserving each sale's (device_uuid, local_id)
       // so this device knows they originated elsewhere and won't re-push them.
@@ -162,15 +169,17 @@ class SyncActionService {
         });
 
         final controlSaleId = saleData['id'];
-        for (final line in linesData
-            .where((l) => l['sale_id'] == controlSaleId)) {
+        for (final line in linesData.where(
+          (l) => l['sale_id'] == controlSaleId,
+        )) {
           await txn.insert('sale_lines', {
             'sale_id': localSaleId,
             'product_id': null,
             'name_snapshot': line['name_snapshot'],
             'price_snapshot': line['price_snapshot'],
             'quantity': line['quantity'],
-            'subtotal': (line['price_snapshot'] as num).toDouble() *
+            'subtotal':
+                (line['price_snapshot'] as num).toDouble() *
                 (line['quantity'] as num).toInt(),
           });
         }
@@ -178,7 +187,9 @@ class SyncActionService {
 
       // Update business day aggregates.
       final totalRevenue = salesData.fold<double>(
-          0, (sum, s) => sum + (s['total'] as num).toDouble());
+        0,
+        (sum, s) => sum + (s['total'] as num).toDouble(),
+      );
       await txn.update(
         'business_days',
         {'total_revenue': totalRevenue, 'sale_count': salesData.length},

@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart' as shelf_io;
-import 'package:shelf_router/shelf_router.dart';
+
 import 'package:festi_buvette_app/features/products/data/repositories/categories_repository.dart';
 import 'package:festi_buvette_app/features/products/data/repositories/products_repository.dart';
 import 'package:festi_buvette_app/features/sales/data/repositories/sales_repository.dart';
 import 'package:festi_buvette_app/features/sync/data/models/connected_device.dart';
+import 'package:shelf/shelf.dart';
+import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_router/shelf_router.dart';
 
 typedef PrintCallback = Future<bool> Function(List<Map<String, dynamic>> items);
 
@@ -35,6 +36,7 @@ class SyncServer {
   }) : _pin = initialPin;
 
   bool get isRunning => _httpServer != null;
+
   int get connectedSecondsCount => _connectedSeconds.length;
 
   /// Updates the PIN and invalidates all existing tokens.
@@ -71,40 +73,42 @@ class SyncServer {
       ..post('/sales/push', _handleSalesPush)
       ..get('/sales/pull', _handleSalesPull);
 
-    return Pipeline()
-        .addMiddleware(_authMiddleware())
-        .addHandler(router.call);
+    return Pipeline().addMiddleware(_authMiddleware()).addHandler(router.call);
   }
 
   // ─── Auth middleware ────────────────────────────────────────────────────────
 
   Middleware _authMiddleware() => (innerHandler) {
-        return (Request request) {
-          // '/auth' or 'auth' depending on how the Request is created
-          if (request.url.pathSegments.isNotEmpty &&
-              request.url.pathSegments.first == 'auth') {
-            return innerHandler(request);
-          }
+    return (Request request) {
+      // '/auth' or 'auth' depending on how the Request is created
+      if (request.url.pathSegments.isNotEmpty &&
+          request.url.pathSegments.first == 'auth') {
+        return innerHandler(request);
+      }
 
-          final auth = request.headers['authorization'];
-          if (auth == null || !auth.startsWith('Bearer ')) {
-            return Future.value(Response(
-              401,
-              body: '{"error":"missing_token"}',
-              headers: {'content-type': 'application/json'},
-            ));
-          }
-          final token = auth.substring(7);
-          if (!_connectedSeconds.containsKey(token)) {
-            return Future.value(Response(
-              401,
-              body: '{"error":"invalid_token"}',
-              headers: {'content-type': 'application/json'},
-            ));
-          }
-          return innerHandler(request);
-        };
-      };
+      final auth = request.headers['authorization'];
+      if (auth == null || !auth.startsWith('Bearer ')) {
+        return Future.value(
+          Response(
+            401,
+            body: '{"error":"missing_token"}',
+            headers: {'content-type': 'application/json'},
+          ),
+        );
+      }
+      final token = auth.substring(7);
+      if (!_connectedSeconds.containsKey(token)) {
+        return Future.value(
+          Response(
+            401,
+            body: '{"error":"invalid_token"}',
+            headers: {'content-type': 'application/json'},
+          ),
+        );
+      }
+      return innerHandler(request);
+    };
+  };
 
   // ─── Route handlers ─────────────────────────────────────────────────────────
 
@@ -120,8 +124,8 @@ class SyncServer {
         );
       }
       final token = _generateToken();
-      final info = request.context['shelf.io.connection_info']
-          as HttpConnectionInfo?;
+      final info =
+          request.context['shelf.io.connection_info'] as HttpConnectionInfo?;
       _connectedSeconds[token] = ConnectedDevice(
         token: token,
         ip: info?.remoteAddress.address ?? 'unknown',
@@ -198,8 +202,9 @@ class SyncServer {
 
       // Use the device UUID from the payload as the stable identifier.
       // This replaces the bearer token so deduplication survives PIN rotations.
-      final deviceId = body['device_id'] as String?
-          ?? request.headers['authorization']!.substring(7);
+      final deviceId =
+          body['device_id'] as String? ??
+          request.headers['authorization']!.substring(7);
 
       final day = await salesRepo.getToday();
       if (day == null) {
@@ -255,15 +260,17 @@ class SyncServer {
         'sales': salesRaw,
         'sale_lines': salesWithLines
             .expand((s) => s.lines)
-            .map((l) => {
-                  'id': l.id,
-                  'sale_id': l.saleId,
-                  if (l.productId != null) 'product_id': l.productId,
-                  'name_snapshot': l.nameSnapshot,
-                  'price_snapshot': l.priceSnapshot,
-                  'quantity': l.quantity,
-                  'subtotal': l.subtotal,
-                })
+            .map(
+              (l) => {
+                'id': l.id,
+                'sale_id': l.saleId,
+                if (l.productId != null) 'product_id': l.productId,
+                'name_snapshot': l.nameSnapshot,
+                'price_snapshot': l.priceSnapshot,
+                'quantity': l.quantity,
+                'subtotal': l.subtotal,
+              },
+            )
             .toList(),
       }),
       headers: {'content-type': 'application/json'},
@@ -274,8 +281,9 @@ class SyncServer {
 
   static String _generateToken() {
     final random = Random.secure();
-    return List.generate(16, (_) => random.nextInt(256))
-        .map((b) => b.toRadixString(16).padLeft(2, '0'))
-        .join();
+    return List.generate(
+      16,
+      (_) => random.nextInt(256),
+    ).map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 }
